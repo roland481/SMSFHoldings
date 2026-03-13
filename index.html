@@ -4,6 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>SMSF Portfolio Tracker</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=PT+Sans:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
 <style>
 :root{
   --bg:#f5f5f3;--surface:#fff;--surface2:#f9f9f7;--surface3:#f0efe8;--surface4:#fdf9f7;
@@ -44,53 +46,53 @@ body.dark{
   --gain-pos:#4dd4a0;--gain-neg:#e88a7a;
 }
 *{box-sizing:border-box;margin:0;padding:0;}
-body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);color:var(--text);padding:24px;transition:background 0.2s,color 0.2s;}
+body{font-family:'PT Sans',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);color:var(--text);padding:24px;transition:background 0.2s,color 0.2s;font-size:15px;}
 .wrap{max-width:1200px;margin:0 auto;padding:1.25rem 0;}
 .topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem;gap:12px;flex-wrap:wrap;}
-.title-block h1{font-size:22px;font-weight:500;color:var(--text);line-height:1.2;}
+.title-block h1{font-size:24px;font-weight:700;color:var(--text);line-height:1.2;}
 .top-actions{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
-.aud-pill{display:flex;align-items:center;gap:6px;font-size:13px;color:var(--text2);background:var(--surface3);border:0.5px solid var(--border);border-radius:8px;padding:6px 12px;cursor:pointer;}
-.rfbtn{display:flex;align-items:center;gap:6px;font-size:13px;font-weight:500;color:var(--text);background:var(--surface);border:0.5px solid var(--border5);border-radius:8px;padding:6px 14px;cursor:pointer;transition:background 0.15s;font-family:inherit;}
+.aud-pill{display:flex;align-items:center;gap:6px;font-size:14px;color:var(--text2);background:var(--surface3);border:0.5px solid var(--border);border-radius:8px;padding:6px 12px;cursor:pointer;}
+.rfbtn{display:flex;align-items:center;gap:6px;font-size:14px;font-weight:700;color:var(--text);background:var(--surface);border:0.5px solid var(--border5);border-radius:8px;padding:6px 14px;cursor:pointer;transition:background 0.15s;font-family:inherit;}
 .rfbtn:hover{background:var(--surface3);}
 .rfbtn:disabled{opacity:0.45;cursor:not-allowed;}
-.darkbtn{display:flex;align-items:center;gap:6px;font-size:13px;color:var(--text2);background:var(--surface3);border:0.5px solid var(--border);border-radius:8px;padding:6px 12px;cursor:pointer;font-family:inherit;transition:background 0.15s;}
+.darkbtn{display:flex;align-items:center;gap:6px;font-size:14px;color:var(--text2);background:var(--surface3);border:0.5px solid var(--border);border-radius:8px;padding:6px 12px;cursor:pointer;font-family:inherit;transition:background 0.15s;}
 .darkbtn:hover{background:var(--surface2);}
 .spin{animation:spin 0.9s linear infinite;}
 @keyframes spin{to{transform:rotate(360deg);}}
 .summary{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:10px;margin-bottom:1.25rem;}
 .scard{background:var(--surface);border:0.5px solid var(--border);border-radius:12px;padding:1rem;position:relative;overflow:hidden;transition:background 0.2s;}
 .scard-accent{position:absolute;top:0;left:0;width:3px;height:100%;}
-.slabel{font-size:12px;color:var(--text2);margin-bottom:5px;}
-.sval{font-size:19px;font-weight:500;color:var(--text);line-height:1.15;font-variant-numeric:tabular-nums;}
-.ssub{font-size:11px;margin-top:4px;}
+.slabel{font-size:13px;color:var(--text2);margin-bottom:5px;}
+.sval{font-size:21px;font-weight:700;color:var(--text);line-height:1.15;font-variant-numeric:tabular-nums;}
+.ssub{font-size:12px;margin-top:4px;}
 .gain-pos{color:var(--gain-pos);}.gain-neg{color:var(--gain-neg);}.gain-neu{color:var(--text3);}
 .dash{background:var(--surface);border:0.5px solid var(--border);border-radius:12px;padding:1rem 1.25rem;margin-bottom:1.25rem;display:flex;gap:20px;align-items:center;transition:background 0.2s;}
 .alloc-section{flex:1;min-width:0;}
 .alloc-bar{height:14px;background:var(--alloc-bg);border-radius:8px;overflow:hidden;display:flex;gap:3px;margin-bottom:10px;}
 .alloc-seg{height:100%;border-radius:6px;transition:width 0.5s;}
 .legend{display:flex;flex-direction:column;gap:5px;}
-.leg-item{display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:12px;color:var(--text2);}
+.leg-item{display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:13px;color:var(--text2);}
 .leg-left{display:flex;align-items:center;gap:6px;}
 .leg-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
-.leg-val{font-size:12px;font-weight:500;color:var(--text);font-variant-numeric:tabular-nums;}
-.leg-pct{font-size:11px;color:var(--text3);min-width:34px;text-align:right;}
+.leg-val{font-size:13px;font-weight:700;color:var(--text);font-variant-numeric:tabular-nums;}
+.leg-pct{font-size:12px;color:var(--text3);min-width:34px;text-align:right;}
 .dash-divider{width:0.5px;background:var(--border);align-self:stretch;flex-shrink:0;}
-.pie-section{width:130px;flex-shrink:0;}
-.pie-label{font-size:11px;font-weight:500;color:var(--text3);margin-bottom:6px;text-transform:uppercase;letter-spacing:0.05em;}
+.pie-section{width:220px;flex-shrink:0;}
+.pie-label{font-size:12px;font-weight:700;color:var(--text3);margin-bottom:6px;text-transform:uppercase;letter-spacing:0.05em;}
 .pie-legend{display:flex;flex-direction:column;gap:4px;margin-top:8px;}
-.pie-leg-row{display:flex;align-items:center;justify-content:space-between;font-size:11px;color:var(--text2);}
+.pie-leg-row{display:flex;align-items:center;justify-content:space-between;font-size:12px;color:var(--text2);}
 .pie-leg-left{display:flex;align-items:center;gap:5px;}
 .pie-leg-sw{width:8px;height:8px;border-radius:2px;flex-shrink:0;}
 .section{background:var(--surface);border:0.5px solid var(--border);border-radius:12px;margin-bottom:12px;overflow:hidden;transition:background 0.2s;}
 .sec-head{display:flex;align-items:center;justify-content:space-between;padding:0.875rem 1.125rem;border-bottom:0.5px solid var(--border2);}
-.sec-title{display:flex;align-items:center;gap:8px;font-size:14px;font-weight:500;color:var(--text);}
+.sec-title{display:flex;align-items:center;gap:8px;font-size:15px;font-weight:700;color:var(--text);}
 .dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;}
 .dot-live{background:#1D9E75;animation:pulse 2s infinite;}
 .dot-stale{background:#B4B2A9;}
 .dot-err{background:#D85A30;}
 .dot-loading{background:#EF9F27;animation:pulse 0.8s infinite;}
 @keyframes pulse{0%,100%{opacity:1;}50%{opacity:0.35;}}
-.badge{font-size:11px;padding:2px 8px;border-radius:999px;font-weight:500;}
+.badge{font-size:12px;padding:2px 8px;border-radius:999px;font-weight:700;}
 .b-blue{background:var(--b-blue-bg);color:var(--b-blue-c);}
 .b-green{background:var(--b-green-bg);color:var(--b-green-c);}
 .b-amber{background:var(--b-amber-bg);color:var(--b-amber-c);}
@@ -98,76 +100,98 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .b-teal{background:var(--b-teal-bg);color:var(--b-teal-c);}
 .b-red{background:var(--b-red-bg);color:var(--b-red-c);}
 .sec-right{display:flex;align-items:center;gap:8px;}
-.sec-tot{font-size:13px;font-weight:500;color:var(--text);}
-.addbtn{font-size:12px;color:var(--text2);cursor:pointer;border:0.5px solid var(--border4);background:transparent;padding:4px 10px;border-radius:8px;transition:background 0.15s;font-family:inherit;}
+.sec-tot{font-size:14px;font-weight:700;color:var(--text);}
+.addbtn{font-size:13px;color:var(--text2);cursor:pointer;border:0.5px solid var(--border4);background:transparent;padding:4px 10px;border-radius:8px;transition:background 0.15s;font-family:inherit;}
 .addbtn:hover{background:var(--surface3);}
 .tbl-wrap{overflow-x:auto;}
-table{width:100%;border-collapse:collapse;font-size:13px;}
-th{padding:7px 12px;font-size:11px;font-weight:500;color:var(--text3);text-transform:uppercase;letter-spacing:0.05em;border-bottom:0.5px solid var(--border2);text-align:left;white-space:nowrap;}
+table{width:100%;border-collapse:collapse;font-size:14px;}
+th{padding:7px 12px;font-size:12px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.05em;border-bottom:0.5px solid var(--border2);text-align:left;white-space:nowrap;}
 th.r,td.r{text-align:right;}
 td{padding:9px 12px;border-bottom:0.5px solid var(--border3);color:var(--text);vertical-align:middle;white-space:nowrap;}
 tr:last-child td{border-bottom:none;}
 tr:hover td{background:var(--surface2);}
-.sym{font-weight:500;font-family:'SF Mono','Fira Code',monospace;font-size:12px;letter-spacing:0.03em;}
-.aname{font-size:11px;color:var(--text3);margin-top:2px;}
-.ni{width:80px;text-align:right;padding:3px 6px;font-size:12px;border:0.5px solid var(--border4);border-radius:8px;background:transparent;color:var(--text);font-family:inherit;}
+.sym{font-weight:700;font-family:'SF Mono','Fira Code',monospace;font-size:13px;letter-spacing:0.03em;}
+.aname{font-size:12px;color:var(--text3);margin-top:2px;}
+.ni{width:80px;text-align:right;padding:3px 6px;font-size:13px;border:0.5px solid var(--border4);border-radius:8px;background:transparent;color:var(--text);font-family:inherit;}
 .ni:focus{outline:none;border-color:var(--border5);}
 .pos{color:var(--gain-pos);}.neg{color:var(--gain-neg);}.dim{color:var(--text4);}
-.valbold{font-weight:500;font-variant-numeric:tabular-nums;}
-.gl-chip{display:inline-block;font-size:11px;padding:2px 6px;border-radius:4px;font-weight:500;white-space:nowrap;}
+.valbold{font-weight:700;font-variant-numeric:tabular-nums;}
+.gl-chip{display:inline-block;font-size:12px;padding:2px 7px;border-radius:4px;font-weight:700;white-space:nowrap;}
 .gl-pos{background:var(--gl-pos-bg);color:var(--gl-pos-c);}
 .gl-neg{background:var(--gl-neg-bg);color:var(--gl-neg-c);}
 .gl-neu{background:var(--gl-neu-bg);color:var(--gl-neu-c);}
-.del{cursor:pointer;color:var(--text4);background:none;border:none;font-size:13px;padding:3px 5px;border-radius:4px;opacity:0;transition:opacity 0.15s;line-height:1;}
+.del{cursor:pointer;color:var(--text4);background:none;border:none;font-size:14px;padding:3px 5px;border-radius:4px;opacity:0;transition:opacity 0.15s;line-height:1;}
 tr:hover .del{opacity:1;}
 .del:hover{color:#D85A30;}
 .add-row{display:flex;gap:6px;padding:10px 12px;border-top:0.5px dashed var(--border4);flex-wrap:wrap;background:var(--surface2);}
-.add-row input,.add-row select{flex:1;min-width:60px;padding:5px 8px;font-size:13px;border:0.5px solid var(--border4);border-radius:8px;background:var(--surface);color:var(--text);font-family:inherit;}
+.add-row input,.add-row select{flex:1;min-width:60px;padding:5px 8px;font-size:14px;border:0.5px solid var(--border4);border-radius:8px;background:var(--surface);color:var(--text);font-family:inherit;}
 .add-row input:focus,.add-row select:focus{outline:none;border-color:var(--border5);}
 .add-row select{flex:none;}
-.okbtn{font-size:13px;padding:5px 12px;border:none;background:var(--okbtn-bg);color:var(--okbtn-c);border-radius:8px;cursor:pointer;font-family:inherit;white-space:nowrap;}
+.okbtn{font-size:14px;padding:5px 12px;border:none;background:var(--okbtn-bg);color:var(--okbtn-c);border-radius:8px;cursor:pointer;font-family:inherit;white-space:nowrap;font-weight:700;}
 .okbtn:hover{opacity:0.85;}
-.sync-bar{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--text3);margin-top:4px;}
+.sync-bar{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--text3);margin-top:4px;}
 .sync-dot{width:7px;height:7px;border-radius:50%;background:#B4B2A9;flex-shrink:0;transition:background 0.3s;}
 .sync-dot.syncing{background:#EF9F27;animation:pulse 0.8s infinite;}
 .sync-dot.synced{background:#1D9E75;}
 .sync-dot.err{background:#D85A30;}
-.err-note{font-size:12px;color:#D85A30;padding:8px 12px;background:var(--err-bg);border-radius:8px;margin:8px 12px;}
+.err-note{font-size:13px;color:#D85A30;padding:8px 12px;background:var(--err-bg);border-radius:8px;margin:8px 12px;}
 .fees-summary{display:flex;align-items:center;gap:20px;padding:10px 1.125rem;background:var(--fees-bg);border-bottom:0.5px solid var(--border3);flex-wrap:wrap;}
-.fees-fy{font-size:12px;color:var(--text3);}
-.fees-total{font-size:15px;font-weight:500;color:var(--gain-neg);}
-.footer{font-size:11px;color:var(--text4);margin-top:1rem;line-height:1.6;}
-.wl-type{font-size:10px;padding:1px 6px;border-radius:999px;font-weight:600;letter-spacing:0.04em;border:1px solid currentColor;opacity:0.7;}
+.fees-fy{font-size:13px;color:var(--text3);}
+.fees-total{font-size:16px;font-weight:700;color:var(--gain-neg);}
+.footer{font-size:12px;color:var(--text4);margin-top:1rem;line-height:1.6;}
+.wl-type{font-size:11px;padding:1px 6px;border-radius:999px;font-weight:700;letter-spacing:0.04em;border:1px solid currentColor;opacity:0.7;}
 .wl-above{color:var(--gain-pos);}.wl-below{color:var(--gain-neg);}.wl-near{color:#EF9F27;}
 /* ── Transaction drawer ── */
 .tx-row td{padding:0!important;border-bottom:none!important;background:var(--surface2)!important;}
 .tx-drawer{padding:12px 16px 14px;border-top:1px dashed var(--border4);}
 .tx-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;}
-.tx-title{font-size:12px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:0.06em;}
-.tx-addbtn{font-size:12px;color:var(--text2);cursor:pointer;border:0.5px solid var(--border4);background:var(--surface);padding:3px 10px;border-radius:8px;font-family:inherit;}
+.tx-title{font-size:13px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:0.06em;}
+.tx-addbtn{font-size:13px;color:var(--text2);cursor:pointer;border:0.5px solid var(--border4);background:var(--surface);padding:3px 10px;border-radius:8px;font-family:inherit;}
 .tx-addbtn:hover{background:var(--surface3);}
-.tx-table{width:100%;border-collapse:collapse;font-size:12px;margin-bottom:8px;}
-.tx-table th{padding:5px 10px;font-size:10px;font-weight:600;color:var(--text4);text-transform:uppercase;letter-spacing:0.06em;border-bottom:0.5px solid var(--border3);text-align:left;}
+.tx-table{width:100%;border-collapse:collapse;font-size:13px;margin-bottom:8px;}
+.tx-table th{padding:5px 10px;font-size:11px;font-weight:700;color:var(--text4);text-transform:uppercase;letter-spacing:0.06em;border-bottom:0.5px solid var(--border3);text-align:left;}
 .tx-table th.r,.tx-table td.r{text-align:right;}
 .tx-table td{padding:7px 10px;border-bottom:0.5px solid var(--border3);color:var(--text);vertical-align:middle;}
 .tx-table tr:last-child td{border-bottom:none;}
 .tx-table tr:hover td{background:var(--surface3);}
-.tx-buy{color:var(--gain-pos);font-weight:600;}
-.tx-sell{color:var(--gain-neg);font-weight:600;}
+.tx-buy{color:var(--gain-pos);font-weight:700;}
+.tx-sell{color:var(--gain-neg);font-weight:700;}
 .tx-add-form{display:none;flex-wrap:wrap;gap:6px;padding:8px 10px;background:var(--surface);border:0.5px solid var(--border4);border-radius:10px;margin-top:6px;}
-.tx-add-form input,.tx-add-form select{padding:4px 8px;font-size:12px;border:0.5px solid var(--border4);border-radius:7px;background:var(--surface2);color:var(--text);font-family:inherit;}
+.tx-add-form input,.tx-add-form select{padding:4px 8px;font-size:13px;border:0.5px solid var(--border4);border-radius:7px;background:var(--surface2);color:var(--text);font-family:inherit;}
 .tx-add-form input:focus,.tx-add-form select:focus{outline:none;border-color:var(--border5);}
-.tx-empty{font-size:12px;color:var(--text4);padding:6px 2px;}
+.tx-empty{font-size:13px;color:var(--text4);padding:6px 2px;}
 tr.holding-row{cursor:pointer;}
 tr.holding-row td:first-child::before{content:'▶';font-size:9px;color:var(--text4);margin-right:6px;display:inline-block;transition:transform 0.15s;}
 tr.holding-row.open td:first-child::before{transform:rotate(90deg);}
 tr.holding-row:hover td{background:var(--surface2);}
 @media(max-width:800px){
+  body{padding:12px;}
   .summary{grid-template-columns:repeat(2,minmax(0,1fr));}
   .dash{flex-direction:column;align-items:stretch;}
   .dash-divider{width:100%;height:0.5px;}
   .pie-section{width:100%;}
+  .topbar{gap:8px;}
+  .top-actions{gap:6px;width:100%;}
+  .aud-pill,.darkbtn,.rfbtn{font-size:13px;padding:5px 10px;}
+  .rfbtn{flex:1;justify-content:center;}
+  /* Mobile: hide non-essential table columns */
+  .mob-hide{display:none;}
+  /* Mobile: holding cards instead of table rows */
+  .tbl-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;}
+  table{font-size:13px;}
+  td,th{padding:7px 8px;}
+  .sec-head{padding:0.75rem 1rem;}
+  .add-row{padding:8px 10px;}
+  .sval{font-size:18px;}
 }
+/* ── Portfolio history chart ── */
+.history-section{background:var(--surface);border:0.5px solid var(--border);border-radius:12px;padding:1rem 1.25rem;margin-bottom:1.25rem;transition:background 0.2s;}
+.history-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:8px;}
+.history-title{font-size:14px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:0.05em;}
+.history-meta{font-size:12px;color:var(--text4);}
+/* ── CSV export button ── */
+.csvbtn{display:flex;align-items:center;gap:6px;font-size:13px;color:var(--text2);background:var(--surface3);border:0.5px solid var(--border);border-radius:8px;padding:4px 12px;cursor:pointer;font-family:inherit;transition:background 0.15s;text-decoration:none;}
+.csvbtn:hover{background:var(--surface2);}
 </style>
 </head>
 <body>
@@ -220,9 +244,18 @@ tr.holding-row:hover td{background:var(--surface2);}
     <div class="dash-divider"></div>
     <div class="pie-section">
       <div class="pie-label">By holding</div>
-      <div style="position:relative;width:100%;height:120px;"><canvas id="pieChart"></canvas></div>
+      <div style="position:relative;width:100%;height:180px;"><canvas id="pieChart"></canvas></div>
       <div class="pie-legend" id="pieLegend"></div>
     </div>
+  </div>
+
+  <!-- Portfolio History Chart -->
+  <div class="history-section">
+    <div class="history-header">
+      <span class="history-title">📈 Portfolio value history</span>
+      <span class="history-meta" id="historyMeta">Snapshots saved each visit</span>
+    </div>
+    <div style="position:relative;width:100%;height:160px;"><canvas id="historyChart"></canvas></div>
   </div>
 
   <!-- US Stocks -->
@@ -233,7 +266,7 @@ tr.holding-row:hover td{background:var(--surface2);}
     </div>
     <div id="usErr"></div>
     <div class="tbl-wrap"><table>
-      <thead><tr><th>Ticker</th><th>Name</th><th class="r">Qty</th><th class="r" id="usPH">Price (USD)</th><th class="r">24h</th><th class="r">Avg cost (USD)</th><th class="r" id="usVH">Value (USD)</th><th class="r">Gain / loss</th><th style="width:28px"></th></tr></thead>
+      <thead><tr><th>Ticker</th><th class="mob-hide">Name</th><th class="r">Qty</th><th class="r" id="usPH">Price (USD)</th><th class="r mob-hide">24h</th><th class="r mob-hide">Avg cost (USD)</th><th class="r" id="usVH">Value (USD)</th><th class="r mob-hide">Gain / loss</th><th style="width:28px"></th></tr></thead>
       <tbody id="usB"></tbody>
     </table></div>
     <div class="add-row" id="usAR" style="display:none;">
@@ -254,7 +287,7 @@ tr.holding-row:hover td{background:var(--surface2);}
     </div>
     <div id="asxErr"></div>
     <div class="tbl-wrap"><table>
-      <thead><tr><th>Ticker</th><th>Name</th><th class="r">Qty</th><th class="r">Price (AUD)</th><th class="r">24h</th><th class="r">Avg cost (AUD)</th><th class="r">Value (AUD)</th><th class="r">Gain / loss</th><th style="width:28px"></th></tr></thead>
+      <thead><tr><th>Ticker</th><th class="mob-hide">Name</th><th class="r">Qty</th><th class="r">Price (AUD)</th><th class="r mob-hide">24h</th><th class="r mob-hide">Avg cost (AUD)</th><th class="r">Value (AUD)</th><th class="r mob-hide">Gain / loss</th><th style="width:28px"></th></tr></thead>
       <tbody id="asxB"></tbody>
     </table></div>
     <div class="add-row" id="asxAR" style="display:none;">
@@ -274,7 +307,7 @@ tr.holding-row:hover td{background:var(--surface2);}
       <div class="sec-right"><span class="sec-tot" id="crypSecTot"></span><button class="addbtn" onclick="showAdd('cry')">+ Add</button></div>
     </div>
     <div class="tbl-wrap"><table>
-      <thead><tr><th>Coin</th><th>Name</th><th class="r">Qty</th><th class="r">Price (AUD)</th><th class="r">24h</th><th class="r">Avg cost (AUD)</th><th class="r">Value (AUD)</th><th class="r">Gain / loss</th><th style="width:28px"></th></tr></thead>
+      <thead><tr><th>Coin</th><th class="mob-hide">Name</th><th class="r">Qty</th><th class="r">Price (AUD)</th><th class="r mob-hide">24h</th><th class="r mob-hide">Avg cost (AUD)</th><th class="r">Value (AUD)</th><th class="r mob-hide">Gain / loss</th><th style="width:28px"></th></tr></thead>
       <tbody id="cryB"></tbody>
     </table></div>
     <div class="add-row" id="cryAR" style="display:none;">
@@ -295,7 +328,7 @@ tr.holding-row:hover td{background:var(--surface2);}
     </div>
     <div id="metErr"></div>
     <div class="tbl-wrap"><table>
-      <thead><tr><th>Symbol</th><th>Name</th><th class="r">Qty (oz)</th><th class="r">Price (AUD/oz)</th><th class="r">24h</th><th class="r">Avg cost (AUD/oz)</th><th class="r">Value (AUD)</th><th class="r">Gain / loss</th><th style="width:28px"></th></tr></thead>
+      <thead><tr><th>Symbol</th><th class="mob-hide">Name</th><th class="r mob-hide">Qty (oz)</th><th class="r">Price (AUD/oz)</th><th class="r mob-hide">24h</th><th class="r mob-hide">Avg cost (AUD/oz)</th><th class="r">Value (AUD)</th><th class="r mob-hide">Gain / loss</th><th style="width:28px"></th></tr></thead>
       <tbody id="metB"></tbody>
     </table></div>
     <div class="add-row" id="metAR" style="display:none;">
@@ -330,7 +363,7 @@ tr.holding-row:hover td{background:var(--surface2);}
   <div class="section">
     <div class="sec-head">
       <div class="sec-title"><span class="badge b-red">AUD</span>Fees ledger</div>
-      <div class="sec-right"><span class="sec-tot" id="feesSecTot"></span><button class="addbtn" onclick="showFeesAdd()">+ Add fee</button></div>
+      <div class="sec-right"><span class="sec-tot" id="feesSecTot"></span><button class="csvbtn" onclick="exportCSV()">⬇ Export FY CSV</button><button class="addbtn" onclick="showFeesAdd()">+ Add fee</button></div>
     </div>
     <div class="fees-summary">
       <span class="fees-fy" id="feesFyLabel"></span>
@@ -507,7 +540,7 @@ function rows(type){
     const txBadge = txCount>0?` <span style="font-size:10px;color:var(--text4);font-weight:400;">${txCount} trade${txCount>1?'s':''}</span>`:'';
     const costDisp = item.cost>0 ? item.cost : '';
     const drawerHtml = isOpen ? buildDrawer(type,i,item,showAud,r) : '';
-    return`<tr class="holding-row${isOpen?' open':''}" onclick="toggleDrawer('${type}',${i})"><td><div class="sym">${item.ticker}${txBadge}</div></td><td><div class="aname">${item.name}</div></td><td class="r"><input class="ni" type="number" step="${isF?'any':'1'}" value="${item.qty}" onclick="event.stopPropagation()" onchange="upField('${type}',${i},'qty',this.value)"></td><td class="r">${price!==null?'$'+f(dp):'<span class="dim">&#8212;</span>'}</td><td class="r ${cc}">${cs}</td><td class="r"><input class="ni" type="number" step="any" value="${costDisp}" placeholder="0.00" onclick="event.stopPropagation()" onchange="upField('${type}',${i},'cost',this.value)" ${txCount>0?'title="Auto-calculated from transactions" style="color:var(--text3)"':''}></td><td class="r valbold">${val!==null?'$'+f(dv):'<span class="dim">&#8212;</span>'}</td><td class="r">${glChip(gl,glPct)}</td><td><button class="del" onclick="event.stopPropagation();delA('${type}',${i})">&#x2715;</button></td></tr>${drawerHtml?`<tr class="tx-row"><td colspan="9">${drawerHtml}</td></tr>`:''}`;
+    return`<tr class="holding-row${isOpen?' open':''}" onclick="toggleDrawer('${type}',${i})"><td><div class="sym">${item.ticker}${txBadge}</div></td><td class="mob-hide"><div class="aname">${item.name}</div></td><td class="r"><input class="ni" type="number" step="${isF?'any':'1'}" value="${item.qty}" onclick="event.stopPropagation()" onchange="upField('${type}',${i},'qty',this.value)"></td><td class="r">${price!==null?'$'+f(dp):'<span class="dim">&#8212;</span>'}</td><td class="r ${cc} mob-hide">${cs}</td><td class="r mob-hide"><input class="ni" type="number" step="any" value="${costDisp}" placeholder="0.00" onclick="event.stopPropagation()" onchange="upField('${type}',${i},'cost',this.value)" ${txCount>0?'title="Auto-calculated from transactions" style="color:var(--text3)"':''}></td><td class="r valbold">${val!==null?'$'+f(dv):'<span class="dim">&#8212;</span>'}</td><td class="r mob-hide">${glChip(gl,glPct)}</td><td><button class="del" onclick="event.stopPropagation();delA('${type}',${i})">&#x2715;</button></td></tr>${drawerHtml?`<tr class="tx-row"><td colspan="9">${drawerHtml}</td></tr>`:''}`;
   }).join('');
   summary();
 }
@@ -783,6 +816,8 @@ function summary(){
     document.getElementById('cashAlloc').textContent=pct(cashA);
   }
   updatePie();
+  // Save daily snapshot once we have live prices
+  if(total > 0 && Object.keys(S.prices).length > 0) saveSnapshot(total);
 }
 function updatePie(){
   const labels=[],data=[],colors=[];let ci=0;
@@ -871,6 +906,128 @@ function toggleDark(){
   if(pieChart){pieChart.options.plugins.tooltip.bodyColor=isDark?'#e8e8e6':'#1a1a1a';pieChart.update();}
 }
 
+// ── Portfolio value history ─────────────────────────────────────
+let historyChart = null;
+const HISTORY_KEY = 'smsf_history';
+const MAX_SNAPSHOTS = 90; // keep up to 90 daily snapshots
+
+function saveSnapshot(totalValue) {
+  if(!totalValue || totalValue <= 0) return;
+  const today = new Date().toISOString().slice(0,10);
+  let history = [];
+  try { history = JSON.parse(localStorage.getItem(HISTORY_KEY)||'[]'); } catch(e){}
+  // Update today's entry or append
+  const last = history[history.length-1];
+  if(last && last.d === today) { last.v = totalValue; }
+  else { history.push({d:today, v:totalValue}); }
+  // Trim to max
+  if(history.length > MAX_SNAPSHOTS) history = history.slice(-MAX_SNAPSHOTS);
+  localStorage.setItem(HISTORY_KEY, JSON.stringify(history));
+  renderHistoryChart(history);
+}
+
+function renderHistoryChart(history) {
+  if(!history) {
+    try { history = JSON.parse(localStorage.getItem(HISTORY_KEY)||'[]'); } catch(e){ history=[]; }
+  }
+  const el = document.getElementById('historyChart');
+  const meta = document.getElementById('historyMeta');
+  if(!history.length){ meta.textContent='No history yet — refresh prices to record first snapshot'; return; }
+  const labels = history.map(h => {
+    const d = new Date(h.d);
+    return d.toLocaleDateString('en-AU',{day:'numeric',month:'short'});
+  });
+  const data = history.map(h => h.v);
+  const first = data[0], last = data[data.length-1];
+  const change = last - first;
+  const changePct = first > 0 ? (change/first*100) : 0;
+  const sign = change >= 0 ? '+' : '';
+  meta.innerHTML = `${history.length} snapshot${history.length>1?'s':''} &nbsp;·&nbsp; <span style="color:${change>=0?'var(--gain-pos)':'var(--gain-neg)'};font-weight:700;">${sign}$${f(Math.abs(change))} (${sign}${changePct.toFixed(1)}%)</span> since first recorded`;
+  const isDark = document.body.classList.contains('dark');
+  const lineColor = '#534AB7';
+  const fillColor = isDark ? 'rgba(83,74,183,0.15)' : 'rgba(83,74,183,0.08)';
+  const gridColor = isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)';
+  const textColor = isDark ? '#6e6e6a' : '#aaa';
+  if(historyChart) {
+    historyChart.data.labels = labels;
+    historyChart.data.datasets[0].data = data;
+    historyChart.update();
+    return;
+  }
+  historyChart = new Chart(el, {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [{
+        data,
+        borderColor: lineColor,
+        backgroundColor: fillColor,
+        borderWidth: 2,
+        pointRadius: history.length > 30 ? 0 : 3,
+        pointHoverRadius: 5,
+        fill: true,
+        tension: 0.3
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: {
+            label: ctx => ' $' + f(ctx.parsed.y)
+          }
+        }
+      },
+      scales: {
+        x: { grid: { color: gridColor }, ticks: { color: textColor, maxTicksLimit: 8, font:{size:11} } },
+        y: { grid: { color: gridColor }, ticks: { color: textColor, font:{size:11}, callback: v => '$'+f(v) } }
+      }
+    }
+  });
+}
+
+// ── CSV export (current FY) ─────────────────────────────────────
+function exportCSV() {
+  const fy = fyLabel();
+  const rows = [['Date','Type','Ticker / Account','Name','Side','Qty','Price','Total (AUD)','Fee (AUD)','Category','Description']];
+
+  // Transactions from holdings
+  ['us','asx','cry','met'].forEach(type => {
+    S[type].forEach(item => {
+      (item.txns||[]).forEach(tx => {
+        const d = new Date(tx.date);
+        if(d < fy.start || d > fy.end) return;
+        const audPrice = type==='us' ? (tx.price / S.audUsd) : tx.price;
+        const audTotal = audPrice * tx.qty;
+        rows.push([tx.date, type.toUpperCase(), item.ticker, item.name, tx.side, tx.qty, audPrice.toFixed(2), audTotal.toFixed(2), tx.fee||0, 'Transaction', '']);
+      });
+    });
+  });
+
+  // Fees ledger
+  S.fees.forEach(fee => {
+    const d = new Date(fee.date);
+    if(d < fy.start || d > fy.end) return;
+    rows.push([fee.date, 'FEE', '', '', '', '', '', fee.amount||0, fee.amount||0, fee.cat||'', fee.desc||'']);
+  });
+
+  // Sort by date
+  const header = rows.shift();
+  rows.sort((a,b) => a[0].localeCompare(b[0]));
+  rows.unshift(header);
+
+  const csv = rows.map(r => r.map(v => `"${String(v).replace(/"/g,'""')}"`).join(',')).join('\n');
+  const blob = new Blob([csv], {type:'text/csv'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `SMSF_${fy.label.replace('/','_')}.csv`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
 // ── Boot: load from cloud first ─────────────────────────────────
 document.getElementById('todayDate').textContent = new Date().toLocaleDateString('en-AU',{weekday:'short',day:'numeric',month:'long',year:'numeric'});
 if(localStorage.getItem('smsf_dark')==='1'){
@@ -879,6 +1036,7 @@ if(localStorage.getItem('smsf_dark')==='1'){
   document.getElementById('darkLabel').textContent='Light';
 }
 cloudLoad();
+renderHistoryChart();
 </script>
 </body>
 </html>
