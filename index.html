@@ -88,6 +88,12 @@ tr:hover .del{opacity:1;}
 .sync-dot.synced{background:#1D9E75;}
 .sync-dot.err{background:#D85A30;}
 .err-note{font-size:12px;color:#D85A30;padding:8px 12px;background:#FAECE7;border-radius:8px;margin:8px 12px;}
+.b-red{background:#FAECE7;color:#993C1D;}
+.fees-summary{display:flex;align-items:center;gap:20px;padding:10px 1.125rem;background:#fdf9f7;border-bottom:0.5px solid rgba(0,0,0,0.06);flex-wrap:wrap;}
+.fees-fy{font-size:12px;color:#888;}
+.fees-total{font-size:15px;font-weight:500;color:#D85A30;}
+.add-row select{flex:none;padding:5px 8px;font-size:13px;border:0.5px solid rgba(0,0,0,0.2);border-radius:8px;background:#fff;color:#1a1a1a;font-family:inherit;}
+.add-row select:focus{outline:none;border-color:rgba(0,0,0,0.4);}
 .footer{font-size:11px;color:#aaa;margin-top:1rem;line-height:1.6;}
 @media(max-width:800px){
   .summary{grid-template-columns:repeat(2,minmax(0,1fr));}
@@ -114,16 +120,16 @@ tr:hover .del{opacity:1;}
       </button>
     </div>
   </div>
- 
+
   <div class="summary">
-    <div class="scard"><div class="scard-accent" style="background:#534AB7;"></div><div class="slabel">Total value (AUD)</div><div class="sval" id="tot">—</div><div class="ssub gain-neu" id="totGL">Awaiting refresh</div></div>
+    <div class="scard"><div class="scard-accent" style="background:#534AB7;"></div><div class="slabel">Total value (AUD)</div><div class="sval" id="tot">—</div><div class="ssub gain-neu" id="totGL">Investments + cash</div></div>
     <div class="scard"><div class="scard-accent" style="background:#378ADD;"></div><div class="slabel">US stocks (AUD)</div><div class="sval" id="usT">—</div><div class="ssub" id="usGL"></div></div>
     <div class="scard"><div class="scard-accent" style="background:#639922;"></div><div class="slabel">ASX stocks (AUD)</div><div class="sval" id="asxT">—</div><div class="ssub" id="asxGL"></div></div>
     <div class="scard"><div class="scard-accent" style="background:#BA7517;"></div><div class="slabel">Crypto (AUD)</div><div class="sval" id="crypT">—</div><div class="ssub" id="crypGL"></div></div>
     <div class="scard"><div class="scard-accent" style="background:#888780;"></div><div class="slabel">Precious metals (AUD)</div><div class="sval" id="metT">—</div><div class="ssub" id="metGL"></div></div>
     <div class="scard"><div class="scard-accent" style="background:#00897B;"></div><div class="slabel">Cash (AUD)</div><div class="sval" id="cashT">—</div><div class="ssub" id="cashGL"></div></div>
   </div>
- 
+
   <div class="dash">
     <div class="alloc-section">
       <div class="alloc-bar" id="allocBar">
@@ -146,7 +152,7 @@ tr:hover .del{opacity:1;}
       <div class="pie-legend" id="pieLegend"></div>
     </div>
   </div>
- 
+
   <!-- US Stocks -->
   <div class="section">
     <div class="sec-head">
@@ -167,7 +173,7 @@ tr:hover .del{opacity:1;}
       <button class="addbtn" onclick="hideAdd('us')">Cancel</button>
     </div>
   </div>
- 
+
   <!-- ASX Stocks -->
   <div class="section">
     <div class="sec-head">
@@ -188,7 +194,7 @@ tr:hover .del{opacity:1;}
       <button class="addbtn" onclick="hideAdd('asx')">Cancel</button>
     </div>
   </div>
- 
+
   <!-- Crypto -->
   <div class="section">
     <div class="sec-head">
@@ -208,7 +214,7 @@ tr:hover .del{opacity:1;}
       <button class="addbtn" onclick="hideAdd('cry')">Cancel</button>
     </div>
   </div>
- 
+
   <!-- Precious Metals -->
   <div class="section">
     <div class="sec-head">
@@ -229,7 +235,7 @@ tr:hover .del{opacity:1;}
       <button class="addbtn" onclick="hideAdd('met')">Cancel</button>
     </div>
   </div>
- 
+
   <!-- Cash -->
   <div class="section">
     <div class="sec-head">
@@ -247,10 +253,42 @@ tr:hover .del{opacity:1;}
       <button class="addbtn" onclick="hideCashAdd()">Cancel</button>
     </div>
   </div>
- 
-  <div class="footer">Prices: Finnhub (US &amp; ASX) · gold-api.com (metals) · CoinGecko (crypto). Cash entered manually. Portfolio synced to cloud via JSONBin. Verify all figures with your SMSF accountant.</div>
+
+  <!-- Fees Ledger -->
+  <div class="section">
+    <div class="sec-head">
+      <div class="sec-title"><span class="badge b-red">AUD</span>Fees ledger</div>
+      <div class="sec-right"><span class="sec-tot" id="feesSecTot"></span><button class="addbtn" onclick="showFeesAdd()">+ Add fee</button></div>
+    </div>
+    <div class="fees-summary">
+      <span class="fees-fy" id="feesFyLabel"></span>
+      <span class="fees-total" id="feesTotal"></span>
+    </div>
+    <div class="tbl-wrap"><table>
+      <thead><tr><th>Date</th><th>Description</th><th>Category</th><th class="r">Amount (AUD)</th><th style="width:28px"></th></tr></thead>
+      <tbody id="feesB"></tbody>
+    </table></div>
+    <div class="add-row" id="feesAR" style="display:none;">
+      <input id="feesDate" type="date" style="flex:none;width:140px;">
+      <input id="feesDesc" placeholder="Description (e.g. Annual audit)">
+      <select id="feesCat" style="flex:none;width:160px;">
+        <option value="Accounting">Accounting</option>
+        <option value="Audit">Audit</option>
+        <option value="Financial advice">Financial advice</option>
+        <option value="Legal">Legal</option>
+        <option value="Administration">Administration</option>
+        <option value="Investment management">Investment management</option>
+        <option value="Other">Other</option>
+      </select>
+      <input id="feesAmt" placeholder="Amount AUD" type="number" step="any" style="flex:none;width:130px;">
+      <button class="okbtn" onclick="addFee()">Add</button>
+      <button class="addbtn" onclick="hideFeesAdd()">Cancel</button>
+    </div>
+  </div>
+
+  <div class="footer">Prices: Finnhub (US &amp; ASX) · gold-api.com (metals) · CoinGecko (crypto). Cash and fees entered manually. Portfolio synced to cloud via JSONBin. Verify all figures with your SMSF accountant.</div>
 </div>
- 
+
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <script>
 // ── JSONBin config ──────────────────────────────────────────────
@@ -258,7 +296,7 @@ const BIN_ID  = '69b364fcc3097a1dd51e9af3';
 const BIN_KEY = '$2a$10$9QahmPEg0bbPmmnLEY/U4eQaJCinqSjxbfwav5odexWr9K2VJJM.G';
 const BIN_URL = `https://api.jsonbin.io/v3/b/${BIN_ID}`;
 const HEADERS = { 'Content-Type':'application/json', 'X-Access-Key': BIN_KEY };
- 
+
 // ── App config ──────────────────────────────────────────────────
 const FINHUB_KEY = 'd6pl1a9r01qo88ajl29gd6pl1a9r01qo88ajl2a0';
 const DEF = {
@@ -266,15 +304,16 @@ const DEF = {
   asx:[{ticker:'CBA',name:'Commonwealth Bank',qty:15,cost:95},{ticker:'BHP',name:'BHP Group',qty:30,cost:42},{ticker:'VAS',name:'Vanguard Australia Shares',qty:50,cost:88}],
   cry:[{ticker:'BTC',name:'Bitcoin',qty:0.05,cost:55000},{ticker:'ETH',name:'Ethereum',qty:1.2,cost:3200},{ticker:'SOL',name:'Solana',qty:10,cost:120}],
   met:[{ticker:'XAU',name:'Gold',qty:1,cost:2800},{ticker:'XAG',name:'Silver',qty:10,cost:45}],
-  cash:[{name:'CBA Savings',balance:10000}]
+  cash:[{name:'CBA Savings',balance:10000}],
+  fees:[]
 };
 const CID={BTC:'bitcoin',ETH:'ethereum',SOL:'solana',ADA:'cardano',XRP:'ripple',BNB:'binancecoin',DOGE:'dogecoin',DOT:'polkadot',AVAX:'avalanche-2',MATIC:'matic-network',LINK:'chainlink',UNI:'uniswap',LTC:'litecoin',ATOM:'cosmos',NEAR:'near',SHIB:'shiba-inu',TRX:'tron',BCH:'bitcoin-cash',XLM:'stellar',ALGO:'algorand',XMR:'monero',ETC:'ethereum-classic'};
 const PIE_COLORS=['#378ADD','#185FA5','#0C447C','#639922','#3B6D11','#27500A','#BA7517','#854F0B','#633806','#534AB7','#3C3489','#1D9E75','#D85A30','#D4537E','#5F5E5A','#888780','#B4B2A9'];
- 
-const S = { audUsd:0.63, prices:{}, us:[], asx:[], cry:[], met:[], cash:[] };
+
+const S = { audUsd:0.63, prices:{}, us:[], asx:[], cry:[], met:[], cash:[], fees:[] };
 let pieChart = null;
 let saveTimer = null;
- 
+
 // ── Sync status UI ──────────────────────────────────────────────
 function syncUI(state, msg) {
   const dot = document.getElementById('syncDot');
@@ -282,7 +321,7 @@ function syncUI(state, msg) {
   dot.className = 'sync-dot' + (state === 'syncing' ? ' syncing' : state === 'synced' ? ' synced' : state === 'err' ? ' err' : '');
   txt.textContent = msg;
 }
- 
+
 // ── JSONBin: load ───────────────────────────────────────────────
 async function cloudLoad() {
   syncUI('syncing', 'Loading from cloud...');
@@ -296,16 +335,17 @@ async function cloudLoad() {
     S.cry = rec.cry || DEF.cry;
     S.met = rec.met || DEF.met;
     S.cash= rec.cash|| DEF.cash;
+    S.fees= rec.fees|| DEF.fees;
     syncUI('synced', 'Synced · ' + new Date().toLocaleTimeString('en-AU',{hour:'2-digit',minute:'2-digit'}));
   } catch(e) {
     // Fall back to defaults if bin is empty/new
-    S.us = DEF.us; S.asx = DEF.asx; S.cry = DEF.cry; S.met = DEF.met; S.cash = DEF.cash;
+    S.us = DEF.us; S.asx = DEF.asx; S.cry = DEF.cry; S.met = DEF.met; S.cash = DEF.cash; S.fees = DEF.fees;
     syncUI('err', 'Cloud unavailable — using local data');
   }
-  ['us','asx','cry','met','cash'].forEach(t => rows(t));
+  ['us','asx','cry','met','cash','fees'].forEach(t => rows(t));
   document.getElementById('rfBtn').disabled = false;
 }
- 
+
 // ── JSONBin: save (debounced 1.5s) ─────────────────────────────
 function save() {
   syncUI('syncing', 'Saving...');
@@ -315,7 +355,7 @@ function save() {
       const r = await fetch(BIN_URL, {
         method: 'PUT',
         headers: HEADERS,
-        body: JSON.stringify({ us:S.us, asx:S.asx, cry:S.cry, met:S.met, cash:S.cash })
+        body: JSON.stringify({ us:S.us, asx:S.asx, cry:S.cry, met:S.met, cash:S.cash, fees:S.fees })
       });
       if (!r.ok) throw new Error('HTTP ' + r.status);
       syncUI('synced', 'Saved · ' + new Date().toLocaleTimeString('en-AU',{hour:'2-digit',minute:'2-digit'}));
@@ -324,7 +364,7 @@ function save() {
     }
   }, 1500);
 }
- 
+
 // ── Helpers ─────────────────────────────────────────────────────
 function f(n,d=2){if(n===null||n===undefined||isNaN(n))return'—';return n.toLocaleString('en-AU',{minimumFractionDigits:d,maximumFractionDigits:d});}
 function glChip(gl,pct){
@@ -332,10 +372,11 @@ function glChip(gl,pct){
   const cls=gl>0?'gl-pos':gl<0?'gl-neg':'gl-neu';const sign=gl>=0?'+':'';
   return`<span class="gl-chip ${cls}">${sign}$${f(Math.abs(gl))} (${sign}${f(pct,1)}%)</span>`;
 }
- 
+
 // ── Render rows ─────────────────────────────────────────────────
 function rows(type){
   if(type==='cash'){renderCash();return;}
+  if(type==='fees'){renderFees();return;}
   const body=document.getElementById(type+'B');
   const showAud=document.getElementById('audToggle').checked,r=S.audUsd;
   if(type==='us'){const cur=showAud?'AUD':'USD';document.getElementById('usPH').textContent='Price ('+cur+')';document.getElementById('usVH').textContent='Value ('+cur+')';}
@@ -357,7 +398,7 @@ function rows(type){
 }
 function upField(t,i,field,v){S[t][i][field]=parseFloat(v)||0;save();rows(t);}
 function delA(t,i){S[t].splice(i,1);save();rows(t);}
- 
+
 function renderCash(){
   const body=document.getElementById('cashB');
   const total=S.cash.reduce((s,a)=>s+(a.balance||0),0);
@@ -379,7 +420,46 @@ function addCash(){
   document.getElementById('cashNm').value='';document.getElementById('cashBal').value='';
   renderCash();
 }
- 
+
+// ── Fees ledger ─────────────────────────────────────────────────
+function fyLabel(){
+  const now=new Date();
+  const fyStart=now.getMonth()>=6?now.getFullYear():now.getFullYear()-1;
+  return{label:`FY${fyStart}/${String(fyStart+1).slice(2)}`,start:new Date(fyStart,6,1),end:new Date(fyStart+1,5,30,23,59,59)};
+}
+function renderFees(){
+  const body=document.getElementById('feesB');
+  const fy=fyLabel();
+  // Sort by date descending
+  const sorted=[...S.fees].sort((a,b)=>new Date(b.date)-new Date(a.date));
+  const fyTotal=S.fees.filter(f=>{const d=new Date(f.date);return d>=fy.start&&d<=fy.end;}).reduce((s,f)=>s+(f.amount||0),0);
+  document.getElementById('feesFyLabel').textContent=fy.label+' total fees:';
+  document.getElementById('feesTotal').textContent=fyTotal>0?'-$'+f(fyTotal):'$0.00';
+  document.getElementById('feesSecTot').textContent=fyTotal>0?'-$'+f(fyTotal)+' AUD this FY':'';
+  body.innerHTML=sorted.length?sorted.map((item,i)=>{
+    const orig=S.fees.indexOf(item);
+    const d=item.date?new Date(item.date).toLocaleDateString('en-AU',{day:'2-digit',month:'short',year:'numeric'}):'—';
+    return`<tr><td>${d}</td><td>${item.desc||'—'}</td><td><span class="badge b-gray">${item.cat||'Other'}</span></td><td class="r valbold" style="color:#D85A30;">-$${f(item.amount||0)}</td><td><button class="del" onclick="delFee(${orig})">&#x2715;</button></td></tr>`;
+  }).join(''):'<tr><td colspan="5" style="text-align:center;color:#aaa;padding:16px;">No fees recorded yet</td></tr>';
+}
+function delFee(i){S.fees.splice(i,1);save();renderFees();}
+function showFeesAdd(){
+  document.getElementById('feesAR').style.display='flex';
+  document.getElementById('feesDate').value=new Date().toISOString().slice(0,10);
+}
+function hideFeesAdd(){document.getElementById('feesAR').style.display='none';}
+function addFee(){
+  const date=document.getElementById('feesDate').value;
+  const desc=document.getElementById('feesDesc').value.trim();
+  const cat=document.getElementById('feesCat').value;
+  const amount=parseFloat(document.getElementById('feesAmt').value)||0;
+  if(!desc||!amount)return;
+  S.fees.push({date,desc,cat,amount});
+  save();hideFeesAdd();
+  document.getElementById('feesDesc').value='';document.getElementById('feesAmt').value='';
+  renderFees();
+}
+
 // ── Summary + chart ─────────────────────────────────────────────
 function summary(){
   const showAud=document.getElementById('audToggle').checked,r=S.audUsd;
@@ -392,7 +472,6 @@ function summary(){
   const usA=usU/r,usCA=usCU/r,total=usA+asxA+cryA+metA+cashA,totalCost=usCA+asxCA+cryCA+metCA;
   function glStr(val,cost){if(!cost||!val)return'';const gl=val-cost,pct=cost>0?(gl/cost)*100:0;const cls=gl>0?'gain-pos':gl<0?'gain-neg':'gain-neu';const sign=gl>=0?'+':'';return`<span class="${cls}">${sign}$${f(Math.abs(gl))} (${sign}${f(pct,1)}%)</span>`;}
   document.getElementById('tot').textContent=total>0?'$'+f(total):'—';
-  document.getElementById('totGL').innerHTML=totalCost>0?glStr(total,totalCost):'Awaiting refresh';
   document.getElementById('usT').textContent=usA>0?'$'+f(usA):'—';document.getElementById('usGL').innerHTML=usCA>0?glStr(usA,usCA):'';
   document.getElementById('asxT').textContent=asxA>0?'$'+f(asxA):'—';document.getElementById('asxGL').innerHTML=asxCA>0?glStr(asxA,asxCA):'';
   document.getElementById('crypT').textContent=cryA>0?'$'+f(cryA):'—';document.getElementById('crypGL').innerHTML=cryCA>0?glStr(cryA,cryCA):'';
@@ -428,12 +507,12 @@ function updatePie(){
   if(pieChart){pieChart.data.labels=labels;pieChart.data.datasets[0].data=data;pieChart.data.datasets[0].backgroundColor=colors;pieChart.update();}
   else{pieChart=new Chart(document.getElementById('pieChart'),{type:'doughnut',data:{labels,datasets:[{data,backgroundColor:colors,borderWidth:2,borderColor:'transparent',hoverOffset:4}]},options:{responsive:true,maintainAspectRatio:false,cutout:'60%',plugins:{legend:{display:false},tooltip:{callbacks:{label:(ctx)=>{const pct=gt>0?((ctx.parsed/gt)*100).toFixed(1):0;return ctx.label+': $'+f(ctx.parsed)+' ('+pct+'%)';}}}}}});}
 }
- 
+
 // ── Price fetchers ──────────────────────────────────────────────
 function setDot(id,s){document.getElementById(id).className='dot dot-'+s;}
 function showErr(type,msg){const el=document.getElementById(type+'Err');if(el)el.innerHTML=`<div class="err-note">${msg}</div>`;}
 function clearErr(type){const el=document.getElementById(type+'Err');if(el)el.innerHTML='';}
- 
+
 async function fetchRate(){
   try{const r=await fetch('https://api.coingecko.com/api/v3/simple/price?ids=usd&vs_currencies=aud');const d=await r.json();if(d.usd&&d.usd.aud)S.audUsd=1/d.usd.aud;}catch(e){}
 }
@@ -466,7 +545,7 @@ async function fetchMetals(){
   }));
   setDot('metDot',ok?'live':'err');if(!ok)showErr('met','Could not load metal prices. Try again shortly.');rows('met');
 }
- 
+
 async function refreshAll(){
   const btn=document.getElementById('rfBtn'),icon=document.getElementById('rfIcon');
   btn.disabled=true;icon.classList.add('spin');
@@ -475,7 +554,7 @@ async function refreshAll(){
   document.getElementById('lastUp') && (document.getElementById('lastUp').textContent='Updated '+new Date().toLocaleTimeString('en-AU',{hour:'2-digit',minute:'2-digit'})+' · AUD/USD '+S.audUsd.toFixed(4));
   summary();btn.disabled=false;icon.classList.remove('spin');
 }
- 
+
 // ── Add / remove holdings ───────────────────────────────────────
 function showAdd(t){document.getElementById(t+'AR').style.display='flex';}
 function hideAdd(t){document.getElementById(t+'AR').style.display='none';}
@@ -490,12 +569,11 @@ function addA(t){
   ['Tk','Nm','Qt','Cost'].forEach(x=>document.getElementById(t+x).value='');
   rows(t);
 }
-document.getElementById('audToggle').addEventListener('change',()=>['us','asx','cry','met','cash'].forEach(t=>rows(t)));
- 
+document.getElementById('audToggle').addEventListener('change',()=>['us','asx','cry','met','cash','fees'].forEach(t=>rows(t)));
+
 // ── Boot: load from cloud first ─────────────────────────────────
 document.getElementById('todayDate').textContent = new Date().toLocaleDateString('en-AU',{weekday:'short',day:'numeric',month:'long',year:'numeric'});
 cloudLoad();
 </script>
 </body>
 </html>
- 
