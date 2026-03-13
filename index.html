@@ -588,7 +588,7 @@ function recalcFromTxns(type, i){
   let totalQty=0, totalCost=0;
   [...txns].sort((a,b)=>new Date(a.date)-new Date(b.date)).forEach(tx=>{
     if(tx.side==='buy'){
-      totalCost += tx.qty * tx.price;
+      totalCost += tx.qty * tx.price + (tx.fee||0);
       totalQty  += tx.qty;
     } else {
       // sell reduces qty proportionally
