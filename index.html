@@ -212,6 +212,31 @@ body.dark .tab-btn.active{box-shadow:0 1px 8px rgba(110,106,222,0.3);}
 /* ── CSV export button ── */
 .csvbtn{display:flex;align-items:center;gap:5px;font-size:12px;font-weight:500;color:var(--text2);background:var(--surface2);border:1px solid var(--border4);border-radius:7px;padding:4px 10px;cursor:pointer;font-family:inherit;transition:background 0.15s;}
 .csvbtn:hover{background:var(--surface3);color:var(--text);}
+/* ── Animated number counters ── */
+.sval{transition:color 0.3s;}
+.sval.flash-up{color:var(--gain-pos)!important;}
+.sval.flash-down{color:var(--gain-neg)!important;}
+/* ── Colour-coded rows ── */
+@keyframes rowFlashUp{0%{background:rgba(34,197,94,0.18);}100%{background:transparent;}}
+@keyframes rowFlashDown{0%{background:rgba(239,68,68,0.18);}100%{background:transparent;}}
+tr.row-up td{animation:rowFlashUp 1.8s ease-out forwards;}
+tr.row-down td{animation:rowFlashDown 1.8s ease-out forwards;}
+tr.tint-up td{background:rgba(34,197,94,0.05)!important;}
+tr.tint-down td{background:rgba(239,68,68,0.05)!important;}
+/* ── Market session indicator ── */
+.sessions{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:1rem;}
+.session-pill{display:flex;align-items:center;gap:6px;font-size:11px;font-weight:500;padding:4px 10px;border-radius:99px;border:1px solid var(--border4);color:var(--text2);background:var(--surface);}
+.session-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0;}
+.session-open .session-dot{background:#22c55e;animation:pulse 2s infinite;}
+.session-open{border-color:rgba(34,197,94,0.3);color:var(--text);}
+.session-closed .session-dot{background:var(--text4);}
+.session-pre .session-dot{background:#f59e0b;animation:pulse 2s infinite;}
+.session-pre{border-color:rgba(245,158,11,0.3);color:var(--text);}
+/* ── Smooth tab transitions ── */
+.tab-panel{display:none;opacity:0;transform:translateY(6px);transition:opacity 0.2s ease,transform 0.2s ease;}
+.tab-panel.active{display:block;opacity:1;transform:translateY(0);}
+.tab-panel.entering{display:block;animation:tabIn 0.2s ease forwards;}
+@keyframes tabIn{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
 </style>
 </head>
 <body>
@@ -235,6 +260,9 @@ body.dark .tab-btn.active{box-shadow:0 1px 8px rgba(110,106,222,0.3);}
       </button>
     </div>
   </div>
+
+  <!-- Market sessions -->
+  <div class="sessions" id="sessions"></div>
 
   <!-- Tab bar -->
   <div class="tab-bar">
@@ -831,11 +859,21 @@ function summary(){
   const usA=usU/r,usCA=usCU/r,total=usA+asxA+cryA+metA+cashA,totalCost=usCA+asxCA+cryCA+metCA;
   function glStr(val,cost){if(!cost||!val)return'';const gl=val-cost,pct=cost>0?(gl/cost)*100:0;const cls=gl>0?'gain-pos':gl<0?'gain-neg':'gain-neu';const sign=gl>=0?'+':'';return`<span class="${cls}">${sign}$${f(Math.abs(gl))} (${sign}${f(pct,1)}%)</span>`;}
   document.getElementById('tot').textContent=total>0?'$'+f(total):'—';
-  document.getElementById('usT').textContent=usA>0?'$'+f(usA):'—';document.getElementById('usGL').innerHTML=usCA>0?glStr(usA,usCA):'';
-  document.getElementById('asxT').textContent=asxA>0?'$'+f(asxA):'—';document.getElementById('asxGL').innerHTML=asxCA>0?glStr(asxA,asxCA):'';
-  document.getElementById('crypT').textContent=cryA>0?'$'+f(cryA):'—';document.getElementById('crypGL').innerHTML=cryCA>0?glStr(cryA,cryCA):'';
-  document.getElementById('metT').textContent=metA>0?'$'+f(metA):'—';document.getElementById('metGL').innerHTML=metCA>0?glStr(metA,metCA):'';
-  document.getElementById('cashT').textContent=cashA>0?'$'+f(cashA):'—';
+  if(total>0) animateValue(document.getElementById('tot'), total);
+  if(usA>0) animateValue(document.getElementById('usT'), usA);
+  else document.getElementById('usT').textContent='—';
+  document.getElementById('usGL').innerHTML=usCA>0?glStr(usA,usCA):'';
+  if(asxA>0) animateValue(document.getElementById('asxT'), asxA);
+  else document.getElementById('asxT').textContent='—';
+  document.getElementById('asxGL').innerHTML=asxCA>0?glStr(asxA,asxCA):'';
+  if(cryA>0) animateValue(document.getElementById('crypT'), cryA);
+  else document.getElementById('crypT').textContent='—';
+  document.getElementById('crypGL').innerHTML=cryCA>0?glStr(cryA,cryCA):'';
+  if(metA>0) animateValue(document.getElementById('metT'), metA);
+  else document.getElementById('metT').textContent='—';
+  document.getElementById('metGL').innerHTML=metCA>0?glStr(metA,metCA):'';
+  if(cashA>0) animateValue(document.getElementById('cashT'), cashA);
+  else document.getElementById('cashT').textContent='—';
   document.getElementById('cashSecTot').textContent=cashA>0?'$'+f(cashA)+' AUD':'';
   const usD=showAud?usA:usU,usC=showAud?'AUD':'USD';
   document.getElementById('usSecTot').textContent=usU>0?'$'+f(usD)+' '+usC:'';
@@ -858,6 +896,7 @@ function summary(){
     document.getElementById('cashAlloc').textContent=pct(cashA);
   }
   updatePie();
+  setTimeout(applyRowTints, 100);
   // Save daily snapshot once we have live prices
   if(total > 0 && Object.keys(S.prices).length > 0) saveSnapshot(total);
 }
@@ -940,12 +979,12 @@ async function syncWidget() {
     return {ticker:item.ticker, name:item.name, type:item.type, price, target:item.target||null, vsTarget};
   });
 
-  // Pre-formatted string for KWGT — one line per watchlist item
-  const watchlistText = watchlist.map(item=>{
+  // Pre-formatted string for KWGT — pipe separated, no newlines
+  const watchlistText = watchlist.length ? watchlist.map(item=>{
     const priceStr = item.price != null ? '$'+item.price.toLocaleString('en-AU',{minimumFractionDigits:2,maximumFractionDigits:2}) : '—';
     const vsStr = item.vsTarget != null ? (item.vsTarget>=0?'+':'')+item.vsTarget+'%' : '';
-    return item.ticker+'  '+priceStr+(vsStr?'  '+vsStr:'');
-  }).join('\n');
+    return item.ticker+' '+priceStr+(vsStr?' '+vsStr:'');
+  }).join(' | ') : 'No watchlist items';
 
   const payload = {
     total: parseFloat(total.toFixed(2)),
@@ -1004,19 +1043,120 @@ function toggleDark(){
 }
 
 // ── Tabs ─────────────────────────────────────────────────────────
+
+// ── Smooth tab transitions ───────────────────────────────────────
 function switchTab(name) {
   document.querySelectorAll('.tab-btn').forEach((b,i) => {
     const tabs = ['portfolio','fees','watchlist'];
     b.classList.toggle('active', tabs[i] === name);
   });
   document.querySelectorAll('.tab-panel').forEach(p => {
-    p.classList.toggle('active', p.id === 'tab-'+name);
+    if(p.id === 'tab-'+name) {
+      p.classList.add('active','entering');
+      setTimeout(()=>p.classList.remove('entering'), 220);
+    } else {
+      p.classList.remove('active','entering');
+    }
   });
-  // Resize charts when portfolio tab becomes visible
   if(name === 'portfolio') {
     if(pieChart) pieChart.resize();
     if(historyChart) historyChart.resize();
   }
+}
+
+// ── Animated number counter ─────────────────────────────────────
+function animateValue(el, newVal, prefix='$', decimals=2) {
+  if(!el) return;
+  const raw = el.getAttribute('data-raw');
+  const oldVal = raw ? parseFloat(raw) : null;
+  el.setAttribute('data-raw', newVal);
+  if(oldVal === null || isNaN(oldVal) || oldVal === newVal) {
+    el.textContent = prefix + f(newVal, decimals);
+    return;
+  }
+  // Flash colour
+  const dir = newVal > oldVal ? 'up' : 'down';
+  el.classList.remove('flash-up','flash-down');
+  void el.offsetWidth;
+  el.classList.add('flash-'+dir);
+  setTimeout(()=>el.classList.remove('flash-up','flash-down'), 1200);
+  // Count up/down
+  const duration = 600, steps = 30, increment = (newVal - oldVal) / steps;
+  let current = oldVal, step = 0;
+  const timer = setInterval(()=>{
+    step++;
+    current += increment;
+    if(step >= steps){ current = newVal; clearInterval(timer); }
+    el.textContent = prefix + f(current, decimals);
+  }, duration / steps);
+}
+
+// ── Market session indicator ────────────────────────────────────
+function updateSessions() {
+  const now = new Date();
+  const utc = now.getTime() + now.getTimezoneOffset() * 60000;
+
+  const sessions = [
+    { name: 'ASX',   tz: 10,  open: [10,0],  close: [16,12], label: 'ASX' },
+    { name: 'NYSE',  tz: -5,  open: [9,30],   close: [16,0],  label: 'NYSE' },
+    { name: 'LSE',   tz: 0,   open: [8,0],    close: [16,30], label: 'LSE' },
+    { name: 'Crypto',tz: null, open: null,     close: null,    label: '₿ Crypto' },
+  ];
+
+  // Check if weekday
+  const isWeekday = d => d.getDay() !== 0 && d.getDay() !== 6;
+
+  const html = sessions.map(s => {
+    if(s.tz === null) {
+      // Crypto always open
+      return `<div class="session-pill session-open"><span class="session-dot"></span>${s.label} 24/7</div>`;
+    }
+    const local = new Date(utc + s.tz * 3600000);
+    const mins = local.getHours() * 60 + local.getMinutes();
+    const openMins  = s.open[0]  * 60 + s.open[1];
+    const closeMins = s.close[0] * 60 + s.close[1];
+    const preMins   = openMins - 90;
+    const weekday   = isWeekday(local);
+
+    let state, label;
+    if(!weekday) {
+      state = 'closed'; label = s.label + ' Closed';
+    } else if(mins >= openMins && mins < closeMins) {
+      // Time remaining
+      const rem = closeMins - mins;
+      const h = Math.floor(rem/60), m = rem%60;
+      label = s.label + ' Open · closes ' + (h>0?h+'h ':'') + m+'m';
+      state = 'open';
+    } else if(mins >= preMins && mins < openMins && weekday) {
+      const rem = openMins - mins;
+      label = s.label + ' Pre-market · opens ' + rem+'m';
+      state = 'pre';
+    } else {
+      state = 'closed'; label = s.label + ' Closed';
+    }
+    return `<div class="session-pill session-${state}"><span class="session-dot"></span>${label}</div>`;
+  }).join('');
+
+  document.getElementById('sessions').innerHTML = html;
+}
+
+// ── Colour-coded rows ───────────────────────────────────────────
+// Store previous prices to detect direction on refresh
+const prevPrices = {};
+function applyRowTints() {
+  document.querySelectorAll('tr.holding-row').forEach(tr => {
+    const sym = tr.querySelector('.sym');
+    if(!sym) return;
+    // Find the value cell (second to last td before delete button)
+    const tds = tr.querySelectorAll('td');
+    if(tds.length < 2) return;
+    // Get 24h change cell — it's the one with class pos/neg
+    const changeCell = [...tds].find(td => td.classList.contains('pos') || td.classList.contains('neg'));
+    if(!changeCell) return;
+    tr.classList.remove('tint-up','tint-down','row-up','row-down');
+    if(changeCell.classList.contains('pos')) tr.classList.add('tint-up');
+    else if(changeCell.classList.contains('neg')) tr.classList.add('tint-down');
+  });
 }
 
 // ── Portfolio value history ─────────────────────────────────────
@@ -1152,6 +1292,8 @@ if(savedTheme === '1') {
 }
 cloudLoad();
 renderHistoryChart();
+updateSessions();
+setInterval(updateSessions, 60000);
 </script>
 </body>
 </html>
