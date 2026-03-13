@@ -64,19 +64,23 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .sval{font-size:19px;font-weight:500;color:var(--text);line-height:1.15;font-variant-numeric:tabular-nums;}
 .ssub{font-size:11px;margin-top:4px;}
 .gain-pos{color:var(--gain-pos);}.gain-neg{color:var(--gain-neg);}.gain-neu{color:var(--text3);}
-.dash{display:grid;grid-template-columns:1fr 260px;gap:12px;margin-bottom:1.25rem;align-items:start;}
-.alloc-section{background:var(--surface);border:0.5px solid var(--border);border-radius:12px;padding:1rem 1.125rem;transition:background 0.2s;}
-.alloc-bar{height:5px;background:var(--alloc-bg);border-radius:3px;overflow:hidden;display:flex;gap:2px;margin-bottom:10px;}
-.alloc-seg{height:100%;border-radius:2px;transition:width 0.5s;}
-.legend{display:flex;gap:12px;flex-wrap:wrap;}
-.leg-item{display:flex;align-items:center;gap:5px;font-size:12px;color:var(--text2);}
+.dash{background:var(--surface);border:0.5px solid var(--border);border-radius:12px;padding:1rem 1.25rem;margin-bottom:1.25rem;display:flex;gap:20px;align-items:center;transition:background 0.2s;}
+.alloc-section{flex:1;min-width:0;}
+.alloc-bar{height:14px;background:var(--alloc-bg);border-radius:8px;overflow:hidden;display:flex;gap:3px;margin-bottom:10px;}
+.alloc-seg{height:100%;border-radius:6px;transition:width 0.5s;}
+.legend{display:flex;flex-direction:column;gap:5px;}
+.leg-item{display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:12px;color:var(--text2);}
+.leg-left{display:flex;align-items:center;gap:6px;}
 .leg-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
-.pie-section{background:var(--surface);border:0.5px solid var(--border);border-radius:12px;padding:1rem 1.125rem;transition:background 0.2s;}
-.pie-label{font-size:12px;font-weight:500;color:var(--text2);margin-bottom:10px;}
-.pie-legend{display:flex;flex-direction:column;gap:5px;margin-top:10px;}
-.pie-leg-row{display:flex;align-items:center;justify-content:space-between;font-size:12px;color:var(--text2);}
-.pie-leg-left{display:flex;align-items:center;gap:6px;}
-.pie-leg-sw{width:10px;height:10px;border-radius:2px;flex-shrink:0;}
+.leg-val{font-size:12px;font-weight:500;color:var(--text);font-variant-numeric:tabular-nums;}
+.leg-pct{font-size:11px;color:var(--text3);min-width:34px;text-align:right;}
+.dash-divider{width:0.5px;background:var(--border);align-self:stretch;flex-shrink:0;}
+.pie-section{width:130px;flex-shrink:0;}
+.pie-label{font-size:11px;font-weight:500;color:var(--text3);margin-bottom:6px;text-transform:uppercase;letter-spacing:0.05em;}
+.pie-legend{display:flex;flex-direction:column;gap:4px;margin-top:8px;}
+.pie-leg-row{display:flex;align-items:center;justify-content:space-between;font-size:11px;color:var(--text2);}
+.pie-leg-left{display:flex;align-items:center;gap:5px;}
+.pie-leg-sw{width:8px;height:8px;border-radius:2px;flex-shrink:0;}
 .section{background:var(--surface);border:0.5px solid var(--border);border-radius:12px;margin-bottom:12px;overflow:hidden;transition:background 0.2s;}
 .sec-head{display:flex;align-items:center;justify-content:space-between;padding:0.875rem 1.125rem;border-bottom:0.5px solid var(--border2);}
 .sec-title{display:flex;align-items:center;gap:8px;font-size:14px;font-weight:500;color:var(--text);}
@@ -160,7 +164,9 @@ tr.holding-row.open td:first-child::before{transform:rotate(90deg);}
 tr.holding-row:hover td{background:var(--surface2);}
 @media(max-width:800px){
   .summary{grid-template-columns:repeat(2,minmax(0,1fr));}
-  .dash{grid-template-columns:1fr;}
+  .dash{flex-direction:column;align-items:stretch;}
+  .dash-divider{width:100%;height:0.5px;}
+  .pie-section{width:100%;}
 }
 </style>
 </head>
@@ -203,17 +209,18 @@ tr.holding-row:hover td{background:var(--surface2);}
         <div class="alloc-seg" style="background:#BA7517;width:25%"></div>
         <div class="alloc-seg" style="background:#888780;width:25%"></div>
       </div>
-      <div class="legend">
-        <div class="leg-item"><div class="leg-dot" style="background:#378ADD"></div><span id="usAlloc">US</span></div>
-        <div class="leg-item"><div class="leg-dot" style="background:#639922"></div><span id="asxAlloc">ASX</span></div>
-        <div class="leg-item"><div class="leg-dot" style="background:#BA7517"></div><span id="crypAlloc">Crypto</span></div>
-        <div class="leg-item"><div class="leg-dot" style="background:#888780"></div><span id="metAlloc">Metals</span></div>
-        <div class="leg-item"><div class="leg-dot" style="background:#00897B"></div><span id="cashAlloc">Cash</span></div>
+      <div class="legend" id="allocLegend">
+        <div class="leg-item"><div class="leg-left"><div class="leg-dot" style="background:#378ADD"></div><span id="usAllocName">US stocks</span></div><span class="leg-val" id="usAllocVal">—</span><span class="leg-pct" id="usAlloc"></span></div>
+        <div class="leg-item"><div class="leg-left"><div class="leg-dot" style="background:#639922"></div><span id="asxAllocName">ASX stocks</span></div><span class="leg-val" id="asxAllocVal">—</span><span class="leg-pct" id="asxAlloc"></span></div>
+        <div class="leg-item"><div class="leg-left"><div class="leg-dot" style="background:#BA7517"></div><span id="crypAllocName">Crypto</span></div><span class="leg-val" id="crypAllocVal">—</span><span class="leg-pct" id="crypAlloc"></span></div>
+        <div class="leg-item"><div class="leg-left"><div class="leg-dot" style="background:#888780"></div><span id="metAllocName">Metals</span></div><span class="leg-val" id="metAllocVal">—</span><span class="leg-pct" id="metAlloc"></span></div>
+        <div class="leg-item"><div class="leg-left"><div class="leg-dot" style="background:#00897B"></div><span id="cashAllocName">Cash</span></div><span class="leg-val" id="cashAllocVal">—</span><span class="leg-pct" id="cashAlloc"></span></div>
       </div>
     </div>
+    <div class="dash-divider"></div>
     <div class="pie-section">
-      <div class="pie-label">Holdings breakdown</div>
-      <div style="position:relative;width:100%;height:160px;"><canvas id="pieChart"></canvas></div>
+      <div class="pie-label">By holding</div>
+      <div style="position:relative;width:100%;height:120px;"><canvas id="pieChart"></canvas></div>
       <div class="pie-legend" id="pieLegend"></div>
     </div>
   </div>
@@ -440,6 +447,8 @@ async function cloudLoad() {
     syncUI('err', 'Cloud unavailable — using local data');
   }
   ['us','asx','cry','met','cash','fees','wl'].forEach(t => rows(t));
+  recalcAll();
+  ['us','asx','cry','met'].forEach(t => rows(t));
   document.getElementById('rfBtn').disabled = false;
 }
 
@@ -584,14 +593,12 @@ function delTxn(type, i, ti){
 function recalcFromTxns(type, i){
   const txns = S[type][i].txns||[];
   if(!txns.length){ return; }
-  // FIFO avg cost: running weighted avg of buys
   let totalQty=0, totalCost=0;
   [...txns].sort((a,b)=>new Date(a.date)-new Date(b.date)).forEach(tx=>{
     if(tx.side==='buy'){
       totalCost += tx.qty * tx.price + (tx.fee||0);
       totalQty  += tx.qty;
     } else {
-      // sell reduces qty proportionally
       const sellFrac = Math.min(tx.qty / (totalQty||1), 1);
       totalCost -= totalCost * sellFrac;
       totalQty  -= tx.qty;
@@ -600,7 +607,14 @@ function recalcFromTxns(type, i){
     }
   });
   S[type][i].qty  = parseFloat(totalQty.toFixed(8));
-  S[type][i].cost = totalQty>0 ? parseFloat((totalCost/totalQty).toFixed(4)) : 0;
+  S[type][i].cost = totalQty>0 ? parseFloat((totalCost/totalQty).toFixed(6)) : 0;
+}
+
+// Re-run recalc for all holdings that have transactions on load, to fix any stale stored values
+function recalcAll(){
+  ['us','asx','cry','met'].forEach(type=>{
+    S[type].forEach((item,i)=>{ if((item.txns||[]).length) recalcFromTxns(type,i); });
+  });
 }
 
 function upField(t,i,field,v){S[t][i][field]=parseFloat(v)||0;save();rows(t);}
@@ -755,12 +769,18 @@ function summary(){
   document.getElementById('metSecTot').textContent=metA>0?'$'+f(metA)+' AUD':'';
   if(total>0){
     const up=v=>((v/total)*100).toFixed(1)+'%';
+    const pct=v=>total>0?((v/total)*100).toFixed(0)+'%':'0%';
     document.getElementById('allocBar').innerHTML=`<div class="alloc-seg" style="background:#378ADD;width:${up(usA)};min-width:${usA>0?'4px':'0'}"></div><div class="alloc-seg" style="background:#639922;width:${up(asxA)};min-width:${asxA>0?'4px':'0'}"></div><div class="alloc-seg" style="background:#BA7517;width:${up(cryA)};min-width:${cryA>0?'4px':'0'}"></div><div class="alloc-seg" style="background:#888780;width:${up(metA)};min-width:${metA>0?'4px':'0'}"></div><div class="alloc-seg" style="background:#00897B;width:${up(cashA)};min-width:${cashA>0?'4px':'0'}"></div>`;
-    document.getElementById('usAlloc').textContent='US '+((usA/total)*100).toFixed(0)+'%';
-    document.getElementById('asxAlloc').textContent='ASX '+((asxA/total)*100).toFixed(0)+'%';
-    document.getElementById('crypAlloc').textContent='Crypto '+((cryA/total)*100).toFixed(0)+'%';
-    document.getElementById('metAlloc').textContent='Metals '+((metA/total)*100).toFixed(0)+'%';
-    document.getElementById('cashAlloc').textContent='Cash '+((cashA/total)*100).toFixed(0)+'%';
+    document.getElementById('usAllocVal').textContent=usA>0?'$'+f(usA):'—';
+    document.getElementById('asxAllocVal').textContent=asxA>0?'$'+f(asxA):'—';
+    document.getElementById('crypAllocVal').textContent=cryA>0?'$'+f(cryA):'—';
+    document.getElementById('metAllocVal').textContent=metA>0?'$'+f(metA):'—';
+    document.getElementById('cashAllocVal').textContent=cashA>0?'$'+f(cashA):'—';
+    document.getElementById('usAlloc').textContent=pct(usA);
+    document.getElementById('asxAlloc').textContent=pct(asxA);
+    document.getElementById('crypAlloc').textContent=pct(cryA);
+    document.getElementById('metAlloc').textContent=pct(metA);
+    document.getElementById('cashAlloc').textContent=pct(cashA);
   }
   updatePie();
 }
@@ -773,9 +793,10 @@ function updatePie(){
   S.cash.forEach(item=>{if(item.balance>0){labels.push(item.name);data.push(parseFloat(item.balance.toFixed(2)));colors.push('#00897B');ci++;}});
   if(!data.length)return;
   const gt=data.reduce((a,b)=>a+b,0);
-  document.getElementById('pieLegend').innerHTML=labels.map((l,i)=>{const pct=gt>0?((data[i]/gt)*100).toFixed(1):0;return`<div class="pie-leg-row"><div class="pie-leg-left"><div class="pie-leg-sw" style="background:${colors[i]}"></div><span>${l}</span></div><span style="color:#1a1a1a;font-weight:500;">${pct}%</span></div>`;}).join('');
+  const isDark=document.body.classList.contains('dark');
+  document.getElementById('pieLegend').innerHTML=labels.map((l,i)=>{const pct=gt>0?((data[i]/gt)*100).toFixed(1):0;return`<div class="pie-leg-row"><div class="pie-leg-left"><div class="pie-leg-sw" style="background:${colors[i]}"></div><span>${l}</span></div><span style="font-weight:500;">${pct}%</span></div>`;}).join('');
   if(pieChart){pieChart.data.labels=labels;pieChart.data.datasets[0].data=data;pieChart.data.datasets[0].backgroundColor=colors;pieChart.update();}
-  else{pieChart=new Chart(document.getElementById('pieChart'),{type:'doughnut',data:{labels,datasets:[{data,backgroundColor:colors,borderWidth:2,borderColor:'transparent',hoverOffset:4}]},options:{responsive:true,maintainAspectRatio:false,cutout:'60%',plugins:{legend:{display:false},tooltip:{callbacks:{label:(ctx)=>{const pct=gt>0?((ctx.parsed/gt)*100).toFixed(1):0;return ctx.label+': $'+f(ctx.parsed)+' ('+pct+'%)';}}}}}});}
+  else{pieChart=new Chart(document.getElementById('pieChart'),{type:'doughnut',data:{labels,datasets:[{data,backgroundColor:colors,borderWidth:2,borderColor:'transparent',hoverOffset:4}]},options:{responsive:true,maintainAspectRatio:false,cutout:'65%',plugins:{legend:{display:false},tooltip:{callbacks:{label:(ctx)=>{const pct=gt>0?((ctx.parsed/gt)*100).toFixed(1):0;return ctx.label+': $'+f(ctx.parsed)+' ('+pct+'%)';}}}}}});}
 }
 
 // ── Price fetchers ──────────────────────────────────────────────
