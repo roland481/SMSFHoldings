@@ -2,7 +2,14 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#f6f5f4" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0e0e0f" media="(prefers-color-scheme: dark)">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="SMSF">
+<link rel="manifest" href="manifest.json">
 <title>SMSF Portfolio Tracker</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -907,6 +914,60 @@ async function fetchMetals(){
   setDot('metDot',ok?'live':'err');if(!ok)showErr('met','Could not load metal prices. Try again shortly.');rows('met');
 }
 
+// ── Public widget sync (JSONBin public bin) ─────────────────────
+const WIDGET_BIN_ID  = '69b3f88eaa77b81da9dfacfc';
+const WIDGET_BIN_URL = `https://api.jsonbin.io/v3/b/${WIDGET_BIN_ID}`;
+
+async function syncWidget() {
+  // Calculate current totals (same logic as summary())
+  const r = S.audUsd;
+  let usA=0, asxA=0, cryA=0, metA=0;
+  S.us.forEach(item=>{const p=S.prices['us:'+item.ticker];if(p&&item.qty)usA+=p.price*item.qty/r;});
+  S.asx.forEach(item=>{const p=S.prices['asx:'+item.ticker];if(p&&item.qty)asxA+=p.price*item.qty;});
+  S.cry.forEach(item=>{const p=S.prices['cry:'+item.ticker];if(p&&item.qty)cryA+=p.price*item.qty;});
+  S.met.forEach(item=>{const p=S.prices['met:'+item.ticker];if(p&&item.qty)metA+=p.price*item.qty;});
+  const cashA = S.cash.reduce((s,a)=>s+(a.balance||0),0);
+  const total = usA+asxA+cryA+metA+cashA;
+
+  // Build watchlist snapshot with current prices
+  const watchlist = S.wl.map(item=>{
+    let price = null;
+    if(item.type==='us'){const p=S.prices['us:'+item.ticker];if(p)price=parseFloat((p.price/r).toFixed(2));}
+    else if(item.type==='asx'){const p=S.prices['asx:'+item.ticker];if(p)price=parseFloat(p.price.toFixed(2));}
+    else if(item.type==='crypto'){const p=S.prices['cry:'+item.ticker];if(p)price=parseFloat(p.price.toFixed(2));}
+    else if(item.type==='metal'){const p=S.prices['met:'+item.ticker];if(p)price=parseFloat(p.price.toFixed(2));}
+    const vsTarget = price&&item.target ? parseFloat(((price-item.target)/item.target*100).toFixed(1)) : null;
+    return {ticker:item.ticker, name:item.name, type:item.type, price, target:item.target||null, vsTarget};
+  });
+
+  // Pre-formatted string for KWGT — one line per watchlist item
+  const watchlistText = watchlist.map(item=>{
+    const priceStr = item.price != null ? '$'+item.price.toLocaleString('en-AU',{minimumFractionDigits:2,maximumFractionDigits:2}) : '—';
+    const vsStr = item.vsTarget != null ? (item.vsTarget>=0?'+':'')+item.vsTarget+'%' : '';
+    return item.ticker+'  '+priceStr+(vsStr?'  '+vsStr:'');
+  }).join('\n');
+
+  const payload = {
+    total: parseFloat(total.toFixed(2)),
+    us: parseFloat(usA.toFixed(2)),
+    asx: parseFloat(asxA.toFixed(2)),
+    crypto: parseFloat(cryA.toFixed(2)),
+    metals: parseFloat(metA.toFixed(2)),
+    cash: parseFloat(cashA.toFixed(2)),
+    watchlist,
+    watchlistText,
+    updated: new Date().toLocaleString('en-AU',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'})
+  };
+
+  try {
+    await fetch(WIDGET_BIN_URL, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json', 'X-Access-Key': BIN_KEY },
+      body: JSON.stringify(payload)
+    });
+  } catch(e) { console.warn('Widget sync failed', e); }
+}
+
 async function refreshAll(){
   const btn=document.getElementById('rfBtn'),icon=document.getElementById('rfIcon');
   btn.disabled=true;icon.classList.add('spin');
@@ -914,6 +975,7 @@ async function refreshAll(){
   await Promise.all([fetchUS(),fetchASX(),fetchCry(),fetchMetals(),fetchWl()]);
   document.getElementById('lastUp') && (document.getElementById('lastUp').textContent='Updated '+new Date().toLocaleTimeString('en-AU',{hour:'2-digit',minute:'2-digit'})+' · AUD/USD '+S.audUsd.toFixed(4));
   summary();btn.disabled=false;icon.classList.remove('spin');
+  syncWidget();
 }
 
 // ── Add / remove holdings ───────────────────────────────────────
