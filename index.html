@@ -516,7 +516,7 @@ const DEF = {
 const CID={BTC:'bitcoin',ETH:'ethereum',SOL:'solana',ADA:'cardano',XRP:'ripple',BNB:'binancecoin',DOGE:'dogecoin',DOT:'polkadot',AVAX:'avalanche-2',MATIC:'matic-network',LINK:'chainlink',UNI:'uniswap',LTC:'litecoin',ATOM:'cosmos',NEAR:'near',SHIB:'shiba-inu',TRX:'tron',BCH:'bitcoin-cash',XLM:'stellar',ALGO:'algorand',XMR:'monero',ETC:'ethereum-classic'};
 const PIE_COLORS=['#378ADD','#185FA5','#0C447C','#639922','#3B6D11','#27500A','#BA7517','#854F0B','#633806','#534AB7','#3C3489','#1D9E75','#D85A30','#D4537E','#5F5E5A','#888780','#B4B2A9'];
 
-const S = { audUsd:0.63, prices:{}, us:[], asx:[], cry:[], met:[], cash:[], fees:[], wl:[] };
+const S = { audUsd:0.695, prices:{}, us:[], asx:[], cry:[], met:[], cash:[], fees:[], wl:[] };
 let pieChart = null;
 let saveTimer = null;
 
@@ -601,7 +601,7 @@ function rows(type){
     if(type==='us'&&showAud&&price!==null){dp=price/r;dv=val/r;}
     const hasCost=item.cost&&item.cost>0;
     let gl=null,glPct=null;
-    if(hasCost&&val!==null){const cb=type==='us'?(showAud?item.cost/r:item.cost):item.cost;const tc=cb*item.qty;const dv2=type==='us'?dv:val;gl=dv2-tc;glPct=tc>0?(gl/tc)*100:0;}
+    if(hasCost&&val!==null){const cb=type==='us'?(showAud?item.cost/r:item.cost):item.cost;const tc=cb*item.qty;const dv2=type==='us'?(showAud?val/r:val):val;gl=dv2-tc;glPct=tc>0?(gl/tc)*100:0;}
     const cc=chg>0?'pos':chg<0?'neg':'';
     const cs=chg!==null?(chg>0?'+':'')+f(chg,2)+'%':'—';
     const isF=(type==='cry'||type==='met');
@@ -671,14 +671,16 @@ function saveTxn(type, i){
   const date=document.getElementById(`txDate_${type}_${i}`).value;
   const side=document.getElementById(`txSide_${type}_${i}`).value;
   const qty=parseFloat(document.getElementById(`txQty_${type}_${i}`).value)||0;
-  const price=parseFloat(document.getElementById(`txPrice_${type}_${i}`).value)||0;
+  let price=parseFloat(document.getElementById(`txPrice_${type}_${i}`).value)||0;
   const fee=parseFloat(document.getElementById(`txFee_${type}_${i}`).value)||0;
   if(!qty||!price)return;
+  // US stock prices are entered in whatever currency is displayed (AUD or USD)
+  // Always store in USD so cost basis calc is consistent
+  const showAud=document.getElementById('audToggle').checked;
+  if(type==='us' && showAud) price = price * S.audUsd; // convert AUD entry back to USD
   if(!S[type][i].txns) S[type][i].txns=[];
   S[type][i].txns.push({date,side,qty,price,fee});
-  // Recalculate qty and avg cost from all buy/sell transactions
   recalcFromTxns(type, i);
-  // Auto-add fee to fees ledger if provided
   if(fee>0){
     S.fees.push({date, desc:`${side==='buy'?'Buy':'Sell'} ${qty} ${S[type][i].ticker}`, cat:'Transaction Fee', amount:fee});
     renderFees();
@@ -921,7 +923,33 @@ function showErr(type,msg){const el=document.getElementById(type+'Err');if(el)el
 function clearErr(type){const el=document.getElementById(type+'Err');if(el)el.innerHTML='';}
 
 async function fetchRate(){
-  try{const r=await fetch('https://api.coingecko.com/api/v3/simple/price?ids=usd&vs_currencies=aud');const d=await r.json();if(d.usd&&d.usd.aud)S.audUsd=1/d.usd.aud;}catch(e){}
+  // Try multiple free FX sources in order
+  const sources = [
+    // Source 1: Frankfurter (ECB rates, very reliable)
+    async () => {
+      const r = await fetch('https://api.frankfurter.app/latest?from=USD&to=AUD');
+      const d = await r.json();
+      if(d.rates && d.rates.AUD) return 1 / d.rates.AUD;
+      return null;
+    },
+    // Source 2: CoinGecko (uses crypto market rate, slightly different)
+    async () => {
+      const r = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=usd&vs_currencies=aud');
+      const d = await r.json();
+      if(d.usd && d.usd.aud) return 1 / d.usd.aud;
+      return null;
+    },
+  ];
+  for(const source of sources){
+    try{
+      const rate = await source();
+      if(rate && rate > 0.5 && rate < 1.2){ // sanity check
+        S.audUsd = rate;
+        return;
+      }
+    } catch(e){}
+  }
+  // All sources failed — keep existing rate (don't reset to default)
 }
 async function fetchUS(){
   setDot('usDot','loading');clearErr('us');
@@ -1252,6 +1280,7 @@ function exportCSV() {
       (item.txns||[]).forEach(tx => {
         const d = new Date(tx.date);
         if(d < fy.start || d > fy.end) return;
+        // US prices stored in USD, convert to AUD for export
         const audPrice = type==='us' ? (tx.price / S.audUsd) : tx.price;
         const audTotal = audPrice * tx.qty;
         rows.push([tx.date, type.toUpperCase(), item.ticker, item.name, tx.side, tx.qty, audPrice.toFixed(2), audTotal.toFixed(2), tx.fee||0, 'Transaction', '']);
