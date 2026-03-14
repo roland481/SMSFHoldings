@@ -337,6 +337,10 @@ tr.tint-down td{background:rgba(239,68,68,0.05)!important;}
       <svg width="15" height="15" viewBox="0 0 16 16" fill="none" style="flex-shrink:0;"><circle cx="8" cy="8" r="5" stroke="currentColor" stroke-width="1.5"/><circle cx="8" cy="8" r="2" fill="currentColor"/></svg>
       <span class="sb-label">Watchlist</span>
     </button>
+    <button class="sb-item" id="sb-import" data-action="switchTab" data-tab="import" title="Import">
+      <svg width="15" height="15" viewBox="0 0 16 16" fill="none" style="flex-shrink:0;"><path d="M8 2v9M4 7l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><rect x="2" y="11" width="12" height="3" rx="1" stroke="currentColor" stroke-width="1.5"/></svg>
+      <span class="sb-label">Import</span>
+    </button>
     <div class="sb-section" style="margin-top:8px;">Tools</div>
     <button class="sb-item" data-action="exportCSV" title="Export CSV">
       <svg width="15" height="15" viewBox="0 0 16 16" fill="none" style="flex-shrink:0;"><path d="M3 12h10M8 3v7M5 7l3 3 3-3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
@@ -361,6 +365,11 @@ tr.tint-down td{background:rgba(239,68,68,0.05)!important;}
     Watchlist
     <div class="bn-dot"></div>
   </button>
+  <button class="bn-item" id="bn-import" data-action="switchTab" data-tab="import">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M12 3v13M7 11l5 5 5-5"/><rect x="3" y="17" width="18" height="4" rx="1.5"/></svg>
+    Import
+    <div class="bn-dot"></div>
+  </button>
 </nav>
 
 <div class="sidebar-overlay" id="sidebarOverlay" data-action="closeMobileSidebar"></div>
@@ -382,11 +391,8 @@ tr.tint-down td{background:rgba(239,68,68,0.05)!important;}
     <div class="top-actions">
       <label class="aud-pill"><input type="checkbox" id="audToggle" checked><span>US in AUD</span></label>
       <button class="addbtn" id="topbarAddBtn" data-action="openAddModal" style="background:#397968;color:#fff;border-color:#397968;font-weight:600;">+ Add</button>
-      <button class="addbtn" id="swyftxBtn" data-action="triggerSwyftxCSV" style="background:rgba(174,223,51,0.15);color:#aedf33;border-color:rgba(174,223,51,0.4);font-weight:600;display:flex;align-items:center;gap:5px;">
-        <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M8 2v9M4 7l4 4 4-4"/><rect x="2" y="11" width="12" height="3" rx="1"/></svg>
-        Import Swyftx
-      </button>
       <input type="file" id="swyftxCSVInput" accept=".csv" style="display:none;" onchange="importSwyftxCSV(this)">
+      <input type="file" id="commsecIntlCSVInput" accept=".csv" style="display:none;" onchange="importCommsecIntlCSV(this)">
       <button class="rfbtn" id="rfBtn" data-action="refreshAll" disabled>
         <svg id="rfIcon" width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" style="flex-shrink:0;"><path d="M2 8a6 6 0 1 0 1.5-3.9M2 4v4h4"/></svg>
         Refresh prices
@@ -400,6 +406,7 @@ tr.tint-down td{background:rgba(239,68,68,0.05)!important;}
     <button class="tab-btn active" data-action="switchTab" data-tab="portfolio">📊 Portfolio</button>
     <button class="tab-btn" data-action="switchTab" data-tab="fees">🧾 Transactions</button>
     <button class="tab-btn" data-action="switchTab" data-tab="watchlist">👁 Watchlist</button>
+    <button class="tab-btn" data-action="switchTab" data-tab="import">⬇ Import</button>
   </div>
 
   <div class="tab-panel active" id="tab-portfolio">
@@ -614,6 +621,67 @@ tr.tint-down td{background:rgba(239,68,68,0.05)!important;}
   </div>
   </div><!-- /tab-watchlist -->
 
+  <!-- Import tab -->
+  <div class="tab-panel" id="tab-import">
+  <div class="section">
+    <div class="sec-head">
+      <div class="sec-title">
+        <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><path d="M8 2v9M4 7l4 4 4-4"/><rect x="2" y="11" width="12" height="3" rx="1"/></svg>
+        Import transactions
+      </div>
+    </div>
+    <div style="padding:20px 24px;display:flex;flex-direction:column;gap:16px;">
+
+      <!-- Swyftx -->
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:16px 20px;background:var(--surface2);border:1px solid var(--border4);border-radius:12px;gap:16px;flex-wrap:wrap;">
+        <div style="display:flex;flex-direction:column;gap:4px;min-width:0;">
+          <div style="display:flex;align-items:center;gap:8px;">
+            <span style="font-size:13px;font-weight:600;color:var(--text);">Swyftx</span>
+            <span class="badge b-amber">Crypto</span>
+          </div>
+          <div style="font-size:12px;color:var(--text3);">Import your Swyftx Transaction Report CSV. Imports all buy &amp; sell trades, deduplicates by UUID.</div>
+          <div style="font-size:11px;color:var(--text4);margin-top:2px;">Swyftx app → Reports → Transaction Report → Export CSV</div>
+        </div>
+        <button onclick="document.getElementById('swyftxCSVInput').click()" style="flex-shrink:0;font-size:13px;font-weight:600;padding:8px 20px;border:none;background:linear-gradient(135deg,#BA7517,#e89c2a);color:#fff;border-radius:99px;cursor:pointer;font-family:inherit;white-space:nowrap;box-shadow:0 4px 12px rgba(186,117,23,0.3);">
+          ⬇ Import Swyftx CSV
+        </button>
+      </div>
+
+      <!-- CommSec International -->
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:16px 20px;background:var(--surface2);border:1px solid var(--border4);border-radius:12px;gap:16px;flex-wrap:wrap;">
+        <div style="display:flex;flex-direction:column;gap:4px;min-width:0;">
+          <div style="display:flex;align-items:center;gap:8px;">
+            <span style="font-size:13px;font-weight:600;color:var(--text);">CommSec International</span>
+            <span class="badge b-blue">US Stocks</span>
+          </div>
+          <div style="font-size:12px;color:var(--text3);">Import your CommSec International Activity Statement CSV. All values converted to AUD using the exchange rate locked in at trade time.</div>
+          <div style="font-size:11px;color:var(--text4);margin-top:2px;">CommSec International → Reports → Activity → Export CSV</div>
+        </div>
+        <button onclick="document.getElementById('commsecIntlCSVInput').click()" style="flex-shrink:0;font-size:13px;font-weight:600;padding:8px 20px;border:none;background:linear-gradient(135deg,#1a5fa8,#378ADD);color:#fff;border-radius:99px;cursor:pointer;font-family:inherit;white-space:nowrap;box-shadow:0 4px 12px rgba(55,138,221,0.3);">
+          ⬇ Import CommSec Intl CSV
+        </button>
+      </div>
+
+      <!-- CommSec ASX — coming soon -->
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:16px 20px;background:var(--surface2);border:1px dashed var(--border4);border-radius:12px;gap:16px;flex-wrap:wrap;opacity:0.6;">
+        <div style="display:flex;flex-direction:column;gap:4px;min-width:0;">
+          <div style="display:flex;align-items:center;gap:8px;">
+            <span style="font-size:13px;font-weight:600;color:var(--text);">CommSec ASX</span>
+            <span class="badge b-green">ASX Stocks</span>
+            <span class="badge b-gray">Coming soon</span>
+          </div>
+          <div style="font-size:12px;color:var(--text3);">Import CommSec domestic transaction history. Upload your CSV once available.</div>
+          <div style="font-size:11px;color:var(--text4);margin-top:2px;">CommSec → Portfolio → Reports → Transaction History → CSV</div>
+        </div>
+        <button disabled style="flex-shrink:0;font-size:13px;font-weight:600;padding:8px 20px;border:none;background:var(--surface3);color:var(--text3);border-radius:99px;cursor:not-allowed;font-family:inherit;white-space:nowrap;">
+          ⬇ Import CommSec ASX CSV
+        </button>
+      </div>
+
+    </div>
+  </div>
+  </div><!-- /tab-import -->
+
 <div class="modal-overlay" id="addModal" style="display:none;visibility:hidden;" data-action="closeModalOverlay">
   <div class="modal">
     <button class="modal-close" data-action="closeAddModal">✕</button>
@@ -631,6 +699,7 @@ tr.tint-down td{background:rgba(239,68,68,0.05)!important;}
       <button data-action="setSmartMode" data-mode="fees" id="qbtn-fees" style="font-size:12px;font-weight:500;padding:5px 14px;border:1px solid var(--border4);border-radius:99px;background:var(--surface2);color:var(--text2);cursor:pointer;font-family:inherit;transition:all 0.15s;">+ Fee entry</button>
       <button data-action="setSmartMode" data-mode="income" id="qbtn-income" style="font-size:12px;font-weight:500;padding:5px 14px;border:1px solid var(--border4);border-radius:99px;background:var(--surface2);color:var(--text2);cursor:pointer;font-family:inherit;transition:all 0.15s;">+ Income</button>
       <button data-action="setSmartMode" data-mode="contribution" id="qbtn-contribution" style="font-size:12px;font-weight:500;padding:5px 14px;border:1px solid var(--border4);border-radius:99px;background:var(--surface2);color:var(--text2);cursor:pointer;font-family:inherit;transition:all 0.15s;">+ Contribution</button>
+      <button data-action="setSmartMode" data-mode="transfer" id="qbtn-transfer" style="font-size:12px;font-weight:500;padding:5px 14px;border:1px solid var(--border4);border-radius:99px;background:var(--surface2);color:var(--text2);cursor:pointer;font-family:inherit;transition:all 0.15s;">&#x21c4; Transfer</button>
     </div>
     <div id="modal-cat-row" style="display:none;margin-bottom:16px;">
       <label class="modal-label" style="display:block;margin-bottom:6px;">Category</label>
@@ -730,6 +799,17 @@ tr.tint-down td{background:rgba(239,68,68,0.05)!important;}
       </div>
       <div class="modal-field"><label class="modal-label">Credit to cash account</label><select class="modal-select" id="modal-contrib-account"><option value="">— Don't adjust cash —</option></select></div>
     </div>
+    <!-- Transfer fields -->
+    <div id="modal-transfer-fields" style="display:none;">
+      <div class="modal-hint" style="margin-bottom:12px;">Move funds between two cash accounts. Both balances will be updated immediately.</div>
+      <div class="modal-field"><label class="modal-label">Date</label><input class="modal-input" id="modal-transfer-date" type="date"></div>
+      <div class="modal-row">
+        <div class="modal-field"><label class="modal-label">From account</label><select class="modal-select" id="modal-transfer-from"><option value="">— Select account —</option></select></div>
+        <div class="modal-field"><label class="modal-label">To account</label><select class="modal-select" id="modal-transfer-to"><option value="">— Select account —</option></select></div>
+      </div>
+      <div class="modal-field"><label class="modal-label">Amount (AUD)</label><input class="modal-input" id="modal-transfer-amt" type="number" step="any" placeholder="0.00"></div>
+      <div class="modal-field"><label class="modal-label">Description (optional)</label><input class="modal-input" id="modal-transfer-desc" placeholder="e.g. SMSF contribution deposit"></div>
+    </div>
     <div class="modal-footer">
       <button class="addbtn" data-action="closeAddModal">Cancel</button>
       <button class="okbtn" data-action="submitAddModal" id="modal-submit-btn">Add</button>
@@ -755,12 +835,12 @@ const DEF = {
     {date:'2026-03-13',side:'buy',qty:20,price:128.32,fee:15.40,txnId:'TXN-20260313-002',cashAcct:null},
     {date:'2026-03-13',side:'buy',qty:20,price:127.81,fee:15.34,txnId:'TXN-20260313-003',cashAcct:null}
   ]}],
-  met:[],cash:[{name:'CBA Savings',balance:10000}],fees:[],income:[],contributions:[],wl:[]
+  met:[],cash:[{name:'CBA Savings',balance:10000}],fees:[],income:[],contributions:[],transfers:[],wl:[]
 };
 const CID={BTC:'bitcoin',ETH:'ethereum',SOL:'solana',ADA:'cardano',XRP:'ripple',BNB:'binancecoin',DOGE:'dogecoin',DOT:'polkadot',AVAX:'avalanche-2',MATIC:'matic-network',LINK:'chainlink',UNI:'uniswap',LTC:'litecoin',ATOM:'cosmos',NEAR:'near',SHIB:'shiba-inu',TRX:'tron',BCH:'bitcoin-cash',XLM:'stellar',ALGO:'algorand',XMR:'monero',ETC:'ethereum-classic'};
 const PIE_COLORS=['#378ADD','#185FA5','#0C447C','#639922','#aedf33','#9acc20','#BA7517','#854F0B','#633806','#534AB7','#3C3489','#1D9E75','#D85A30','#D4537E','#5F5E5A','#888780','#B4B2A9'];
 
-const S = { audUsd:0.695, prices:{}, us:[], asx:[], cry:[], met:[], cash:[], fees:[], income:[], contributions:[], wl:[] };
+const S = { audUsd:0.695, prices:{}, us:[], asx:[], cry:[], met:[], cash:[], fees:[], income:[], contributions:[], transfers:[], wl:[] };
 let pieChart = null;
 let saveTimer = null;
 
@@ -992,11 +1072,12 @@ async function cloudLoad() {
     S.wl  = rec.wl  || DEF.wl;
     S.income = rec.income || [];
     S.contributions = rec.contributions || [];
+    S.transfers = rec.transfers || [];
     syncUI('synced', 'Synced · ' + new Date().toLocaleTimeString('en-AU',{hour:'2-digit',minute:'2-digit'}));
   } catch(e) {
     S.us = DEF.us; S.asx = DEF.asx; S.cry = DEF.cry; S.met = DEF.met;
     S.cash = DEF.cash; S.fees = DEF.fees; S.wl = DEF.wl;
-    S.income = []; S.contributions = [];
+    S.income = []; S.contributions = []; S.transfers = [];
     syncUI('err', 'Cloud unavailable — using local data');
   }
   try {
@@ -1024,7 +1105,7 @@ function save() {
     try {
       const r = await fetch(BIN_URL, {
         method: 'PUT', headers: HEADERS,
-        body: JSON.stringify({ us:S.us, asx:S.asx, cry:S.cry, met:S.met, cash:S.cash, fees:S.fees, wl:S.wl, income:S.income, contributions:S.contributions })
+        body: JSON.stringify({ us:S.us, asx:S.asx, cry:S.cry, met:S.met, cash:S.cash, fees:S.fees, wl:S.wl, income:S.income, contributions:S.contributions, transfers:S.transfers })
       });
       if(!r.ok) throw new Error('HTTP ' + r.status);
       syncUI('synced', 'Saved · ' + new Date().toLocaleTimeString('en-AU',{hour:'2-digit',minute:'2-digit'}));
@@ -1161,20 +1242,29 @@ function renderFees(){
     S.fees.forEach((item,orig)=>{entries.push({date:item.date||'',desc:item.desc||'—',type:'fee',amount:item.amount||0,isDebit:true,orig,deletable:true,reversible:false,txnId:item.txnId||'—',isBrokerageFee:false,cashAcct:item.cashAcct??null});});
     (S.income||[]).forEach((item,orig)=>{entries.push({date:item.date||'',desc:`${item.type} — ${item.source}${item.franking>0?' (Franking: $'+f(item.franking)+')':''}`,type:'income',amount:item.amount||0,isDebit:false,orig,deletable:true,reversible:false,txnId:item.txnId||'—',isBrokerageFee:false,cashAcct:item.cashAcct??null});});
     (S.contributions||[]).forEach((item,orig)=>{entries.push({date:item.date||'',desc:`${item.type} contribution — ${item.member}`,type:'contribution',amount:item.amount||0,isDebit:false,orig,deletable:true,reversible:false,txnId:item.txnId||'—',isBrokerageFee:false,cashAcct:item.cashAcct??null});});
+    // Transfers — generate two linked entries per transfer
+    (S.transfers||[]).forEach((item,orig)=>{
+      const fromName = S.cash[item.from]?.name || 'Unknown';
+      const toName   = S.cash[item.to]?.name   || 'Unknown';
+      // Debit leg (source account)
+      entries.push({date:item.date||'',desc:`Transfer to ${toName}${item.desc?' — '+item.desc:''}`,type:'transfer',amount:item.amount||0,isDebit:true,orig,deletable:true,reversible:false,txnId:item.txnId||'—',isBrokerageFee:false,cashAcct:item.from});
+      // Credit leg (destination account)
+      entries.push({date:item.date||'',desc:`Transfer from ${fromName}${item.desc?' — '+item.desc:''}`,type:'transfer',amount:item.amount||0,isDebit:false,orig,deletable:false,reversible:false,txnId:item.txnId||'—',isBrokerageFee:false,cashAcct:item.to});
+    });
     ['us','asx','cry','met'].forEach(assetType=>{S[assetType].forEach((item,assetIdx)=>{(item.txns||[]).forEach((tx,txnIdx)=>{const total=tx.price*tx.qty;const txId=tx.txnId||'—';const ca=tx.cashAcct!=null?tx.cashAcct:null;entries.push({date:tx.date||'',desc:`${tx.side==='buy'?'Buy':'Sell'} ${f(tx.qty,tx.qty%1===0?0:4)} ${item.ticker}${item.name?' — '+item.name:''}`,type:'trade',amount:total,isDebit:tx.side==='buy',deletable:false,reversible:true,assetType,assetIdx,txnIdx,txnId:txId,isBrokerageFee:false,cashAcct:ca});if(tx.fee>0){entries.push({date:tx.date||'',desc:`Brokerage — ${item.ticker} ${tx.side}`,type:'fee',amount:tx.fee,isDebit:true,deletable:false,reversible:false,txnId:txId,isBrokerageFee:true,cashAcct:ca});}});});});
     let filtered=showBalance?entries.filter(e=>e.cashAcct===acctIndex):entries;
     filtered.sort((a,b)=>new Date(a.date)-new Date(b.date));
-    if(showBalance){let running=S.cash[acctIndex]?.balance||0;for(let i=filtered.length-1;i>=0;i--){const e=filtered[i];const credit=!e.isDebit||e.type==='income'||e.type==='contribution';e._runningBalance=running;running+=credit?-e.amount:e.amount;}}
+    if(showBalance){let running=S.cash[acctIndex]?.balance||0;for(let i=filtered.length-1;i>=0;i--){const e=filtered[i];const credit=!e.isDebit||e.type==='income'||e.type==='contribution'||e.type==='transfer';e._runningBalance=running;running+=credit?-e.amount:e.amount;}}
     filtered.reverse();
     const fyFees=entries.filter(e=>e.type==='fee'&&e.isDebit&&(()=>{const d=new Date(e.date);return d>=fy.start&&d<=fy.end;})()).reduce((s,e)=>s+e.amount,0);
     document.getElementById('feesFyLabel').textContent=fy.label+' total fees:';
     document.getElementById('feesTotal').textContent=fyFees>0?'-$'+f(fyFees):'$0.00';
     document.getElementById('feesSecTot').textContent=fyFees>0?'-$'+f(fyFees)+' fees this FY':'';
-    const TYPE_LABELS={trade:'<span class="badge b-blue" style="font-size:9px;">Trade</span>',fee:'<span class="badge b-red" style="font-size:9px;">Fee</span>',income:'<span class="badge b-green" style="font-size:9px;">Income</span>',contribution:'<span class="badge b-teal" style="font-size:9px;">Contribution</span>'};
+    const TYPE_LABELS={trade:'<span class="badge b-blue" style="font-size:9px;">Trade</span>',fee:'<span class="badge b-red" style="font-size:9px;">Fee</span>',income:'<span class="badge b-green" style="font-size:9px;">Income</span>',contribution:'<span class="badge b-teal" style="font-size:9px;">Contribution</span>',transfer:'<span class="badge b-gray" style="font-size:9px;">Transfer</span>'};
     const cols=showBalance?7:6;
     body.innerHTML=filtered.length?filtered.map(e=>{
       const d=e.date?new Date(e.date).toLocaleDateString('en-AU',{day:'2-digit',month:'short',year:'numeric'}):'—';
-      const credit=!e.isDebit||e.type==='income'||e.type==='contribution';
+      const credit=!e.isDebit||e.type==='income'||e.type==='contribution'||e.type==='transfer';
       const amtCol=`<span style="color:${credit?'var(--gain-pos)':'var(--gain-neg)'};">${credit?'+':'-'}$${f(e.amount)}</span>`;
       const idStr=e.txnId||'—';const idDisplay=e.isBrokerageFee?`${idStr} (FEE)`:idStr;
       const idBadge=`<span title="${idDisplay}" style="font-size:9px;font-family:monospace;color:var(--text3);cursor:default;border-bottom:1px dashed var(--text4);white-space:nowrap;">${idDisplay.length>16?idDisplay.slice(0,16)+'…':idDisplay}</span>`;
@@ -1182,6 +1272,7 @@ function renderFees(){
       let actions;
       if(e.deletable&&e.type==='income')actions=`<button class="del" style="opacity:1;" onclick="delIncome(${e.orig})">&#x2715;</button>`;
       else if(e.deletable&&e.type==='contribution')actions=`<button class="del" style="opacity:1;" onclick="delContribution(${e.orig})">&#x2715;</button>`;
+      else if(e.deletable&&e.type==='transfer')actions=`<button class="del" style="opacity:1;" onclick="delTransfer(${e.orig})">&#x2715;</button>`;
       else if(e.deletable)actions=`<button class="del" style="opacity:1;" onclick="delFee(${e.orig})">&#x2715;</button>`;
       else if(e.reversible)actions=`<button onclick="reverseTxn('${e.assetType}',${e.assetIdx},${e.txnIdx})" style="font-size:10px;font-weight:600;padding:2px 8px;border:1px solid rgba(248,113,113,0.4);border-radius:99px;background:rgba(248,113,113,0.12);color:#f87171;cursor:pointer;font-family:inherit;">↩ Reverse</button>`;
       else actions='<span style="color:var(--text4);font-size:10px;">—</span>';
@@ -1192,6 +1283,13 @@ function renderFees(){
 
 function delIncome(i){S.income.splice(i,1);save();renderFees();}
 function delContribution(i){S.contributions.splice(i,1);save();renderFees();}
+function delTransfer(i){
+  const t=S.transfers[i];if(!t)return;
+  // Reverse the balance adjustments
+  if(S.cash[t.from]!=null)S.cash[t.from].balance=(S.cash[t.from].balance||0)+t.amount;
+  if(S.cash[t.to]!=null)S.cash[t.to].balance=(S.cash[t.to].balance||0)-t.amount;
+  S.transfers.splice(i,1);save();renderCash();renderFees();
+}
 
 function reverseTxn(assetType,assetIdx,txnIdx){
   const item=S[assetType][assetIdx];if(!item||!item.txns)return;
@@ -1435,12 +1533,13 @@ function onSmartTickerInput(raw){
   _renderSmartModal();
 }
 function setSmartMode(mode){
-  smartMode=mode;const noTicker=['cash','fees','income','contribution'];
+  smartMode=mode;const noTicker=['cash','fees','income','contribution','transfer'];
   if(noTicker.includes(mode)){document.getElementById('modal-smart-ticker').value='';document.getElementById('modal-ticker-status').textContent='';}
   const today=new Date().toISOString().slice(0,10);
   if(mode==='fees'){const d=document.getElementById('modal-fees-date');if(d&&!d.value)d.value=today;}
   if(mode==='income'){const d=document.getElementById('modal-income-date');if(d&&!d.value)d.value=today;}
   if(mode==='contribution'){const d=document.getElementById('modal-contrib-date');if(d&&!d.value)d.value=today;}
+  if(mode==='transfer'){const d=document.getElementById('modal-transfer-date');if(d&&!d.value)d.value=today;}
   _renderSmartModal();
 }
 function setSmartCategory(cat){
@@ -1451,25 +1550,32 @@ function setSmartCategory(cat){
   document.getElementById('modal-hint')&&(document.getElementById('modal-hint').textContent=MODAL_HINTS[cat]);
 }
 function _renderSmartModal(){
-  const isTxn=smartMode==='txn',isCash=smartMode==='cash',isFees=smartMode==='fees',isIncome=smartMode==='income',isContrib=smartMode==='contribution',isNew=smartMode==='new';
-  const noTicker=isCash||isFees||isIncome||isContrib;
-  const titles={txn:'Add transaction',cash:'Add cash account',fees:'Add fee',income:'Record income',contribution:'Record contribution'};
-  const subs={txn:'Adding trade for '+(S[smartFoundType]?.[smartFoundIdx]?.name||''),cash:'Enter account name and current balance',fees:'Log a fee to your FY ledger',income:'Record dividend, interest or other fund income',contribution:'Record a member contribution to the fund'};
+  const isTxn=smartMode==='txn',isCash=smartMode==='cash',isFees=smartMode==='fees',isIncome=smartMode==='income',isContrib=smartMode==='contribution',isTransfer=smartMode==='transfer',isNew=smartMode==='new';
+  const noTicker=isCash||isFees||isIncome||isContrib||isTransfer;
+  const titles={txn:'Add transaction',cash:'Add cash account',fees:'Add fee',income:'Record income',contribution:'Record contribution',transfer:'Transfer between accounts'};
+  const subs={txn:'Adding trade for '+(S[smartFoundType]?.[smartFoundIdx]?.name||''),cash:'Enter account name and current balance',fees:'Log a fee to your FY ledger',income:'Record dividend, interest or other fund income',contribution:'Record a member contribution to the fund',transfer:'Move funds between two cash accounts'};
   document.getElementById('modal-title').textContent=titles[smartMode]||'Add to portfolio';
   document.getElementById('modal-sub').textContent=subs[smartMode]||'Type a ticker — or choose a type below';
   document.getElementById('modal-ticker-row').style.display=noTicker?'none':'block';
   document.getElementById('modal-quick-btns').style.display=noTicker?'none':'flex';
   document.getElementById('modal-cat-row').style.display=isNew?'block':'none';
   if(isNew)setSmartCategory(smartCategory);
-  document.getElementById('modal-divider').style.display=(isNew||isTxn||isCash||isFees||isIncome||isContrib)?'block':'none';
+  document.getElementById('modal-divider').style.display=(isNew||isTxn||isCash||isFees||isIncome||isContrib||isTransfer)?'block':'none';
   document.getElementById('modal-new-holding').style.display=isNew?'block':'none';
   document.getElementById('modal-txn-fields').style.display=isTxn?'block':'none';
   document.getElementById('modal-cash-fields').style.display=isCash?'block':'none';
   document.getElementById('modal-fees-fields').style.display=isFees?'block':'none';
   document.getElementById('modal-income-fields').style.display=isIncome?'block':'none';
   document.getElementById('modal-contribution-fields').style.display=isContrib?'block':'none';
+  document.getElementById('modal-transfer-fields').style.display=isTransfer?'block':'none';
+  if(isTransfer){
+    const opts=S.cash.map((a,i)=>`<option value="${i}">${a.name} ($${f(a.balance||0)} AUD)</option>`).join('');
+    const fromEl=document.getElementById('modal-transfer-from');const toEl=document.getElementById('modal-transfer-to');
+    if(fromEl)fromEl.innerHTML='<option value="">— Select account —</option>'+opts;
+    if(toEl)toEl.innerHTML='<option value="">— Select account —</option>'+opts;
+  }
   if(isIncome||isContrib){const opts='<option value="">— Don\'t adjust cash —</option>'+S.cash.map((a,i)=>`<option value="${i}">${a.name} ($${f(a.balance||0)} AUD)</option>`).join('');const incAcct=document.getElementById('modal-income-account');const ctbAcct=document.getElementById('modal-contrib-account');if(incAcct)incAcct.innerHTML=opts;if(ctbAcct)ctbAcct.innerHTML=opts;}
-  ['cash','fees','income','contribution'].forEach(m=>{const b=document.getElementById('qbtn-'+m);if(b){b.style.background=smartMode===m?'#397968':'';b.style.color=smartMode===m?'#fff':'';b.style.borderColor=smartMode===m?'#397968':'';}});
+  ['cash','fees','income','contribution','transfer'].forEach(m=>{const b=document.getElementById('qbtn-'+m);if(b){b.style.background=smartMode===m?'#397968':'';b.style.color=smartMode===m?'#fff':'';b.style.borderColor=smartMode===m?'#397968':'';}});
 }
 function submitAddModal(){
   if(smartMode==='txn'){
@@ -1497,6 +1603,19 @@ function submitAddModal(){
     if(!amt||!source)return;const txnId=generateTxnId(date);S.income.push({date,source,type,amount:amt,franking,txnId});
     if(acctIdx!==''){const idx=parseInt(acctIdx);S.cash[idx].balance=(S.cash[idx].balance||0)+amt;renderCash();}
     save();renderFees();
+  }else if(smartMode==='transfer'){
+    const date  = document.getElementById('modal-transfer-date').value;
+    const from  = document.getElementById('modal-transfer-from').value;
+    const to    = document.getElementById('modal-transfer-to').value;
+    const amt   = parseFloat(document.getElementById('modal-transfer-amt').value)||0;
+    const desc  = document.getElementById('modal-transfer-desc').value.trim();
+    if(!amt||from===''||to===''||from===to)return;
+    const fromIdx=parseInt(from),toIdx=parseInt(to);
+    const txnId=generateTxnId(date);
+    S.transfers.push({date,from:fromIdx,to:toIdx,amount:amt,desc,txnId});
+    S.cash[fromIdx].balance=(S.cash[fromIdx].balance||0)-amt;
+    S.cash[toIdx].balance=(S.cash[toIdx].balance||0)+amt;
+    save();renderCash();renderFees();
   }else if(smartMode==='contribution'){
     const date=document.getElementById('modal-contrib-date').value;const amt=parseFloat(document.getElementById('modal-contrib-amt').value)||0;
     const member=document.getElementById('modal-contrib-member').value.trim();const type=document.getElementById('modal-contrib-type').value;
@@ -1523,10 +1642,10 @@ function closeMobileSidebar(){document.getElementById('sidebar').classList.remov
 function toggleSidebar(){const sb=document.getElementById('sidebar');const collapsed=sb.classList.toggle('collapsed');localStorage.setItem('smsf_sb_collapsed',collapsed?'1':'0');if(pieChart)setTimeout(()=>pieChart.resize(),280);if(historyChart)setTimeout(()=>historyChart.resize(),280);}
 
 function switchTab(name){
-  document.querySelectorAll('.tab-btn').forEach((b,i)=>{const tabs=['portfolio','fees','watchlist'];b.classList.toggle('active',tabs[i]===name);});
-  ['portfolio','fees','watchlist'].forEach(t=>{const sb=document.getElementById('sb-'+t);if(sb)sb.classList.toggle('active',t===name);const bn=document.getElementById('bn-'+t);if(bn)bn.classList.toggle('active',t===name);});
+  document.querySelectorAll('.tab-btn').forEach((b,i)=>{const tabs=['portfolio','fees','watchlist','import'];b.classList.toggle('active',tabs[i]===name);});
+  ['portfolio','fees','watchlist','import'].forEach(t=>{const sb=document.getElementById('sb-'+t);if(sb)sb.classList.toggle('active',t===name);const bn=document.getElementById('bn-'+t);if(bn)bn.classList.toggle('active',t===name);});
   document.querySelectorAll('.tab-panel').forEach(p=>{if(p.id==='tab-'+name){p.classList.add('active','entering');setTimeout(()=>p.classList.remove('entering'),220);}else{p.classList.remove('active','entering');}});
-  const addBtn=document.getElementById('topbarAddBtn');if(addBtn)addBtn.style.display=(name==='watchlist')?'none':'';
+  const addBtn=document.getElementById('topbarAddBtn');if(addBtn)addBtn.style.display=(name==='watchlist'||name==='import')?'none':'';
   if(name==='fees'){try{renderFees();}catch(e){console.error('renderFees error:',e);}}
   if(name==='portfolio'){try{renderCash();}catch(e){console.error('renderCash error:',e);}}
   closeMobileSidebar();
@@ -1605,6 +1724,7 @@ function migrateIds(){
   (S.fees||[]).forEach(fe=>{if(!fe.txnId){fe.txnId=generateTxnId(fe.date);changed=true;}});
   (S.income||[]).forEach(item=>{if(!item.txnId){item.txnId=generateTxnId(item.date);changed=true;}});
   (S.contributions||[]).forEach(item=>{if(!item.txnId){item.txnId=generateTxnId(item.date);changed=true;}});
+  (S.transfers||[]).forEach(item=>{if(!item.txnId){item.txnId=generateTxnId(item.date);changed=true;}});
   return changed;
 }
 
@@ -1635,6 +1755,7 @@ document.addEventListener('click',function(e){
     case 'submitAddModal':    submitAddModal();break;
     case 'refreshAll':        refreshAll();break;
     case 'triggerSwyftxCSV':  document.getElementById('swyftxCSVInput').click();break;
+    case 'triggerCommsecIntlCSV': document.getElementById('commsecIntlCSVInput').click();break;
     case 'exportCSV':         exportCSV();break;
     case 'openMobileSidebar': openMobileSidebar();break;
     case 'closeMobileSidebar':closeMobileSidebar();break;
@@ -1654,6 +1775,219 @@ document.addEventListener('change',function(e){
   if(e.target.id==='audToggle'){['us','asx','cry','met','cash','fees','wl'].forEach(t=>rows(t));renderAllHoldings();}
   if(e.target.id==='modal-txn-side')updateTxnAccountLabel();
 });
+
+// ══════════════════════════════════════════════════════════════
+// CommSec International CSV Importer
+// Parses Interactive Brokers-format Activity Statements from CommSec International
+// All monetary values stored in AUD using the exchange rate locked in at trade time
+// Deduplication: fingerprint = ticker_YYYYMMDD_qty_usdprice (no UUID in this format)
+// ══════════════════════════════════════════════════════════════
+function importCommsecIntlCSV(input) {
+  const file = input.files[0];
+  if(!file) return;
+  input.value = '';
+
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    try {
+      const text = e.target.result;
+
+      // Parse CSV into rows, handling quoted fields with commas
+      function parseCSVLine(line) {
+        const result = [];
+        let cur = '', inQuote = false;
+        for(let i = 0; i < line.length; i++) {
+          const ch = line[i];
+          if(ch === '"') { inQuote = !inQuote; }
+          else if(ch === ',' && !inQuote) { result.push(cur.trim()); cur = ''; }
+          else { cur += ch; }
+        }
+        result.push(cur.trim());
+        return result;
+      }
+
+      const rows = text.split('\n').map(parseCSVLine);
+
+      // ── Extract trades (stock rows only, Order discriminator) ──
+      // Format: Trades,Data,Order,Stocks,USD,SYMBOL,DATE,TIME,QTY,T.PRICE,C.PRICE,PROCEEDS,COMM,BASIS,...
+      const stockTrades = [];
+      let audTotalProceeds = null; // from Trades,Total,,Stocks,AUD row
+      let audTotalComm     = null;
+
+      // Get AUD totals for the whole statement (used to apportion per-trade AUD values)
+      // For single-trade statements this equals the trade's AUD values directly
+      for(const r of rows) {
+        if(r[0]==='Trades' && r[1]==='Total' && r[3]==='Stocks' && r[4]==='AUD') {
+          // Proceeds col = 10 (index), Comm col = 11
+          audTotalProceeds = Math.abs(parseFloat(r[10])||0); // purchase = negative proceeds
+          audTotalComm     = Math.abs(parseFloat(r[11])||0);
+        }
+      }
+
+      for(const r of rows) {
+        if(r[0]==='Trades' && r[1]==='Data' && r[2]==='Order' && r[3]==='Stocks') {
+          // r: [Trades,Data,Order,Stocks,USD,SYMBOL,DATE,TIME,QTY,T.PRICE,C.PRICE,PROCEEDS,COMM,BASIS,RPL,MTM,CODE]
+          const symbol   = (r[5]||'').trim().toUpperCase();
+          const dateStr  = (r[6]||'').trim(); // YYYY-MM-DD
+          const qtyRaw   = parseFloat(r[8])  || 0;
+          const usdPrice = parseFloat(r[9])  || 0;
+          const usdProc  = parseFloat(r[11]) || 0; // negative for buys
+          if(!symbol || !qtyRaw || !usdPrice) continue;
+
+          const side = qtyRaw > 0 ? 'buy' : 'sell';
+          const qty  = Math.abs(qtyRaw);
+
+          // Deduplication fingerprint — ticker + date + qty + usd price
+          const dedupId = `CSINTL_${symbol}_${dateStr}_${qty}_${usdPrice}`;
+
+          stockTrades.push({ symbol, dateStr, side, qty, usdPrice, usdProc: Math.abs(usdProc), dedupId });
+        }
+      }
+
+      if(!stockTrades.length) {
+        alert('No stock trades found in this CommSec International statement.');
+        return;
+      }
+
+      // ── For single-trade statements: assign AUD values directly ──
+      // For multi-trade: split AUD totals proportionally by USD proceeds
+      const totalUsdProc = stockTrades.reduce((s,t) => s + t.usdProc, 0);
+      stockTrades.forEach(t => {
+        const share = totalUsdProc > 0 ? t.usdProc / totalUsdProc : 1 / stockTrades.length;
+        t.audProc = parseFloat(((audTotalProceeds || 0) * share).toFixed(6));
+        t.audComm = parseFloat(((audTotalComm     || 0) * share).toFixed(6));
+        // AUD price per share ex-fee
+        t.audPrice = t.qty > 0 ? parseFloat((t.audProc / t.qty).toFixed(6)) : 0;
+      });
+
+      // ── Extract deposits ──
+      const deposits = [];
+      for(const r of rows) {
+        if(r[0]==='Deposits & Withdrawals' && r[1]==='Data' && r[2]!=='Total') {
+          const currency = (r[2]||'').trim();
+          const date     = (r[3]||'').trim();
+          const desc     = (r[4]||'').trim();
+          const amount   = parseFloat(r[5]) || 0;
+          if(currency==='AUD' && amount > 0) {
+            deposits.push({ date, desc, amount });
+          }
+        }
+      }
+
+      // ── Summary for user prompt ──
+      const tradeLines = stockTrades.map(t =>
+        `${t.side.toUpperCase()} ${t.qty} ${t.symbol} @ $${t.audPrice.toFixed(2)} AUD (fee $${t.audComm.toFixed(2)})`
+      ).join('\n');
+      const depositLines = deposits.length
+        ? '\n\nDeposits found:\n' + deposits.map(d => `$${d.amount.toLocaleString()} AUD — ${d.desc}`).join('\n')
+        : '';
+
+      const confirmMsg = `CommSec International import preview:\n\n${tradeLines}${depositLines}\n\nProceed?`;
+      if(!confirm(confirmMsg)) return;
+
+      // ── Select cash account ──
+      let cashAcctIdx = null;
+      if(S.cash.length > 0) {
+        const opts = S.cash.map((a,i) => `${i+1}. ${a.name} ($${f(a.balance||0)} AUD)`).join('\n');
+        const ans = prompt(`Which cash account is your CommSec International account?\n\n${opts}\n\nEnter number:`);
+        if(ans === null) return;
+        const n = parseInt(ans);
+        if(n >= 1 && n <= S.cash.length) cashAcctIdx = n - 1;
+      }
+
+      // ── Handle deposits — offer to create transfer entries ──
+      for(const dep of deposits) {
+        const already = (S.transfers||[]).some(t =>
+          t.date === dep.date && Math.abs(t.amount - dep.amount) < 0.01 && t.desc && t.desc.includes('CommSec')
+        );
+        if(already) continue;
+
+        if(S.cash.length > 1 && cashAcctIdx !== null) {
+          const otherAccts = S.cash.map((a,i) => i !== cashAcctIdx ? `${i+1}. ${a.name}` : null).filter(Boolean).join('\n');
+          const ans2 = prompt(
+            `Deposit found: $${dep.amount.toLocaleString()} AUD on ${dep.date}\n"${dep.desc}"\n\nWhich account did this come FROM?\n\n${otherAccts}\n\nEnter number, or 0 to skip:`
+          );
+          if(ans2 !== null) {
+            const n2 = parseInt(ans2);
+            if(n2 >= 1 && n2 <= S.cash.length && n2-1 !== cashAcctIdx) {
+              const fromIdx = n2 - 1;
+              const txnId = generateTxnId(dep.date);
+              if(!S.transfers) S.transfers = [];
+              S.transfers.push({ date:dep.date, from:fromIdx, to:cashAcctIdx, amount:dep.amount, desc:'CommSec Intl deposit — '+dep.desc, txnId });
+              S.cash[fromIdx].balance = (S.cash[fromIdx].balance||0) - dep.amount;
+              S.cash[cashAcctIdx].balance = (S.cash[cashAcctIdx].balance||0) + dep.amount;
+            }
+          }
+        }
+      }
+
+      // ── Import trades ──
+      let imported = 0, skipped = 0;
+
+      for(const t of stockTrades) {
+        // Deduplicate — check all US holdings for matching fingerprint
+        const isDupe = S.us.some(h => (h.txns||[]).some(tx => tx.commsecIntlId === t.dedupId));
+        if(isDupe) { skipped++; continue; }
+
+        // Find or create US holding
+        let idx = S.us.findIndex(h => h.ticker === t.symbol);
+        if(idx === -1) {
+          S.us.push({ ticker:t.symbol, name:t.symbol, qty:0, cost:0, txns:[] });
+          idx = S.us.length - 1;
+        }
+        if(!S.us[idx].txns) S.us[idx].txns = [];
+
+        // Add transaction — price in AUD ex-fee, fee in AUD
+        S.us[idx].txns.push({
+          date:          t.dateStr,
+          side:          t.side,
+          qty:           t.qty,
+          price:         t.audPrice,   // AUD per share ex-fee
+          fee:           t.audComm,    // AUD commission
+          txnId:         generateTxnId(t.dateStr),
+          commsecIntlId: t.dedupId,    // fingerprint for dedup
+          cashAcct:      cashAcctIdx
+        });
+
+        // Adjust cash balance: deduct trade value + commission
+        if(cashAcctIdx !== null && S.cash[cashAcctIdx]) {
+          const move = t.side === 'buy'
+            ? -(t.audProc + t.audComm)   // deduct trade + fee for buys
+            : (t.audProc - t.audComm);   // credit trade - fee for sells
+          S.cash[cashAcctIdx].balance = (S.cash[cashAcctIdx].balance||0) + move;
+        }
+
+        recalcFromTxns('us', idx);
+        imported++;
+      }
+
+      if(imported > 0) {
+        save();
+        rows('us');
+        renderAllHoldings();
+        renderCash();
+        renderFees();
+        summary();
+      }
+
+      const cashMsg = cashAcctIdx !== null
+        ? `\nCash account updated: ${S.cash[cashAcctIdx].name} (balance now $${f(S.cash[cashAcctIdx].balance||0)})`
+        : '';
+
+      alert(
+        `✓ CommSec International import complete!\n\n` +
+        `${imported} trade${imported!==1?'s':''} imported\n` +
+        `${skipped} duplicate${skipped!==1?'s':''} skipped` +
+        cashMsg
+      );
+
+    } catch(err) {
+      console.error('CommSec Intl import error:', err);
+      alert(`Import failed: ${err.message}`);
+    }
+  };
+  reader.readAsText(file);
+}
 </script>
 </body>
 </html>
