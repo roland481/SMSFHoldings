@@ -1247,201 +1247,163 @@ function fyLabel(){
 
 function renderFees(){
   try {
-  const body=document.getElementById('feesB');
-  if(!body) return;
-  const fy=fyLabel();
-  const entries=[];
+    const body = document.getElementById('feesB');
+    if(!body) return;
 
-  // ── Manual fees
-  S.fees.forEach((item,orig)=>{
-    entries.push({
-      date:item.date||'',
-      desc:item.desc||'—',
-      type:'fee',
-      cat:item.cat||'Other',
-      amount:item.amount||0,
-      isDebit:true,
-      orig,
-      deletable:true,
-      reversible:false,
-      txnId:item.txnId||'—',
-      isBrokerageFee:false
-    });
-  });
+    // Populate account filter dropdown
+    const filterEl = document.getElementById('ledgerAccountFilter');
+    if(filterEl) {
+      const prev = filterEl.value;
+      filterEl.innerHTML = '<option value="">All accounts</option>' +
+        S.cash.map((a,i) => `<option value="${i}">${a.name}</option>`).join('');
+      if(prev && filterEl.querySelector(`option[value="${prev}"]`)) filterEl.value = prev;
+    }
+    const selectedAcct = filterEl ? filterEl.value : '';
+    const showBalance  = selectedAcct !== '';
+    const acctIndex    = showBalance ? parseInt(selectedAcct) : null;
 
-  // ── Income entries
-  (S.income||[]).forEach((item,orig)=>{
-    entries.push({
-      date:item.date||'',
-      desc:`${item.type} — ${item.source}${item.franking>0?' (Franking: $'+f(item.franking)+')':''}`,
-      type:'income',
-      cat:item.type,
-      amount:item.amount||0,
-      isDebit:false,
-      orig,
-      deletable:true,
-      reversible:false,
-      txnId:item.txnId||'—',
-      isBrokerageFee:false
-    });
-  });
+    // Show/hide balance column header and current balance display
+    const balHeader  = document.getElementById('balanceColHeader');
+    const balDisplay = document.getElementById('ledgerBalanceDisplay');
+    if(balHeader)  balHeader.style.display  = showBalance ? '' : 'none';
+    if(balDisplay) balDisplay.style.display = showBalance ? 'flex' : 'none';
+    if(showBalance) {
+      const balAmtEl = document.getElementById('ledgerBalanceAmt');
+      if(balAmtEl) balAmtEl.textContent = '$' + f(S.cash[acctIndex]?.balance || 0) + ' AUD';
+    }
 
-  // ── Contribution entries
-  (S.contributions||[]).forEach((item,orig)=>{
-    entries.push({
-      date:item.date||'',
-      desc:`${item.type} contribution — ${item.member}`,
-      type:'contribution',
-      cat:item.type,
-      amount:item.amount||0,
-      isDebit:false,
-      orig,
-      deletable:true,
-      reversible:false,
-      txnId:item.txnId||'—',
-      isBrokerageFee:false
-    });
-  });
-  ['us','asx','cry','met'].forEach(assetType=>{
-    S[assetType].forEach((item,assetIdx)=>{
-      (item.txns||[]).forEach((tx,txnIdx)=>{
-        const total = tx.price * tx.qty;
-        const txId = tx.txnId || '—';
-        entries.push({
-          date:tx.date||'',
-          desc:`${tx.side==='buy'?'Buy':'Sell'} ${f(tx.qty,tx.qty%1===0?0:4)} ${item.ticker}${item.name?' — '+item.name:''}`,
-          type:'trade',
-          cat:tx.side==='buy'?'Purchase':'Sale',
-          amount:total,
-          isDebit:tx.side==='buy',
-          deletable:false,
-          reversible:true,
-          assetType, assetIdx, txnIdx,
-          fee:tx.fee||0,
-          cashAcct:tx.cashAcct!=null?tx.cashAcct:null,
-          txnId:txId,
-          isBrokerageFee:false
-        });
-        // Cash movement entry — if cash account was linked
-        if(tx.cashAcct!=null && S.cash[tx.cashAcct]) {
-          const cashTotal = tx.qty*tx.price + (tx.side==='buy'?tx.fee||0:-(tx.fee||0));
-          entries.push({
-            date:tx.date||'',
-            desc:`Cash ${tx.side==='buy'?'debit':'credit'} — ${item.ticker} ${tx.side} via ${S.cash[tx.cashAcct].name}`,
-            type:'cash-movement',
-            cat:'Cash movement',
-            amount:Math.abs(cashTotal),
-            isDebit:tx.side==='buy',
-            deletable:false,
-            reversible:false,
-            txnId:txId,
-            isBrokerageFee:false,
-            cashAcct:tx.cashAcct
-          });
-        }
-        if(tx.fee>0){
-          entries.push({
-            date:tx.date||'',
-            desc:`Brokerage — ${item.ticker} ${tx.side}`,
-            type:'fee',
-            cat:'Transaction Fee',
-            amount:tx.fee,
-            isDebit:true,
-            deletable:false,
-            reversible:false,
-            txnId:txId,
-            isBrokerageFee:true
-          });
-        }
+    const fy = fyLabel();
+    const entries = [];
+
+    // Manual fees
+    S.fees.forEach((item, orig) => {
+      entries.push({
+        date:item.date||'', desc:item.desc||'—', type:'fee', amount:item.amount||0,
+        isDebit:true, orig, deletable:true, reversible:false,
+        txnId:item.txnId||'—', isBrokerageFee:false, cashAcct:item.cashAcct??null
       });
     });
-  });
 
-  // ── Add cashAcct to trade/fee/cash-movement entries (already done above)
-  // Also tag brokerage fees with their parent trade's cashAcct
-  let lastCashAcct = null;
-  entries.forEach(e => {
-    if(e.type==='trade') lastCashAcct = e.cashAcct;
-    if(e.isBrokerageFee && lastCashAcct!=null) e.cashAcct = lastCashAcct;
-  });
-
-  // ── Filter by selected account
-  let filtered = entries;
-  if(showBalance && acctIndex!=null) {
-    filtered = entries.filter(e => {
-      if(e.type==='cash-movement') return e.cashAcct === acctIndex;
-      if(e.type==='trade') return e.cashAcct === acctIndex;
-      if(e.isBrokerageFee) return e.cashAcct === acctIndex;
-      if(e.type==='income') return e.cashAcct === acctIndex;
-      if(e.type==='contribution') return e.cashAcct === acctIndex;
-      return false; // manual fees without cashAcct hidden in account view
+    // Income
+    (S.income||[]).forEach((item, orig) => {
+      entries.push({
+        date:item.date||'',
+        desc:`${item.type} — ${item.source}${item.franking>0?' (Franking: $'+f(item.franking)+')':''}`,
+        type:'income', amount:item.amount||0,
+        isDebit:false, orig, deletable:true, reversible:false,
+        txnId:item.txnId||'—', isBrokerageFee:false, cashAcct:item.cashAcct??null
+      });
     });
-  }
 
-  // Sort by date ascending for balance calc, then reverse for display
-  filtered.sort((a,b)=>new Date(a.date)-new Date(b.date));
-
-  // ── Compute running balance (oldest first, then reverse for display)
-  if(showBalance && acctIndex!=null) {
-    // Start from current account balance and work backwards
-    // Actually compute forward from 0 and offset
-    let running = 0;
-    filtered.forEach(e => {
-      const isCredit = !e.isDebit || e.type==='income' || e.type==='contribution';
-      running += isCredit ? e.amount : -e.amount;
-      e._runningBalance = running;
+    // Contributions
+    (S.contributions||[]).forEach((item, orig) => {
+      entries.push({
+        date:item.date||'',
+        desc:`${item.type} contribution — ${item.member}`,
+        type:'contribution', amount:item.amount||0,
+        isDebit:false, orig, deletable:true, reversible:false,
+        txnId:item.txnId||'—', isBrokerageFee:false, cashAcct:item.cashAcct??null
+      });
     });
-    // Show current balance
-    const currentBal = S.cash[acctIndex]?.balance || 0;
-    const balAmtEl = document.getElementById('ledgerBalanceAmt');
-    if(balAmtEl) balAmtEl.textContent = '$' + f(currentBal) + ' AUD';
-  }
 
-  // Reverse for display (newest first)
-  filtered.reverse();
+    // Trades, cash movements, brokerage fees from holdings
+    ['us','asx','cry','met'].forEach(assetType => {
+      S[assetType].forEach((item, assetIdx) => {
+        (item.txns||[]).forEach((tx, txnIdx) => {
+          const total = tx.price * tx.qty;
+          const txId  = tx.txnId || '—';
+          const ca    = tx.cashAcct != null ? tx.cashAcct : null;
+          entries.push({
+            date:tx.date||'',
+            desc:`${tx.side==='buy'?'Buy':'Sell'} ${f(tx.qty,tx.qty%1===0?0:4)} ${item.ticker}${item.name?' — '+item.name:''}`,
+            type:'trade', amount:total, isDebit:tx.side==='buy',
+            deletable:false, reversible:true,
+            assetType, assetIdx, txnIdx,
+            txnId:txId, isBrokerageFee:false, cashAcct:ca
+          });
+          if(ca != null && S.cash[ca]) {
+            const cashTotal = tx.qty*tx.price + (tx.side==='buy' ? tx.fee||0 : -(tx.fee||0));
+            entries.push({
+              date:tx.date||'',
+              desc:`Cash ${tx.side==='buy'?'debit':'credit'} — ${item.ticker} via ${S.cash[ca].name}`,
+              type:'cash-movement', amount:Math.abs(cashTotal), isDebit:tx.side==='buy',
+              deletable:false, reversible:false,
+              txnId:txId, isBrokerageFee:false, cashAcct:ca
+            });
+          }
+          if(tx.fee > 0) {
+            entries.push({
+              date:tx.date||'',
+              desc:`Brokerage — ${item.ticker} ${tx.side}`,
+              type:'fee', amount:tx.fee, isDebit:true,
+              deletable:false, reversible:false,
+              txnId:txId, isBrokerageFee:true, cashAcct:ca
+            });
+          }
+        });
+      });
+    });
 
-  // Sort by date descending for all-accounts view
-  if(!showBalance) filtered.sort((a,b)=>new Date(b.date)-new Date(a.date));
+    // Filter by account if selected
+    let filtered = showBalance
+      ? entries.filter(e => e.cashAcct === acctIndex)
+      : entries;
 
-  // FY totals — fees only
-  const fyFees=entries.filter(e=>e.type==='fee'&&e.isDebit&&(()=>{const d=new Date(e.date);return d>=fy.start&&d<=fy.end;})()).reduce((s,e)=>s+e.amount,0);
-  document.getElementById('feesFyLabel').textContent=fy.label+' total fees:';
-  document.getElementById('feesTotal').textContent=fyFees>0?'-$'+f(fyFees):'$0.00';
-  document.getElementById('feesSecTot').textContent=fyFees>0?'-$'+f(fyFees)+' fees this FY':'';
+    // Sort: ascending for balance calc
+    filtered.sort((a,b) => new Date(a.date) - new Date(b.date));
 
-  const TYPE_LABELS={
-    trade:          '<span class="badge b-blue"  style="font-size:9px;">Trade</span>',
-    fee:            '<span class="badge b-red"   style="font-size:9px;">Fee</span>',
-    income:         '<span class="badge b-green" style="font-size:9px;">Income</span>',
-    contribution:   '<span class="badge b-teal"  style="font-size:9px;">Contribution</span>',
-    'cash-movement':'<span class="badge b-gray"  style="font-size:9px;">Cash</span>'
-  };
+    // Compute running balance (forward from 0)
+    if(showBalance) {
+      let running = 0;
+      filtered.forEach(e => {
+        const credit = !e.isDebit || e.type==='income' || e.type==='contribution';
+        running += credit ? e.amount : -e.amount;
+        e._runningBalance = running;
+      });
+    }
 
-  body.innerHTML=filtered.length?filtered.map((e,ei)=>{
-    const d=e.date?new Date(e.date).toLocaleDateString('en-AU',{day:'2-digit',month:'short',year:'numeric'}):'—';
-    const isCredit = !e.isDebit || e.type==='income' || e.type==='contribution';
-    const amtColour = isCredit ? 'var(--gain-pos)' : 'var(--gain-neg)';
-    const amtSign = isCredit ? '+' : '-';
-    const amtCol = `<span style="color:${amtColour};">${amtSign}$${f(e.amount)}</span>`;
-    const balCol = showBalance && e._runningBalance!=null
-      ? `<td class="r" style="font-weight:600;color:${e._runningBalance>=0?'var(--gain-pos)':'var(--gain-neg)'};">$${f(Math.abs(e._runningBalance))}</td>`
-      : (showBalance ? '<td class="r" style="color:var(--text4);">—</td>' : '');
-    const idStr = e.txnId || '—';
-    const idDisplay = e.isBrokerageFee ? `${idStr} (FEE)` : idStr;
-    const idBadge = `<span title="${idDisplay}" style="font-size:9px;font-family:monospace;color:var(--text3);cursor:default;border-bottom:1px dashed var(--text4);white-space:nowrap;">${idDisplay.length>16?idDisplay.slice(0,16)+'…':idDisplay}</span>`;
-    let actions;
-    if(e.deletable && e.type==='income')             actions=`<button class="del" style="opacity:1;" onclick="delIncome(${e.orig})">&#x2715;</button>`;
-    else if(e.deletable && e.type==='contribution')  actions=`<button class="del" style="opacity:1;" onclick="delContribution(${e.orig})">&#x2715;</button>`;
-    else if(e.deletable)                             actions=`<button class="del" style="opacity:1;" onclick="delFee(${e.orig})">&#x2715;</button>`;
-    else if(e.reversible)                            actions=`<button onclick="reverseTxn('${e.assetType}',${e.assetIdx},${e.txnIdx})" title="Reverse transaction" style="font-size:10px;font-weight:600;padding:2px 8px;border:1px solid rgba(248,113,113,0.4);border-radius:99px;background:rgba(248,113,113,0.12);color:#f87171;cursor:pointer;font-family:inherit;white-space:nowrap;">↩ Reverse</button>`;
-    else                                             actions='<span style="color:var(--text4);font-size:10px;">—</span>';
-    return`<tr title="ID: ${idDisplay}"><td>${idBadge}</td><td>${d}</td><td>${e.desc}</td><td>${TYPE_LABELS[e.type]||''}</td><td class="r valbold">${amtCol}</td>${balCol}<td style="text-align:right;min-width:90px;">${actions}</td></tr>`;
-  }).join(''):`<tr><td colspan="${showBalance?7:6}" style="text-align:center;color:var(--text4);padding:16px;">${showBalance?'No entries linked to this account':'No transactions yet'}</td></tr>`;
+    // Reverse for display (newest first)
+    filtered.reverse();
+
+    // FY fees total (from all entries, not filtered)
+    const fyFees = entries
+      .filter(e => e.type==='fee' && e.isDebit && (() => { const d=new Date(e.date); return d>=fy.start&&d<=fy.end; })())
+      .reduce((s,e) => s+e.amount, 0);
+    document.getElementById('feesFyLabel').textContent = fy.label + ' total fees:';
+    document.getElementById('feesTotal').textContent   = fyFees > 0 ? '-$'+f(fyFees) : '$0.00';
+    document.getElementById('feesSecTot').textContent  = fyFees > 0 ? '-$'+f(fyFees)+' fees this FY' : '';
+
+    const TYPE_LABELS = {
+      trade:          '<span class="badge b-blue"  style="font-size:9px;">Trade</span>',
+      fee:            '<span class="badge b-red"   style="font-size:9px;">Fee</span>',
+      income:         '<span class="badge b-green" style="font-size:9px;">Income</span>',
+      contribution:   '<span class="badge b-teal"  style="font-size:9px;">Contribution</span>',
+      'cash-movement':'<span class="badge b-gray"  style="font-size:9px;">Cash</span>'
+    };
+
+    const cols = showBalance ? 7 : 6;
+    body.innerHTML = filtered.length ? filtered.map(e => {
+      const d = e.date ? new Date(e.date).toLocaleDateString('en-AU',{day:'2-digit',month:'short',year:'numeric'}) : '—';
+      const credit    = !e.isDebit || e.type==='income' || e.type==='contribution';
+      const amtCol    = `<span style="color:${credit?'var(--gain-pos)':'var(--gain-neg)'};">${credit?'+':'-'}$${f(e.amount)}</span>`;
+      const idStr     = e.txnId || '—';
+      const idDisplay = e.isBrokerageFee ? `${idStr} (FEE)` : idStr;
+      const idBadge   = `<span title="${idDisplay}" style="font-size:9px;font-family:monospace;color:var(--text3);cursor:default;border-bottom:1px dashed var(--text4);white-space:nowrap;">${idDisplay.length>16?idDisplay.slice(0,16)+'…':idDisplay}</span>`;
+      const balCell   = showBalance
+        ? `<td class="r" style="font-weight:600;color:${(e._runningBalance||0)>=0?'var(--gain-pos)':'var(--gain-neg)'};">$${f(Math.abs(e._runningBalance||0))}</td>`
+        : '';
+      let actions;
+      if(e.deletable && e.type==='income')           actions = `<button class="del" style="opacity:1;" onclick="delIncome(${e.orig})">&#x2715;</button>`;
+      else if(e.deletable && e.type==='contribution')actions = `<button class="del" style="opacity:1;" onclick="delContribution(${e.orig})">&#x2715;</button>`;
+      else if(e.deletable)                           actions = `<button class="del" style="opacity:1;" onclick="delFee(${e.orig})">&#x2715;</button>`;
+      else if(e.reversible)                          actions = `<button onclick="reverseTxn('${e.assetType}',${e.assetIdx},${e.txnIdx})" style="font-size:10px;font-weight:600;padding:2px 8px;border:1px solid rgba(248,113,113,0.4);border-radius:99px;background:rgba(248,113,113,0.12);color:#f87171;cursor:pointer;font-family:inherit;">↩ Reverse</button>`;
+      else                                           actions = '<span style="color:var(--text4);font-size:10px;">—</span>';
+      return `<tr title="ID: ${idDisplay}"><td>${idBadge}</td><td>${d}</td><td>${e.desc}</td><td>${TYPE_LABELS[e.type]||''}</td><td class="r valbold">${amtCol}</td>${balCell}<td style="text-align:right;min-width:90px;">${actions}</td></tr>`;
+    }).join('') : `<tr><td colspan="${cols}" style="text-align:center;color:var(--text4);padding:16px;">${showBalance?'No entries linked to this account yet':'No transactions yet'}</td></tr>`;
+
   } catch(err) { console.error('renderFees error:', err); }
 }
 
-function delIncome(i){ S.income.splice(i,1); save(); renderFees(); }
-function delContribution(i){ S.contributions.splice(i,1); save(); renderFees(); }
 
 
 function reverseTxn(assetType, assetIdx, txnIdx) {
