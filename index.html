@@ -4,7 +4,6 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="theme-color" content="#060d1f">
-
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
@@ -16,7 +15,6 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <style>
 :root{
-  /* Same vars — theme is always dark */
   --bg:transparent;
   --surface:rgba(255,255,255,0.07);
   --surface2:rgba(255,255,255,0.05);
@@ -61,7 +59,6 @@ body::after{content:'';position:fixed;inset:0;z-index:-1;
 .rfbtn{display:flex;align-items:center;gap:6px;font-size:13px;font-weight:600;color:#fff;background:linear-gradient(135deg,#397968,#59d0a3);border:none;border-radius:99px;padding:7px 18px;cursor:pointer;transition:all 0.2s;font-family:inherit;box-shadow:0 4px 15px rgba(89,208,163,0.3);}
 .rfbtn:hover{background:linear-gradient(135deg,#2d6a57,#40b08a);box-shadow:0 4px 20px rgba(89,208,163,0.45);}
 .rfbtn:disabled{opacity:0.5;cursor:not-allowed;}
-
 .spin{animation:spin 0.9s linear infinite;}
 @keyframes spin{to{transform:rotate(360deg);}}
 .summary{display:grid;grid-template-columns:1.3fr 1fr 1fr;gap:12px;margin-bottom:12px;}
@@ -146,7 +143,6 @@ tr:hover .del{opacity:1;}
 .footer{font-size:11px;color:var(--text4);margin-top:1.25rem;line-height:1.8;}
 .wl-type{font-size:10px;padding:1px 6px;border-radius:4px;font-weight:600;letter-spacing:0.04em;border:1px solid currentColor;opacity:0.75;}
 .wl-above{color:var(--gain-pos);}.wl-below{color:var(--gain-neg);}.wl-near{color:#f59e0b;}
-/* ── Transaction drawer ── */
 .tx-row td{padding:0!important;border-bottom:none!important;background:var(--surface2)!important;}
 .tx-drawer{padding:14px 18px 16px;border-top:1px dashed var(--border4);}
 .tx-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;}
@@ -169,14 +165,12 @@ tr.holding-row{cursor:pointer;}
 tr.holding-row td:first-child::before{content:'▶';font-size:8px;color:var(--text4);margin-right:8px;display:inline-block;transition:transform 0.15s;}
 tr.holding-row.open td:first-child::before{transform:rotate(90deg);color:var(--accent);}
 tr.holding-row:hover td{background:var(--surface2);}
-/* ── Bottom nav (mobile only) ── */
 .bottom-nav{display:none;position:fixed;bottom:0;left:0;right:0;z-index:100;background:var(--surface);border-top:1px solid var(--border);padding:8px 0 max(8px,env(safe-area-inset-bottom));flex-direction:row;justify-content:space-around;align-items:center;backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);}
 .bn-item{display:flex;flex-direction:column;align-items:center;gap:3px;font-size:10px;font-weight:500;color:var(--text3);cursor:pointer;padding:4px 20px;border:none;background:transparent;font-family:inherit;transition:color 0.15s;}
 .bn-item.active{color:#59d0a3;}
 .bn-item svg{width:20px;height:20px;}
 .bn-dot{width:5px;height:5px;border-radius:50%;background:#59d0a3;margin-top:2px;opacity:0;transition:opacity 0.15s;}
 .bn-item.active .bn-dot{opacity:1;}
-
 @media(max-width:800px){
   body{display:block;}
   .sidebar{position:fixed;top:0;left:0;height:100vh;width:240px;z-index:200;transform:translateX(-100%);transition:transform 0.25s ease;box-shadow:4px 0 24px rgba(0,0,0,0.18);}
@@ -207,44 +201,35 @@ tr.holding-row:hover td{background:var(--surface2);}
   .add-row{padding:8px 10px;}
   .sval{font-size:17px;}
   .sessions{gap:5px;margin-bottom:0.75rem;}
-@media(max-width:800px){
   #hamburgerBtn{display:flex!important;}
   .topbar-date{display:none;}
   .aud-pill{display:none;}
-}
   .session-pill{font-size:10px;padding:3px 8px;}
   .summary{margin-bottom:1rem;}
 }
-/* ── Tabs ── */
 .tab-bar{display:none;gap:2px;margin-bottom:1.25rem;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:99px;padding:3px;backdrop-filter:blur(8px);}
 .tab-btn{flex:1;padding:7px 16px;font-size:13px;font-weight:500;color:var(--text3);background:transparent;border:none;border-radius:99px;cursor:pointer;font-family:inherit;transition:background 0.15s,color 0.15s;}
 .tab-btn:hover{color:var(--text);background:var(--surface3);}
 .tab-btn.active{background:#fff;color:#397968;font-weight:600;}
-body.dark .tab-btn.active{box-shadow:0 1px 8px rgba(64,145,108,0.35);}
-.tab-btn.active:hover{background:var(--accent-hover);}
-.tab-panel{display:none;}
-.tab-panel.active{display:block;}
-@media(max-width:800px){.tab-bar{display:none;}.tab-btn{font-size:12px;padding:6px 8px;}}
-/* ── Portfolio history chart ── */
+.tab-panel{display:none;opacity:0;transform:translateY(6px);transition:opacity 0.2s ease,transform 0.2s ease;}
+.tab-panel.active{display:block;opacity:1;transform:translateY(0);}
+.tab-panel.entering{display:block;animation:tabIn 0.2s ease forwards;}
+@keyframes tabIn{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
 .history-section{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:1.1rem 1.25rem;margin-bottom:1.25rem;transition:all 0.2s;box-shadow:var(--card-shadow);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);}
 .history-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:8px;}
 .history-title{font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:0.07em;}
 .history-meta{font-size:11px;color:var(--text4);}
-/* ── CSV export button ── */
 .csvbtn{display:flex;align-items:center;gap:5px;font-size:12px;font-weight:500;color:var(--text2);background:var(--surface);border:1px solid var(--border4);border-radius:99px;padding:5px 14px;cursor:pointer;font-family:inherit;transition:background 0.15s;box-shadow:var(--card-shadow);}
 .csvbtn:hover{background:var(--surface3);color:var(--text);}
-/* ── Animated number counters ── */
 .sval{transition:color 0.3s;}
 .sval.flash-up{color:var(--gain-pos)!important;}
 .sval.flash-down{color:var(--gain-neg)!important;}
-/* ── Colour-coded rows ── */
 @keyframes rowFlashUp{0%{background:rgba(89,208,163,0.2);}100%{background:transparent;}}
 @keyframes rowFlashDown{0%{background:rgba(239,68,68,0.18);}100%{background:transparent;}}
 tr.row-up td{animation:rowFlashUp 1.8s ease-out forwards;}
 tr.row-down td{animation:rowFlashDown 1.8s ease-out forwards;}
 tr.tint-up td{background:rgba(89,208,163,0.08)!important;}
 tr.tint-down td{background:rgba(239,68,68,0.05)!important;}
-/* ── Market session indicator ── */
 .sessions{display:flex;gap:6px;flex-wrap:nowrap;margin-bottom:1rem;overflow-x:auto;scrollbar-width:none;-ms-overflow-style:none;}.sessions::-webkit-scrollbar{display:none;}
 .session-pill{display:flex;align-items:center;gap:6px;font-size:11px;font-weight:500;padding:4px 10px;border-radius:99px;border:1px solid var(--border4);color:var(--text2);background:var(--surface);backdrop-filter:blur(8px);}
 .session-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0;}
@@ -253,12 +238,6 @@ tr.tint-down td{background:rgba(239,68,68,0.05)!important;}
 .session-closed .session-dot{background:var(--text4);}
 .session-pre .session-dot{background:#f59e0b;animation:pulse 2s infinite;}
 .session-pre{border-color:rgba(245,158,11,0.3);color:var(--text);}
-/* ── Smooth tab transitions ── */
-.tab-panel{display:none;opacity:0;transform:translateY(6px);transition:opacity 0.2s ease,transform 0.2s ease;}
-.tab-panel.active{display:block;opacity:1;transform:translateY(0);}
-.tab-panel.entering{display:block;animation:tabIn 0.2s ease forwards;}
-@keyframes tabIn{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
-/* ── Sidebar ── */
 .sidebar{width:210px;flex-shrink:0;background:var(--sidebar-bg);border-right:1px solid var(--border);display:flex;flex-direction:column;height:100vh;overflow-y:auto;transition:width 0.25s ease,transform 0.25s ease;position:fixed;top:0;left:0;z-index:200;transform:translateX(-100%);}
 .sidebar.desktop-visible{position:sticky;transform:none;z-index:auto;}
 .sidebar.collapsed{width:56px;}
@@ -269,8 +248,6 @@ tr.tint-down td{background:rgba(239,68,68,0.05)!important;}
 .sidebar.collapsed .sb-logo{padding:18px 0;justify-content:center;}
 .sidebar.collapsed .sb-item{padding:10px 0;justify-content:center;}
 .sidebar.collapsed .sb-item svg{margin:0;}
-.sidebar.collapsed .sb-dm span{display:none;}
-.sidebar.collapsed 
 .sidebar.collapsed #sb-search{display:none;}
 .sb-toggle{position:absolute;top:18px;right:-12px;width:24px;height:24px;background:rgba(10,20,50,0.9);border:1px solid rgba(255,255,255,0.15);border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:10;transition:transform 0.25s ease;box-shadow:0 4px 12px rgba(0,0,0,0.4);backdrop-filter:blur(8px);}
 .sb-toggle svg{transition:transform 0.25s ease;}
@@ -283,13 +260,6 @@ tr.tint-down td{background:rgba(239,68,68,0.05)!important;}
 .sb-item.active{background:#f0f7f4;color:#397968;font-weight:600;}
 .sb-item svg{flex-shrink:0;}
 .sb-section{font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:0.08em;padding:12px 12px 4px;}
-
-
-
-
-
-.dm-pill.on 
-/* ── Add Holding Modal ── */
 .modal-overlay{display:none;visibility:hidden;position:fixed;inset:0;background:rgba(0,5,20,0.7);z-index:200;align-items:center;justify-content:center;}
 .modal-overlay.open{display:flex;visibility:visible;backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);}
 .modal{background:var(--surface);border:1px solid var(--border4);border-radius:20px;padding:24px;width:460px;max-width:calc(100vw - 32px);position:relative;backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);box-shadow:0 24px 64px rgba(0,0,0,0.5);}
@@ -309,19 +279,15 @@ tr.tint-down td{background:rgba(239,68,68,0.05)!important;}
 .modal-type-btn.active{background:#397968;color:#fff;border-radius:99px;}
 .modal-type-btn:not(.active):hover{background:var(--surface3);color:var(--text);}
 .modal-hint{font-size:11px;color:var(--text4);margin-top:-10px;margin-bottom:14px;}
-
-/* ── Summary card extras ── */
 .scard-row2{display:grid;grid-template-columns:1fr 1fr 1fr;gap:0;margin-top:14px;padding-top:12px;border-top:1px solid rgba(255,255,255,0.08);}
 .scard-sub-col{display:flex;flex-direction:column;gap:2px;}
 .scard-sub-col:not(:last-child){border-right:1px solid var(--border2);padding-right:12px;margin-right:12px;}
 .scard-sub-label{font-size:10px;font-weight:500;color:var(--text4);text-transform:uppercase;letter-spacing:0.06em;}
 .scard-sub-val{font-size:13px;font-weight:500;color:var(--text);font-variant-numeric:tabular-nums;}
-/* Sparkbar inside cards */
 .sparkbar{display:flex;align-items:flex-end;gap:2px;height:40px;margin-top:12px;}
 .spark-b{border-radius:3px 3px 0 0;width:10px;flex-shrink:0;}
 .spark-dark{background:#397968;}
 .spark-light{background:rgba(174,223,51,0.5);}
-/* Mid row — alloc + history side by side */
 .mid-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;}
 @media(max-width:800px){
   .summary{grid-template-columns:1fr 1fr;gap:8px;}
@@ -330,7 +296,6 @@ tr.tint-down td{background:rgba(239,68,68,0.05)!important;}
   .mid-row{grid-template-columns:1fr;gap:8px;}
   .sparkbar{height:32px;}
 }
-
 @media(min-width:801px){
   body{display:flex;align-items:flex-start;}
   .sidebar{position:sticky;top:0;transform:none;z-index:auto;min-height:100vh;}
@@ -373,16 +338,13 @@ tr.tint-down td{background:rgba(239,68,68,0.05)!important;}
       <span class="sb-label">Watchlist</span>
     </button>
     <div class="sb-section" style="margin-top:8px;">Tools</div>
-
     <button class="sb-item" data-action="exportCSV" title="Export CSV">
       <svg width="15" height="15" viewBox="0 0 16 16" fill="none" style="flex-shrink:0;"><path d="M3 12h10M8 3v7M5 7l3 3 3-3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
       <span class="sb-label">Export CSV</span>
     </button>
   </div>
-
 </nav>
 
-<!-- Mobile bottom nav -->
 <nav class="bottom-nav" id="bottomNav">
   <button class="bn-item active" id="bn-portfolio" data-action="switchTab" data-tab="portfolio">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
@@ -399,11 +361,8 @@ tr.tint-down td{background:rgba(239,68,68,0.05)!important;}
     Watchlist
     <div class="bn-dot"></div>
   </button>
-
-
 </nav>
 
-<!-- Sidebar overlay (mobile) -->
 <div class="sidebar-overlay" id="sidebarOverlay" data-action="closeMobileSidebar"></div>
 
 <div class="wrap">
@@ -435,46 +394,28 @@ tr.tint-down td{background:rgba(239,68,68,0.05)!important;}
     </div>
   </div>
 
-  <!-- Market sessions -->
   <div class="sessions" id="sessions"></div>
 
-  <!-- Tab bar -->
   <div class="tab-bar">
     <button class="tab-btn active" data-action="switchTab" data-tab="portfolio">📊 Portfolio</button>
     <button class="tab-btn" data-action="switchTab" data-tab="fees">🧾 Transactions</button>
     <button class="tab-btn" data-action="switchTab" data-tab="watchlist">👁 Watchlist</button>
   </div>
 
-  <!-- Portfolio tab -->
   <div class="tab-panel active" id="tab-portfolio">
-
-  <!-- Summary cards: 3-col grid matching mockup -->
   <div class="summary">
-    <!-- Total value — wide card -->
     <div class="scard" style="grid-column:1;">
       <div class="slabel">Total value (AUD)</div>
       <div class="sval" id="tot">—</div>
       <div class="ssub gain-neu" id="totGL" style="margin-top:4px;">Investments + cash</div>
       <div class="scard-row2">
-        <div class="scard-sub-col">
-          <div class="scard-sub-label">Invested</div>
-          <div class="scard-sub-val" id="tot-invested">—</div>
-        </div>
-        <div class="scard-sub-col">
-          <div class="scard-sub-label">Cash</div>
-          <div class="scard-sub-val" id="tot-cash">—</div>
-        </div>
-        <div class="scard-sub-col">
-          <div class="scard-sub-label">AUD/USD</div>
-          <div class="scard-sub-val" id="tot-rate">—</div>
-        </div>
+        <div class="scard-sub-col"><div class="scard-sub-label">Invested</div><div class="scard-sub-val" id="tot-invested">—</div></div>
+        <div class="scard-sub-col"><div class="scard-sub-label">Cash</div><div class="scard-sub-val" id="tot-cash">—</div></div>
+        <div class="scard-sub-col"><div class="scard-sub-label">AUD/USD</div><div class="scard-sub-val" id="tot-rate">—</div></div>
       </div>
     </div>
-    <!-- US Stocks -->
     <div class="scard">
-      <div class="slabel">US stocks</div>
-      <div class="sval" id="usT">—</div>
-      <div class="ssub" id="usGL"></div>
+      <div class="slabel">US stocks</div><div class="sval" id="usT">—</div><div class="ssub" id="usGL"></div>
       <div class="sparkbar" id="usSpark">
         <div class="spark-b spark-light" style="height:55%"></div><div class="spark-b spark-dark" style="height:60%"></div>
         <div class="spark-b spark-light" style="height:65%"></div><div class="spark-b spark-dark" style="height:70%"></div>
@@ -483,11 +424,8 @@ tr.tint-down td{background:rgba(239,68,68,0.05)!important;}
         <div class="spark-b spark-light" style="height:72%"></div><div class="spark-b spark-dark" style="height:85%"></div>
       </div>
     </div>
-    <!-- Crypto -->
     <div class="scard">
-      <div class="slabel">Crypto</div>
-      <div class="sval" id="crypT">—</div>
-      <div class="ssub" id="crypGL"></div>
+      <div class="slabel">Crypto</div><div class="sval" id="crypT">—</div><div class="ssub" id="crypGL"></div>
       <div class="sparkbar" id="crypSpark">
         <div class="spark-b spark-light" style="height:40%"></div><div class="spark-b spark-dark" style="height:45%"></div>
         <div class="spark-b spark-light" style="height:55%"></div><div class="spark-b spark-dark" style="height:50%"></div>
@@ -496,11 +434,8 @@ tr.tint-down td{background:rgba(239,68,68,0.05)!important;}
         <div class="spark-b spark-light" style="height:62%"></div><div class="spark-b spark-dark" style="height:75%"></div>
       </div>
     </div>
-    <!-- ASX Stocks -->
     <div class="scard">
-      <div class="slabel">ASX stocks</div>
-      <div class="sval" id="asxT">—</div>
-      <div class="ssub" id="asxGL"></div>
+      <div class="slabel">ASX stocks</div><div class="sval" id="asxT">—</div><div class="ssub" id="asxGL"></div>
       <div class="sparkbar">
         <div class="spark-b spark-light" style="height:50%"></div><div class="spark-b spark-dark" style="height:55%"></div>
         <div class="spark-b spark-light" style="height:60%"></div><div class="spark-b spark-dark" style="height:65%"></div>
@@ -509,11 +444,8 @@ tr.tint-down td{background:rgba(239,68,68,0.05)!important;}
         <div class="spark-b spark-light" style="height:68%"></div><div class="spark-b spark-dark" style="height:82%"></div>
       </div>
     </div>
-    <!-- Precious Metals -->
     <div class="scard">
-      <div class="slabel">Precious metals</div>
-      <div class="sval" id="metT">—</div>
-      <div class="ssub" id="metGL"></div>
+      <div class="slabel">Precious metals</div><div class="sval" id="metT">—</div><div class="ssub" id="metGL"></div>
       <div class="sparkbar">
         <div class="spark-b spark-light" style="height:60%"></div><div class="spark-b spark-dark" style="height:65%"></div>
         <div class="spark-b spark-light" style="height:58%"></div><div class="spark-b spark-dark" style="height:72%"></div>
@@ -522,27 +454,18 @@ tr.tint-down td{background:rgba(239,68,68,0.05)!important;}
         <div class="spark-b spark-light" style="height:75%"></div><div class="spark-b spark-dark" style="height:88%"></div>
       </div>
     </div>
-    <!-- Cash -->
     <div class="scard">
-      <div class="slabel">Cash</div>
-      <div class="sval" id="cashT">—</div>
-      <div class="ssub" id="cashGL" style="color:var(--text3);">Account balances</div>
+      <div class="slabel">Cash</div><div class="sval" id="cashT">—</div><div class="ssub" id="cashGL" style="color:var(--text3);">Account balances</div>
       <div class="sparkbar">
-        <div class="spark-b spark-dark" style="height:70%"></div>
-        <div class="spark-b spark-dark" style="height:72%"></div>
-        <div class="spark-b spark-dark" style="height:75%"></div>
-        <div class="spark-b spark-dark" style="height:74%"></div>
-        <div class="spark-b spark-dark" style="height:78%"></div>
-        <div class="spark-b spark-dark" style="height:76%"></div>
-        <div class="spark-b spark-dark" style="height:80%"></div>
-        <div class="spark-b spark-dark" style="height:82%"></div>
-        <div class="spark-b spark-dark" style="height:85%"></div>
-        <div class="spark-b spark-dark" style="height:88%"></div>
+        <div class="spark-b spark-dark" style="height:70%"></div><div class="spark-b spark-dark" style="height:72%"></div>
+        <div class="spark-b spark-dark" style="height:75%"></div><div class="spark-b spark-dark" style="height:74%"></div>
+        <div class="spark-b spark-dark" style="height:78%"></div><div class="spark-b spark-dark" style="height:76%"></div>
+        <div class="spark-b spark-dark" style="height:80%"></div><div class="spark-b spark-dark" style="height:82%"></div>
+        <div class="spark-b spark-dark" style="height:85%"></div><div class="spark-b spark-dark" style="height:88%"></div>
       </div>
     </div>
   </div>
 
-  <!-- Mid row: allocation + history side by side -->
   <div class="mid-row">
     <div class="dash" style="margin-bottom:0;">
       <div class="alloc-section">
@@ -553,11 +476,11 @@ tr.tint-down td{background:rgba(239,68,68,0.05)!important;}
           <div class="alloc-seg" style="background:#888780;width:25%"></div>
         </div>
         <div class="legend" id="allocLegend">
-          <div class="leg-item"><div class="leg-left"><div class="leg-dot" style="background:#378ADD"></div><span id="usAllocName">US stocks</span></div><span class="leg-val" id="usAllocVal">—</span><span class="leg-pct" id="usAlloc"></span></div>
-          <div class="leg-item"><div class="leg-left"><div class="leg-dot" style="background:#639922"></div><span id="asxAllocName">ASX stocks</span></div><span class="leg-val" id="asxAllocVal">—</span><span class="leg-pct" id="asxAlloc"></span></div>
-          <div class="leg-item"><div class="leg-left"><div class="leg-dot" style="background:#BA7517"></div><span id="crypAllocName">Crypto</span></div><span class="leg-val" id="crypAllocVal">—</span><span class="leg-pct" id="crypAlloc"></span></div>
-          <div class="leg-item"><div class="leg-left"><div class="leg-dot" style="background:#888780"></div><span id="metAllocName">Metals</span></div><span class="leg-val" id="metAllocVal">—</span><span class="leg-pct" id="metAlloc"></span></div>
-          <div class="leg-item"><div class="leg-left"><div class="leg-dot" style="background:#397968"></div><span id="cashAllocName">Cash</span></div><span class="leg-val" id="cashAllocVal">—</span><span class="leg-pct" id="cashAlloc"></span></div>
+          <div class="leg-item"><div class="leg-left"><div class="leg-dot" style="background:#378ADD"></div><span>US stocks</span></div><span class="leg-val" id="usAllocVal">—</span><span class="leg-pct" id="usAlloc"></span></div>
+          <div class="leg-item"><div class="leg-left"><div class="leg-dot" style="background:#639922"></div><span>ASX stocks</span></div><span class="leg-val" id="asxAllocVal">—</span><span class="leg-pct" id="asxAlloc"></span></div>
+          <div class="leg-item"><div class="leg-left"><div class="leg-dot" style="background:#BA7517"></div><span>Crypto</span></div><span class="leg-val" id="crypAllocVal">—</span><span class="leg-pct" id="crypAlloc"></span></div>
+          <div class="leg-item"><div class="leg-left"><div class="leg-dot" style="background:#888780"></div><span>Metals</span></div><span class="leg-val" id="metAllocVal">—</span><span class="leg-pct" id="metAlloc"></span></div>
+          <div class="leg-item"><div class="leg-left"><div class="leg-dot" style="background:#397968"></div><span>Cash</span></div><span class="leg-val" id="cashAllocVal">—</span><span class="leg-pct" id="cashAlloc"></span></div>
         </div>
       </div>
       <div class="dash-divider"></div>
@@ -567,8 +490,6 @@ tr.tint-down td{background:rgba(239,68,68,0.05)!important;}
         <div class="pie-legend" id="pieLegend"></div>
       </div>
     </div>
-
-    <!-- Portfolio History -->
     <div class="history-section" style="margin-bottom:0;">
       <div class="history-header">
         <span class="history-title">Portfolio history</span>
@@ -580,7 +501,6 @@ tr.tint-down td{background:rgba(239,68,68,0.05)!important;}
 
   <div style="margin-bottom:12px;"></div>
 
-  <!-- Holdings — all asset types in one table -->
   <div class="section">
     <div class="sec-head">
       <div class="sec-title">
@@ -596,22 +516,15 @@ tr.tint-down td{background:rgba(239,68,68,0.05)!important;}
     </div>
     <div class="tbl-wrap"><table>
       <thead><tr>
-        <th>Ticker</th>
-        <th class="mob-hide">Name</th>
-        <th class="mob-hide">Type</th>
-        <th class="r">Qty</th>
-        <th class="r">Price (AUD)</th>
-        <th class="r mob-hide">24h</th>
-        <th class="r mob-hide">Avg cost</th>
-        <th class="r">Value (AUD)</th>
-        <th class="r mob-hide">Gain / loss</th>
-        <th style="width:28px"></th>
+        <th>Ticker</th><th class="mob-hide">Name</th><th class="mob-hide">Type</th>
+        <th class="r">Qty</th><th class="r">Price (AUD)</th><th class="r mob-hide">24h</th>
+        <th class="r mob-hide">Avg cost</th><th class="r">Value (AUD)</th>
+        <th class="r mob-hide">Gain / loss</th><th style="width:28px"></th>
       </tr></thead>
       <tbody id="allHoldingsB"></tbody>
     </table></div>
   </div>
 
-  <!-- Cash (kept separate — no price feed) -->
   <div class="section">
     <div class="sec-head">
       <div class="sec-title"><span class="badge b-teal">AUD</span>Cash accounts</div>
@@ -623,7 +536,6 @@ tr.tint-down td{background:rgba(239,68,68,0.05)!important;}
     </table></div>
   </div>
 
-  <!-- Keep hidden tbody elements for JS compatibility -->
   <div style="display:none;">
     <table><tbody id="usB"></tbody></table>
     <table><tbody id="asxB"></tbody></table>
@@ -637,19 +549,14 @@ tr.tint-down td{background:rgba(239,68,68,0.05)!important;}
     <span id="metDot" class="dot dot-stale"></span>
     <span id="usPH"></span><span id="usVH"></span>
   </div>
+  </div><!-- /tab-portfolio -->
 
-  </div> <!-- /tab-portfolio -->
-
-  <!-- Transactions tab -->
   <div class="tab-panel" id="tab-fees">
-
-  <!-- Transactions & Fees Ledger -->
   <div class="section">
     <div class="sec-head">
       <div class="sec-title"><span class="badge b-red">AUD</span>Transaction &amp; fees ledger</div>
       <div class="sec-right"><span class="sec-tot" id="feesSecTot"></span><button class="addbtn" data-action="openAddModal" style="background:#397968;color:#fff;border-color:#397968;font-weight:600;">+ Add</button><button class="csvbtn" data-action="exportCSV">⬇ Export FY CSV</button><button class="addbtn" data-action="showFeesAdd">+ Add fee</button></div>
     </div>
-    <!-- Account filter -->
     <div style="padding:10px 14px 0;display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
       <label style="font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:0.06em;">Filter by account:</label>
       <select id="ledgerAccountFilter" onchange="renderFees()" style="font-size:12px;padding:4px 10px;border:1px solid var(--border4);border-radius:99px;background:var(--surface2);color:var(--text);font-family:inherit;cursor:pointer;">
@@ -671,34 +578,22 @@ tr.tint-down td{background:rgba(239,68,68,0.05)!important;}
       <input id="feesDate" type="date" style="flex:none;width:140px;">
       <input id="feesDesc" placeholder="Description (e.g. Annual audit)">
       <select id="feesCat" style="flex:none;width:160px;">
-        <option value="Accounting">Accounting</option>
-        <option value="Audit">Audit</option>
-        <option value="Financial advice">Financial advice</option>
-        <option value="Legal">Legal</option>
-        <option value="Administration">Administration</option>
-        <option value="Investment management">Investment management</option>
-        <option value="Transaction Fee">Transaction Fee</option>
-        <option value="Other">Other</option>
+        <option value="Accounting">Accounting</option><option value="Audit">Audit</option>
+        <option value="Financial advice">Financial advice</option><option value="Legal">Legal</option>
+        <option value="Administration">Administration</option><option value="Investment management">Investment management</option>
+        <option value="Transaction Fee">Transaction Fee</option><option value="Other">Other</option>
       </select>
       <input id="feesAmt" placeholder="Amount AUD" type="number" step="any" style="flex:none;width:130px;">
       <button class="okbtn" data-action="addFee">Add</button>
       <button class="addbtn" data-action="hideFeesAdd">Cancel</button>
     </div>
   </div>
+  </div><!-- /tab-fees -->
 
-  </div> <!-- /tab-fees -->
-
-  <!-- Watchlist tab -->
   <div class="tab-panel" id="tab-watchlist">
-
-  <!-- Watchlist -->
   <div class="section">
     <div class="sec-head">
-      <div class="sec-title">
-        <span class="dot dot-stale" id="wlDot"></span>
-        Watchlist
-        <span class="badge b-gray">Live prices</span>
-      </div>
+      <div class="sec-title"><span class="dot dot-stale" id="wlDot"></span>Watchlist<span class="badge b-gray">Live prices</span></div>
       <div class="sec-right"><button class="addbtn" data-action="showWlAdd">+ Add</button></div>
     </div>
     <div class="tbl-wrap"><table>
@@ -709,26 +604,21 @@ tr.tint-down td{background:rgba(239,68,68,0.05)!important;}
       <input id="wlTk" placeholder="Symbol (e.g. NVDA, BTC, XAU)" style="flex:none;width:150px;">
       <input id="wlNm" placeholder="Name">
       <select id="wlType" style="flex:none;width:130px;">
-        <option value="us">US Stock</option>
-        <option value="asx">ASX Stock</option>
-        <option value="crypto">Crypto</option>
-        <option value="metal">Metal</option>
+        <option value="us">US Stock</option><option value="asx">ASX Stock</option>
+        <option value="crypto">Crypto</option><option value="metal">Metal</option>
       </select>
       <input id="wlTarget" placeholder="Target price AUD" type="number" step="any" style="flex:none;width:150px;">
       <button class="okbtn" data-action="addWl">Add</button>
       <button class="addbtn" data-action="hideWlAdd">Cancel</button>
     </div>
   </div>
-
-  </div> <!-- /tab-watchlist -->
+  </div><!-- /tab-watchlist -->
 
 <div class="modal-overlay" id="addModal" style="display:none;visibility:hidden;" data-action="closeModalOverlay">
   <div class="modal">
     <button class="modal-close" data-action="closeAddModal">✕</button>
     <div class="modal-title" id="modal-title">Add to portfolio</div>
     <div class="modal-sub" id="modal-sub">Type a ticker to add a holding or log a transaction</div>
-
-    <!-- Smart ticker input — always visible unless cash/fees selected -->
     <div id="modal-ticker-row">
       <div class="modal-field" style="margin-bottom:8px;">
         <label class="modal-label">Ticker / symbol</label>
@@ -736,197 +626,99 @@ tr.tint-down td{background:rgba(239,68,68,0.05)!important;}
       </div>
       <div id="modal-ticker-status" style="font-size:12px;margin-bottom:10px;min-height:18px;font-weight:500;"></div>
     </div>
-
-    <!-- Quick buttons for cash/fees -->
     <div style="display:flex;gap:6px;margin-bottom:16px;" id="modal-quick-btns">
       <button data-action="setSmartMode" data-mode="cash" id="qbtn-cash" style="font-size:12px;font-weight:500;padding:5px 14px;border:1px solid var(--border4);border-radius:99px;background:var(--surface2);color:var(--text2);cursor:pointer;font-family:inherit;transition:all 0.15s;">+ Cash account</button>
       <button data-action="setSmartMode" data-mode="fees" id="qbtn-fees" style="font-size:12px;font-weight:500;padding:5px 14px;border:1px solid var(--border4);border-radius:99px;background:var(--surface2);color:var(--text2);cursor:pointer;font-family:inherit;transition:all 0.15s;">+ Fee entry</button>
       <button data-action="setSmartMode" data-mode="income" id="qbtn-income" style="font-size:12px;font-weight:500;padding:5px 14px;border:1px solid var(--border4);border-radius:99px;background:var(--surface2);color:var(--text2);cursor:pointer;font-family:inherit;transition:all 0.15s;">+ Income</button>
       <button data-action="setSmartMode" data-mode="contribution" id="qbtn-contribution" style="font-size:12px;font-weight:500;padding:5px 14px;border:1px solid var(--border4);border-radius:99px;background:var(--surface2);color:var(--text2);cursor:pointer;font-family:inherit;transition:all 0.15s;">+ Contribution</button>
     </div>
-
-    <!-- Category picker — shown for new holdings only -->
     <div id="modal-cat-row" style="display:none;margin-bottom:16px;">
       <label class="modal-label" style="display:block;margin-bottom:6px;">Category</label>
       <div style="display:flex;gap:4px;flex-wrap:wrap;">
-        <button class="modal-type-btn active" id="scat-us" data-action="setSmartCategory" data-cat="us"  style="flex:none;border:1px solid var(--border4);border-radius:99px;padding:5px 14px;">US Stock</button>
+        <button class="modal-type-btn active" id="scat-us"  data-action="setSmartCategory" data-cat="us"  style="flex:none;border:1px solid var(--border4);border-radius:99px;padding:5px 14px;">US Stock</button>
         <button class="modal-type-btn"        id="scat-asx" data-action="setSmartCategory" data-cat="asx" style="flex:none;border:1px solid var(--border4);border-radius:99px;padding:5px 14px;">ASX Stock</button>
         <button class="modal-type-btn"        id="scat-cry" data-action="setSmartCategory" data-cat="cry" style="flex:none;border:1px solid var(--border4);border-radius:99px;padding:5px 14px;">Crypto</button>
         <button class="modal-type-btn"        id="scat-met" data-action="setSmartCategory" data-cat="met" style="flex:none;border:1px solid var(--border4);border-radius:99px;padding:5px 14px;">Metal</button>
       </div>
     </div>
-
-    <div style="height:1px;background:var(--border2);margin-bottom:16px;" id="modal-divider" style="display:none;"></div>
-
-    <!-- New holding fields -->
+    <div style="height:1px;background:var(--border2);margin-bottom:16px;" id="modal-divider"></div>
     <div id="modal-new-holding" style="display:none;">
-      <div class="modal-field">
-        <label class="modal-label">Name</label>
-        <input class="modal-input" id="modal-name" placeholder="e.g. Tesla Inc">
-      </div>
+      <div class="modal-field"><label class="modal-label">Name</label><input class="modal-input" id="modal-name" placeholder="e.g. Tesla Inc"></div>
       <div class="modal-row">
-        <div class="modal-field">
-          <label class="modal-label" id="modal-qty-label">Qty</label>
-          <input class="modal-input" id="modal-qty" type="number" step="any" placeholder="0">
-        </div>
-        <div class="modal-field">
-          <label class="modal-label" id="modal-cost-label">Avg cost (AUD)</label>
-          <input class="modal-input" id="modal-cost" type="number" step="any" placeholder="0.00">
-        </div>
+        <div class="modal-field"><label class="modal-label" id="modal-qty-label">Qty</label><input class="modal-input" id="modal-qty" type="number" step="any" placeholder="0"></div>
+        <div class="modal-field"><label class="modal-label" id="modal-cost-label">Avg cost (AUD)</label><input class="modal-input" id="modal-cost" type="number" step="any" placeholder="0.00"></div>
       </div>
       <div class="modal-hint" id="modal-hint"></div>
       <div class="modal-field">
         <label class="modal-label">Deduct initial cost from cash account (optional)</label>
-        <select class="modal-select" id="modal-new-account">
-          <option value="">— Don't adjust cash —</option>
-        </select>
+        <select class="modal-select" id="modal-new-account"><option value="">— Don't adjust cash —</option></select>
       </div>
     </div>
-
-    <!-- Transaction fields (existing holding) -->
     <div id="modal-txn-fields" style="display:none;">
       <div class="modal-row">
-        <div class="modal-field">
-          <label class="modal-label">Date</label>
-          <input class="modal-input" id="modal-txn-date" type="date">
-        </div>
-        <div class="modal-field">
-          <label class="modal-label">Side</label>
-          <select class="modal-select" id="modal-txn-side">
-            <option value="buy">Buy</option>
-            <option value="sell">Sell</option>
-          </select>
-        </div>
+        <div class="modal-field"><label class="modal-label">Date</label><input class="modal-input" id="modal-txn-date" type="date"></div>
+        <div class="modal-field"><label class="modal-label">Side</label><select class="modal-select" id="modal-txn-side"><option value="buy">Buy</option><option value="sell">Sell</option></select></div>
       </div>
       <div class="modal-row">
-        <div class="modal-field">
-          <label class="modal-label">Qty</label>
-          <input class="modal-input" id="modal-txn-qty" type="number" step="any" placeholder="0">
-        </div>
-        <div class="modal-field">
-          <label class="modal-label">Price (AUD)</label>
-          <input class="modal-input" id="modal-txn-price" type="number" step="any" placeholder="0.00">
-        </div>
+        <div class="modal-field"><label class="modal-label">Qty</label><input class="modal-input" id="modal-txn-qty" type="number" step="any" placeholder="0"></div>
+        <div class="modal-field"><label class="modal-label">Price (AUD)</label><input class="modal-input" id="modal-txn-price" type="number" step="any" placeholder="0.00"></div>
       </div>
-      <div class="modal-field">
-        <label class="modal-label">Brokerage fee AUD (optional)</label>
-        <input class="modal-input" id="modal-txn-fee" type="number" step="any" placeholder="0.00">
-      </div>
+      <div class="modal-field"><label class="modal-label">Brokerage fee AUD (optional)</label><input class="modal-input" id="modal-txn-fee" type="number" step="any" placeholder="0.00"></div>
       <div class="modal-field">
         <label class="modal-label" id="modal-txn-acct-label">Deduct from cash account</label>
-        <select class="modal-select" id="modal-txn-account">
-          <option value="">— Don't adjust cash —</option>
-        </select>
+        <select class="modal-select" id="modal-txn-account"><option value="">— Don't adjust cash —</option></select>
         <div style="font-size:11px;color:var(--text4);margin-top:4px;" id="modal-txn-acct-hint"></div>
       </div>
     </div>
-
-    <!-- Cash fields -->
     <div id="modal-cash-fields" style="display:none;">
-      <div class="modal-field">
-        <label class="modal-label">Account name</label>
-        <input class="modal-input" id="modal-cash-name" placeholder="e.g. CBA Savings Account">
-      </div>
-      <div class="modal-field">
-        <label class="modal-label">Balance (AUD)</label>
-        <input class="modal-input" id="modal-cash-bal" type="number" step="any" placeholder="0.00">
-      </div>
+      <div class="modal-field"><label class="modal-label">Account name</label><input class="modal-input" id="modal-cash-name" placeholder="e.g. CBA Savings Account"></div>
+      <div class="modal-field"><label class="modal-label">Balance (AUD)</label><input class="modal-input" id="modal-cash-bal" type="number" step="any" placeholder="0.00"></div>
     </div>
-
-    <!-- Fee fields -->
     <div id="modal-fees-fields" style="display:none;">
       <div class="modal-row">
-        <div class="modal-field">
-          <label class="modal-label">Date</label>
-          <input class="modal-input" id="modal-fees-date" type="date">
-        </div>
-        <div class="modal-field">
-          <label class="modal-label">Amount (AUD)</label>
-          <input class="modal-input" id="modal-fees-amt" type="number" step="any" placeholder="0.00">
-        </div>
+        <div class="modal-field"><label class="modal-label">Date</label><input class="modal-input" id="modal-fees-date" type="date"></div>
+        <div class="modal-field"><label class="modal-label">Amount (AUD)</label><input class="modal-input" id="modal-fees-amt" type="number" step="any" placeholder="0.00"></div>
       </div>
-      <div class="modal-field">
-        <label class="modal-label">Description</label>
-        <input class="modal-input" id="modal-fees-desc" placeholder="e.g. Annual audit fee">
-      </div>
-      <div class="modal-field">
-        <label class="modal-label">Category</label>
+      <div class="modal-field"><label class="modal-label">Description</label><input class="modal-input" id="modal-fees-desc" placeholder="e.g. Annual audit fee"></div>
+      <div class="modal-field"><label class="modal-label">Category</label>
         <select class="modal-select" id="modal-fees-cat">
-          <option value="Accounting">Accounting</option>
-          <option value="Audit">Audit</option>
-          <option value="Financial advice">Financial advice</option>
-          <option value="Legal">Legal</option>
-          <option value="Administration">Administration</option>
-          <option value="Investment management">Investment management</option>
-          <option value="Transaction Fee">Transaction Fee</option>
-          <option value="Other">Other</option>
+          <option value="Accounting">Accounting</option><option value="Audit">Audit</option>
+          <option value="Financial advice">Financial advice</option><option value="Legal">Legal</option>
+          <option value="Administration">Administration</option><option value="Investment management">Investment management</option>
+          <option value="Transaction Fee">Transaction Fee</option><option value="Other">Other</option>
         </select>
       </div>
     </div>
-
-    <!-- Income fields -->
     <div id="modal-income-fields" style="display:none;">
       <div class="modal-hint" style="margin-bottom:12px;">Record dividends, distributions, interest and other fund income.</div>
       <div class="modal-row">
-        <div class="modal-field">
-          <label class="modal-label">Date received</label>
-          <input class="modal-input" id="modal-income-date" type="date">
-        </div>
-        <div class="modal-field">
-          <label class="modal-label">Amount (AUD)</label>
-          <input class="modal-input" id="modal-income-amt" type="number" step="any" placeholder="0.00">
-        </div>
+        <div class="modal-field"><label class="modal-label">Date received</label><input class="modal-input" id="modal-income-date" type="date"></div>
+        <div class="modal-field"><label class="modal-label">Amount (AUD)</label><input class="modal-input" id="modal-income-amt" type="number" step="any" placeholder="0.00"></div>
       </div>
       <div class="modal-row">
-        <div class="modal-field">
-          <label class="modal-label">Source (ticker or name)</label>
-          <input class="modal-input" id="modal-income-source" placeholder="e.g. TSLA, CBA, Term Deposit">
-        </div>
-        <div class="modal-field">
-          <label class="modal-label">Type</label>
+        <div class="modal-field"><label class="modal-label">Source (ticker or name)</label><input class="modal-input" id="modal-income-source" placeholder="e.g. TSLA, CBA, Term Deposit"></div>
+        <div class="modal-field"><label class="modal-label">Type</label>
           <select class="modal-select" id="modal-income-type">
-            <option value="Dividend">Dividend</option>
-            <option value="Distribution">Distribution</option>
-            <option value="Interest">Interest</option>
-            <option value="Rental income">Rental income</option>
+            <option value="Dividend">Dividend</option><option value="Distribution">Distribution</option>
+            <option value="Interest">Interest</option><option value="Rental income">Rental income</option>
             <option value="Other income">Other income</option>
           </select>
         </div>
       </div>
       <div class="modal-row">
-        <div class="modal-field">
-          <label class="modal-label">Franking credits (AUD)</label>
-          <input class="modal-input" id="modal-income-franking" type="number" step="any" placeholder="0.00">
-        </div>
-        <div class="modal-field">
-          <label class="modal-label">Credit to cash account</label>
-          <select class="modal-select" id="modal-income-account">
-            <option value="">— Don't adjust cash —</option>
-          </select>
-        </div>
+        <div class="modal-field"><label class="modal-label">Franking credits (AUD)</label><input class="modal-input" id="modal-income-franking" type="number" step="any" placeholder="0.00"></div>
+        <div class="modal-field"><label class="modal-label">Credit to cash account</label><select class="modal-select" id="modal-income-account"><option value="">— Don't adjust cash —</option></select></div>
       </div>
     </div>
-
-    <!-- Contribution fields -->
     <div id="modal-contribution-fields" style="display:none;">
       <div class="modal-hint" style="margin-bottom:12px;">Record member contributions — concessional (pre-tax) or non-concessional (post-tax).</div>
       <div class="modal-row">
-        <div class="modal-field">
-          <label class="modal-label">Date received</label>
-          <input class="modal-input" id="modal-contrib-date" type="date">
-        </div>
-        <div class="modal-field">
-          <label class="modal-label">Amount (AUD)</label>
-          <input class="modal-input" id="modal-contrib-amt" type="number" step="any" placeholder="0.00">
-        </div>
+        <div class="modal-field"><label class="modal-label">Date received</label><input class="modal-input" id="modal-contrib-date" type="date"></div>
+        <div class="modal-field"><label class="modal-label">Amount (AUD)</label><input class="modal-input" id="modal-contrib-amt" type="number" step="any" placeholder="0.00"></div>
       </div>
       <div class="modal-row">
-        <div class="modal-field">
-          <label class="modal-label">Member name</label>
-          <input class="modal-input" id="modal-contrib-member" placeholder="e.g. Roland Docker">
-        </div>
-        <div class="modal-field">
-          <label class="modal-label">Type</label>
+        <div class="modal-field"><label class="modal-label">Member name</label><input class="modal-input" id="modal-contrib-member" placeholder="e.g. Roland Docker"></div>
+        <div class="modal-field"><label class="modal-label">Type</label>
           <select class="modal-select" id="modal-contrib-type">
             <option value="Concessional">Concessional (pre-tax / employer)</option>
             <option value="Non-concessional">Non-concessional (post-tax)</option>
@@ -936,23 +728,17 @@ tr.tint-down td{background:rgba(239,68,68,0.05)!important;}
           </select>
         </div>
       </div>
-      <div class="modal-field">
-        <label class="modal-label">Credit to cash account</label>
-        <select class="modal-select" id="modal-contrib-account">
-          <option value="">— Don't adjust cash —</option>
-        </select>
-      </div>
+      <div class="modal-field"><label class="modal-label">Credit to cash account</label><select class="modal-select" id="modal-contrib-account"><option value="">— Don't adjust cash —</option></select></div>
     </div>
-
     <div class="modal-footer">
       <button class="addbtn" data-action="closeAddModal">Cancel</button>
       <button class="okbtn" data-action="submitAddModal" id="modal-submit-btn">Add</button>
     </div>
   </div>
 </div>
+
   <div class="footer">Prices: Finnhub (US &amp; ASX) · gold-api.com (metals) · CoinGecko (crypto). Cash and fees entered manually. Portfolio synced to cloud via JSONBin. Verify all figures with your SMSF accountant.</div>
 </div>
-
 
 <script>
 // ── JSONBin config ──────────────────────────────────────────────
@@ -961,27 +747,15 @@ const BIN_KEY = '$2a$10$9QahmPEg0bbPmmnLEY/U4eQaJCinqSjxbfwav5odexWr9K2VJJM.G';
 const BIN_URL = `https://api.jsonbin.io/v3/b/${BIN_ID}`;
 const HEADERS = { 'Content-Type':'application/json', 'X-Access-Key': BIN_KEY };
 
-// ── App config ──────────────────────────────────────────────────
 const FINHUB_KEY = 'd6pl1a9r01qo88ajl29gd6pl1a9r01qo88ajl2a0';
 const DEF = {
-  us:[
-    {ticker:'TSLA',name:'Tesla Inc',qty:10,cost:569.88,txns:[
-      {date:'2026-03-13',side:'buy',qty:10,price:569.88,fee:7.15,txnId:'TXN-20260313-001',cashAcct:null}
-    ]}
-  ],
+  us:[{ticker:'TSLA',name:'Tesla Inc',qty:10,cost:569.88,txns:[{date:'2026-03-13',side:'buy',qty:10,price:569.88,fee:7.15,txnId:'TXN-20260313-001',cashAcct:null}]}],
   asx:[],
-  cry:[
-    {ticker:'SOL',name:'Solana',qty:40,cost:128.065,txns:[
-      {date:'2026-03-13',side:'buy',qty:20,price:128.32,fee:15.40,txnId:'TXN-20260313-002',cashAcct:null},
-      {date:'2026-03-13',side:'buy',qty:20,price:127.81,fee:15.34,txnId:'TXN-20260313-003',cashAcct:null}
-    ]}
-  ],
-  met:[],
-  cash:[{name:'CBA Savings',balance:10000}],
-  fees:[],
-  income:[],
-  contributions:[],
-  wl:[]
+  cry:[{ticker:'SOL',name:'Solana',qty:40,cost:128.065,txns:[
+    {date:'2026-03-13',side:'buy',qty:20,price:128.32,fee:15.40,txnId:'TXN-20260313-002',cashAcct:null},
+    {date:'2026-03-13',side:'buy',qty:20,price:127.81,fee:15.34,txnId:'TXN-20260313-003',cashAcct:null}
+  ]}],
+  met:[],cash:[{name:'CBA Savings',balance:10000}],fees:[],income:[],contributions:[],wl:[]
 };
 const CID={BTC:'bitcoin',ETH:'ethereum',SOL:'solana',ADA:'cardano',XRP:'ripple',BNB:'binancecoin',DOGE:'dogecoin',DOT:'polkadot',AVAX:'avalanche-2',MATIC:'matic-network',LINK:'chainlink',UNI:'uniswap',LTC:'litecoin',ATOM:'cosmos',NEAR:'near',SHIB:'shiba-inu',TRX:'tron',BCH:'bitcoin-cash',XLM:'stellar',ALGO:'algorand',XMR:'monero',ETC:'ethereum-classic'};
 const PIE_COLORS=['#378ADD','#185FA5','#0C447C','#639922','#aedf33','#9acc20','#BA7517','#854F0B','#633806','#534AB7','#3C3489','#1D9E75','#D85A30','#D4537E','#5F5E5A','#888780','#B4B2A9'];
@@ -990,11 +764,212 @@ const S = { audUsd:0.695, prices:{}, us:[], asx:[], cry:[], met:[], cash:[], fee
 let pieChart = null;
 let saveTimer = null;
 
+// ══════════════════════════════════════════════════════════════
+// FIX 1: Transaction ID utilities — GLOBAL scope (was inside DOMContentLoaded)
+// ══════════════════════════════════════════════════════════════
+function _txnDateStr(date) {
+  const d = date ? new Date(date) : new Date();
+  const y = d.getFullYear();
+  const m = String(d.getMonth()+1).padStart(2,'0');
+  const day = String(d.getDate()).padStart(2,'0');
+  return `${y}${m}${day}`;
+}
+
+function _nextSeqForDate(dateStr) {
+  let max = 0;
+  ['us','asx','cry','met'].forEach(t => {
+    (S[t]||[]).forEach(item => {
+      (item.txns||[]).forEach(tx => {
+        if(tx.txnId && tx.txnId.startsWith('TXN-'+dateStr+'-')) {
+          const n = parseInt(tx.txnId.split('-')[2])||0;
+          if(n > max) max = n;
+        }
+      });
+    });
+  });
+  (S.fees||[]).forEach(fe => {
+    if(fe.txnId && fe.txnId.startsWith('TXN-'+dateStr+'-')) {
+      const n = parseInt(fe.txnId.split('-')[2])||0;
+      if(n > max) max = n;
+    }
+  });
+  return String(max + 1).padStart(3, '0');
+}
+
+function generateTxnId(date) {
+  const ds = _txnDateStr(date);
+  const seq = _nextSeqForDate(ds);
+  return `TXN-${ds}-${seq}`;
+}
+
+// ══════════════════════════════════════════════════════════════
+// FIX 2: Swyftx CSV importer — rewritten for actual Swyftx format
+// ══════════════════════════════════════════════════════════════
+function importSwyftxCSV(input) {
+  const file = input.files[0];
+  if(!file) return;
+  input.value = '';
+
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    try {
+      const text = e.target.result;
+      const allLines = text.split('\n').map(l => l.trim());
+
+      // Swyftx exports multiple sections (Crypto Transactions, Fiat Transactions, etc.)
+      // Each section has its own header row containing "Date", "Event", "Asset"
+      const isHeaderRow = l => {
+        const low = l.toLowerCase();
+        return low.includes('date') && low.includes('event') && low.includes('asset');
+      };
+
+      const tradeRows = [];
+      let headers = null;
+
+      for(let i = 0; i < allLines.length; i++) {
+        const line = allLines[i];
+        if(!line) continue;
+
+        if(isHeaderRow(line)) {
+          headers = line.split(',').map(h => h.trim().replace(/^"|"$/g,'').toLowerCase());
+          continue;
+        }
+
+        if(!headers) continue;
+
+        const cols = line.split(',').map(c => (c||'').trim().replace(/^"|"$/g,'').replace(/^\t/,''));
+
+        // Skip blank, sub-total, and section title rows
+        if(!cols[0] || cols[0].toLowerCase().includes('sub total')) continue;
+        if(cols.length < 5) continue;
+
+        const get = name => {
+          const idx = headers.indexOf(name);
+          return idx >= 0 ? (cols[idx]||'').trim() : '';
+        };
+
+        const event = get('event').toLowerCase();
+        const asset = get('asset').toUpperCase();
+
+        // Only import crypto buys and sells (skip AUD deposits, fiat rows)
+        if(event !== 'buy' && event !== 'sell') continue;
+        if(!asset || asset === 'AUD') continue;
+
+        // Swyftx columns: Amount = crypto qty, AUD Value = total AUD, Fee Amount = fee AUD
+        const amount  = parseFloat(get('amount'))    || 0;
+        const audVal  = parseFloat(get('aud value')) || 0;
+        const fee     = parseFloat(get('fee amount'))|| 0;
+        const rawDate = get('date');  // DD/MM/YYYY
+        const uuid    = get('uuid');
+
+        if(!amount || !audVal || !rawDate) continue;
+
+        // Parse DD/MM/YYYY → YYYY-MM-DD
+        let date = '';
+        if(rawDate.includes('/')) {
+          const p = rawDate.split('/');
+          if(p.length === 3) date = `${p[2]}-${p[1].padStart(2,'0')}-${p[0].padStart(2,'0')}`;
+        } else {
+          date = rawDate.slice(0,10);
+        }
+        if(!date || date.startsWith('NaN') || date.length < 10) continue;
+
+        const price = amount > 0 ? audVal / amount : 0;
+        if(!price) continue;
+
+        tradeRows.push({ date, event, asset, amount, audVal, fee, uuid });
+      }
+
+      if(!tradeRows.length) {
+        alert('No buy/sell trades found in this CSV.\n\nMake sure you\'re uploading a Swyftx Transaction Report (not a different export type).');
+        return;
+      }
+
+      // Ask which cash account to deduct from
+      let cashAcctIdx = null;
+      if(S.cash.length > 0) {
+        const opts = S.cash.map((a,i) => `${i+1}. ${a.name} ($${f(a.balance||0)} AUD)`).join('\n');
+        const ans = prompt(
+          `Found ${tradeRows.length} trade${tradeRows.length!==1?'s':''} to import.\n\nDeduct from which cash account?\n\n${opts}\n\nEnter number, or 0 to skip:`
+        );
+        if(ans === null) return;
+        const n = parseInt(ans);
+        if(n >= 1 && n <= S.cash.length) cashAcctIdx = n - 1;
+      }
+
+      let imported = 0, skipped = 0;
+
+      for(const row of tradeRows) {
+        // Deduplicate by UUID
+        if(row.uuid) {
+          const isDupe = ['us','asx','cry','met'].some(t =>
+            S[t].some(h => (h.txns||[]).some(tx => tx.swyftxId === row.uuid))
+          );
+          if(isDupe) { skipped++; continue; }
+        }
+
+        // Find or create crypto holding
+        let idx = S.cry.findIndex(h => h.ticker === row.asset);
+        if(idx === -1) {
+          S.cry.push({ ticker:row.asset, name:row.asset, qty:0, cost:0, txns:[] });
+          idx = S.cry.length - 1;
+        }
+        if(!S.cry[idx].txns) S.cry[idx].txns = [];
+
+        S.cry[idx].txns.push({
+          date:     row.date,
+          side:     row.event,
+          qty:      row.amount,
+          price:    parseFloat((row.audVal / row.amount).toFixed(6)),
+          fee:      row.fee,
+          txnId:    generateTxnId(row.date),
+          swyftxId: row.uuid,
+          cashAcct: cashAcctIdx
+        });
+
+        // Adjust cash balance
+        if(cashAcctIdx !== null && S.cash[cashAcctIdx]) {
+          const move = row.event === 'buy' ? -(row.audVal + row.fee) : (row.audVal - row.fee);
+          S.cash[cashAcctIdx].balance = (S.cash[cashAcctIdx].balance||0) + move;
+        }
+
+        recalcFromTxns('cry', idx);
+        imported++;
+      }
+
+      if(imported > 0) {
+        save();
+        rows('cry');
+        renderAllHoldings();
+        renderCash();
+        renderFees();
+        summary();
+      }
+
+      const cashMsg = cashAcctIdx !== null
+        ? `\nDeducted from: ${S.cash[cashAcctIdx].name} (balance now $${f(S.cash[cashAcctIdx].balance||0)})`
+        : '';
+
+      alert(
+        `✓ Swyftx import complete!\n\n` +
+        `${imported} trade${imported!==1?'s':''} imported\n` +
+        `${skipped} duplicate${skipped!==1?'s':''} skipped` +
+        cashMsg
+      );
+
+    } catch(err) {
+      console.error('CSV import error:', err);
+      alert(`Import failed: ${err.message}`);
+    }
+  };
+  reader.readAsText(file);
+}
+
 // ── Sync status UI ──────────────────────────────────────────────
 function syncUI(state, msg) {
   const dot = document.getElementById('syncDot');
   const txt = document.getElementById('syncStatus');
-  dot.className = 'sync-dot' + (state === 'syncing' ? ' syncing' : state === 'synced' ? ' synced' : state === 'err' ? ' err' : '');
+  dot.className = 'sync-dot' + (state==='syncing'?' syncing':state==='synced'?' synced':state==='err'?' err':'');
   txt.textContent = msg;
 }
 
@@ -1003,7 +978,7 @@ async function cloudLoad() {
   syncUI('syncing', 'Loading from cloud...');
   try {
     const r = await fetch(BIN_URL + '/latest', { headers: { 'X-Access-Key': BIN_KEY } });
-    if (!r.ok) throw new Error('HTTP ' + r.status);
+    if(!r.ok) throw new Error('HTTP ' + r.status);
     const d = await r.json();
     const rec = d.record || {};
     S.us  = rec.us  || DEF.us;
@@ -1031,7 +1006,6 @@ async function cloudLoad() {
     renderFees();
     renderCash();
     summary();
-    // Small delay to ensure tab panel is visible before final render
     setTimeout(() => { renderCash(); renderAllHoldings(); summary(); }, 150);
   } catch(e) {
     console.error('Render error after cloudLoad:', e);
@@ -1047,11 +1021,10 @@ function save() {
   saveTimer = setTimeout(async () => {
     try {
       const r = await fetch(BIN_URL, {
-        method: 'PUT',
-        headers: HEADERS,
+        method: 'PUT', headers: HEADERS,
         body: JSON.stringify({ us:S.us, asx:S.asx, cry:S.cry, met:S.met, cash:S.cash, fees:S.fees, wl:S.wl, income:S.income, contributions:S.contributions })
       });
-      if (!r.ok) throw new Error('HTTP ' + r.status);
+      if(!r.ok) throw new Error('HTTP ' + r.status);
       syncUI('synced', 'Saved · ' + new Date().toLocaleTimeString('en-AU',{hour:'2-digit',minute:'2-digit'}));
     } catch(e) {
       syncUI('err', 'Save failed — check connection');
@@ -1068,7 +1041,7 @@ function glChip(gl,pct){
 }
 
 // ── Render rows ─────────────────────────────────────────────────
-let openDrawer = null; // tracks "type:index" of currently open drawer
+let openDrawer = null;
 
 function rows(type){
   if(type==='cash'){renderCash();return;}
@@ -1076,7 +1049,7 @@ function rows(type){
   if(type==='wl'){renderWl();return;}
   const body=document.getElementById(type+'B');
   const showAud=document.getElementById('audToggle').checked,r=S.audUsd;
-  if(type==='us'){const cur=showAud?'AUD':'USD';document.getElementById('usPH').textContent='Price ('+cur+')';document.getElementById('usVH').textContent='Value ('+cur+')';}
+  if(type==='us'){document.getElementById('usPH').textContent='Price ('+(showAud?'AUD':'USD')+')';document.getElementById('usVH').textContent='Value ('+(showAud?'AUD':'USD')+')';}
   const wasOpen = openDrawer && openDrawer.startsWith(type+':') ? openDrawer : null;
   body.innerHTML=S[type].map((item,i)=>{
     const p=S.prices[type+':'+item.ticker];
@@ -1095,412 +1068,159 @@ function rows(type){
     const txBadge = txCount>0?` <span style="font-size:10px;color:var(--text4);font-weight:400;">${txCount} trade${txCount>1?'s':''}</span>`:'';
     const costDisp = item.cost>0 ? item.cost : '';
     const drawerHtml = isOpen ? buildDrawer(type,i,item,showAud,r) : '';
-    return`<tr class="holding-row${isOpen?' open':''}" onclick="toggleDrawer('${type}',${i})"><td><div class="sym">${item.ticker}${txBadge}</div></td><td class="mob-hide"><div class="aname">${item.name}</div></td><td class="r"><input class="ni" type="number" step="${isF?'any':'1'}" value="${item.qty}" onclick="event.stopPropagation()" onchange="upField('${type}',${i},'qty',this.value)"></td><td class="r">${price!==null?'$'+f(dp):'<span class="dim">&#8212;</span>'}</td><td class="r ${cc} mob-hide">${cs}</td><td class="r mob-hide"><input class="ni" type="number" step="any" value="${costDisp}" placeholder="0.00" onclick="event.stopPropagation()" onchange="upField('${type}',${i},'cost',this.value)" ${txCount>0?'title="Auto-calculated from transactions" style="color:var(--text3)"':''}></td><td class="r valbold">${val!==null?'$'+f(dv):'<span class="dim">&#8212;</span>'}</td><td class="r mob-hide">${glChip(gl,glPct)}</td><td><button class="del" onclick="event.stopPropagation();delA('${type}',${i})">&#x2715;</button></td></tr>${drawerHtml?`<tr class="tx-row"><td colspan="9">${drawerHtml}</td></tr>`:''}`;
+    return`<tr class="holding-row${isOpen?' open':''}" onclick="toggleDrawer('${type}',${i})"><td><div class="sym">${item.ticker}${txBadge}</div></td><td class="mob-hide"><div class="aname">${item.name}</div></td><td class="r"><input class="ni" type="number" step="${isF?'any':'1'}" value="${item.qty}" onclick="event.stopPropagation()" onchange="upField('${type}',${i},'qty',this.value)"></td><td class="r">${price!==null?'$'+f(dp):'<span class="dim">&#8212;</span>'}</td><td class="r ${cc} mob-hide">${cs}</td><td class="r mob-hide"><input class="ni" type="number" step="any" value="${costDisp}" placeholder="0.00" onclick="event.stopPropagation()" onchange="upField('${type}',${i},'cost',this.value)"${txCount>0?' title="Auto-calculated from transactions" style="color:var(--text3)"':''}></td><td class="r valbold">${val!==null?'$'+f(dv):'<span class="dim">&#8212;</span>'}</td><td class="r mob-hide">${glChip(gl,glPct)}</td><td><button class="del" onclick="event.stopPropagation();delA('${type}',${i})">&#x2715;</button></td></tr>${drawerHtml?`<tr class="tx-row"><td colspan="9">${drawerHtml}</td></tr>`:''}`;
   }).join('');
   summary();
 }
 
-function buildDrawer(type, i, item, showAud, r){
-  const txns = item.txns||[];
-  const cur = (type==='us'&&!showAud)?'USD':'AUD';
-  const txRows = txns.length ? [...txns].sort((a,b)=>new Date(b.date)-new Date(a.date)).map((tx,ti)=>{
-    const origIdx = txns.indexOf(tx);
-    const d = tx.date ? new Date(tx.date).toLocaleDateString('en-AU',{day:'2-digit',month:'short',year:'numeric'}) : '—';
-    const isBuy = tx.side==='buy';
-    const sideLabel = `<span class="${isBuy?'tx-buy':'tx-sell'}">${isBuy?'Buy':'Sell'}</span>`;
-    const feeStr = tx.fee>0 ? '$'+f(tx.fee) : '<span style="color:var(--text4)">—</span>';
+function buildDrawer(type,i,item,showAud,r){
+  const txns=item.txns||[];
+  const cur=(type==='us'&&!showAud)?'USD':'AUD';
+  const txRows=txns.length?[...txns].sort((a,b)=>new Date(b.date)-new Date(a.date)).map((tx,ti)=>{
+    const origIdx=txns.indexOf(tx);
+    const d=tx.date?new Date(tx.date).toLocaleDateString('en-AU',{day:'2-digit',month:'short',year:'numeric'}):'—';
+    const isBuy=tx.side==='buy';
+    const sideLabel=`<span class="${isBuy?'tx-buy':'tx-sell'}">${isBuy?'Buy':'Sell'}</span>`;
+    const feeStr=tx.fee>0?'$'+f(tx.fee):'<span style="color:var(--text4)">—</span>';
     return`<tr><td>${d}</td><td>${sideLabel}</td><td class="r">${f(tx.qty,tx.qty%1===0?0:4)}</td><td class="r">$${f(tx.price)}</td><td class="r">$${f(tx.qty*tx.price)}</td><td class="r">${feeStr}</td><td style="width:24px;text-align:right;"><button class="del" style="opacity:1;" onclick="delTxn('${type}',${i},${origIdx})">&#x2715;</button></td></tr>`;
-  }).join('') : `<tr><td colspan="7" class="tx-empty">No transactions yet — add your first trade below</td></tr>`;
-
-  return `<div class="tx-drawer">
-    <div class="tx-header">
-      <span class="tx-title">${item.ticker} · Trade history</span>
-      <button class="tx-addbtn" onclick="event.stopPropagation();showTxForm('${type}',${i})">+ Add trade</button>
-    </div>
-    <table class="tx-table">
-      <thead><tr><th>Date</th><th>Side</th><th class="r">Qty</th><th class="r">Price (${cur})</th><th class="r">Total (${cur})</th><th class="r">Fee (AUD)</th><th style="width:24px"></th></tr></thead>
-      <tbody>${txRows}</tbody>
-    </table>
-    <div class="tx-add-form" id="txForm_${type}_${i}">
-      <input type="date" id="txDate_${type}_${i}" style="width:130px;">
-      <select id="txSide_${type}_${i}" style="width:80px;">
-        <option value="buy">Buy</option>
-        <option value="sell">Sell</option>
-      </select>
-      <input type="number" step="any" id="txQty_${type}_${i}" placeholder="Qty" style="width:80px;">
-      <input type="number" step="any" id="txPrice_${type}_${i}" placeholder="Price (${cur})" style="width:110px;">
-      <input type="number" step="any" id="txFee_${type}_${i}" placeholder="Fee AUD (opt.)" style="width:120px;">
-      <button class="okbtn" style="font-size:12px;padding:4px 12px;" onclick="event.stopPropagation();saveTxn('${type}',${i})">Add</button>
-      <button class="tx-addbtn" onclick="event.stopPropagation();hideTxForm('${type}',${i})">Cancel</button>
-    </div>
-  </div>`;
+  }).join(''):`<tr><td colspan="7" class="tx-empty">No transactions yet — add your first trade below</td></tr>`;
+  return`<div class="tx-drawer"><div class="tx-header"><span class="tx-title">${item.ticker} · Trade history</span><button class="tx-addbtn" onclick="event.stopPropagation();showTxForm('${type}',${i})">+ Add trade</button></div><table class="tx-table"><thead><tr><th>Date</th><th>Side</th><th class="r">Qty</th><th class="r">Price (${cur})</th><th class="r">Total (${cur})</th><th class="r">Fee (AUD)</th><th style="width:24px"></th></tr></thead><tbody>${txRows}</tbody></table><div class="tx-add-form" id="txForm_${type}_${i}"><input type="date" id="txDate_${type}_${i}" style="width:130px;"><select id="txSide_${type}_${i}" style="width:80px;"><option value="buy">Buy</option><option value="sell">Sell</option></select><input type="number" step="any" id="txQty_${type}_${i}" placeholder="Qty" style="width:80px;"><input type="number" step="any" id="txPrice_${type}_${i}" placeholder="Price (${cur})" style="width:110px;"><input type="number" step="any" id="txFee_${type}_${i}" placeholder="Fee AUD (opt.)" style="width:120px;"><button class="okbtn" style="font-size:12px;padding:4px 12px;" onclick="event.stopPropagation();saveTxn('${type}',${i})">Add</button><button class="tx-addbtn" onclick="event.stopPropagation();hideTxForm('${type}',${i})">Cancel</button></div></div>`;
 }
 
-function toggleDrawer(type, i){
-  const key = type+':'+i;
-  openDrawer = (openDrawer===key) ? null : key;
+function toggleDrawer(type,i){
+  const key=type+':'+i;
+  openDrawer=(openDrawer===key)?null:key;
   renderAllHoldings();
-  // Pre-fill today's date if form is going to be shown
-  setTimeout(() => {
-    const dateEl = document.getElementById(`txDate_${type}_${i}`);
-    if(dateEl && !dateEl.value) dateEl.value = new Date().toISOString().slice(0,10);
-  }, 20);
+  setTimeout(()=>{const d=document.getElementById(`txDate_${type}_${i}`);if(d&&!d.value)d.value=new Date().toISOString().slice(0,10);},20);
 }
-function showTxForm(type,i){
-  const el=document.getElementById(`txForm_${type}_${i}`);
-  if(el){el.style.display='flex';const d=document.getElementById(`txDate_${type}_${i}`);if(d&&!d.value)d.value=new Date().toISOString().slice(0,10);}
-}
+function showTxForm(type,i){const el=document.getElementById(`txForm_${type}_${i}`);if(el){el.style.display='flex';const d=document.getElementById(`txDate_${type}_${i}`);if(d&&!d.value)d.value=new Date().toISOString().slice(0,10);}}
 function hideTxForm(type,i){const el=document.getElementById(`txForm_${type}_${i}`);if(el)el.style.display='none';}
 
-function saveTxn(type, i){
+function saveTxn(type,i){
   const date=document.getElementById(`txDate_${type}_${i}`).value;
   const side=document.getElementById(`txSide_${type}_${i}`).value;
   const qty=parseFloat(document.getElementById(`txQty_${type}_${i}`).value)||0;
   const price=parseFloat(document.getElementById(`txPrice_${type}_${i}`).value)||0;
   const fee=parseFloat(document.getElementById(`txFee_${type}_${i}`).value)||0;
   if(!qty||!price)return;
-  // Always store price in AUD (the currency shown in the drawer)
-  // For US stocks with toggle off (USD entry), convert to AUD for storage
   const showAud=document.getElementById('audToggle').checked;
-  const storePrice = (type==='us' && !showAud) ? price / S.audUsd : price;
-  if(!S[type][i].txns) S[type][i].txns=[];
-  const newTxnId = generateTxnId(date);
-  S[type][i].txns.push({date, side, qty, price:storePrice, fee, txnId:newTxnId});
-  recalcFromTxns(type, i);
-  save();
-  rows(type);renderAllHoldings();
-  renderFees();
-}
-
-function delTxn(type, i, ti){
-  S[type][i].txns.splice(ti,1);
+  const storePrice=(type==='us'&&!showAud)?price/S.audUsd:price;
+  if(!S[type][i].txns)S[type][i].txns=[];
+  S[type][i].txns.push({date,side,qty,price:storePrice,fee,txnId:generateTxnId(date)});
   recalcFromTxns(type,i);
   save();rows(type);renderAllHoldings();renderFees();
 }
+function delTxn(type,i,ti){S[type][i].txns.splice(ti,1);recalcFromTxns(type,i);save();rows(type);renderAllHoldings();renderFees();}
 
-function recalcFromTxns(type, i){
-  const txns = S[type][i].txns||[];
-  if(!txns.length){ return; }
-  let totalQty=0, totalCost=0;
+function recalcFromTxns(type,i){
+  const txns=S[type][i].txns||[];
+  if(!txns.length)return;
+  let totalQty=0,totalCost=0;
   [...txns].sort((a,b)=>new Date(a.date)-new Date(b.date)).forEach(tx=>{
-    if(tx.side==='buy'){
-      totalCost += tx.qty * tx.price + (tx.fee||0);
-      totalQty  += tx.qty;
-    } else {
-      const sellFrac = Math.min(tx.qty / (totalQty||1), 1);
-      totalCost -= totalCost * sellFrac;
-      totalQty  -= tx.qty;
-      if(totalQty<0) totalQty=0;
-      if(totalCost<0) totalCost=0;
-    }
+    if(tx.side==='buy'){totalCost+=tx.qty*tx.price+(tx.fee||0);totalQty+=tx.qty;}
+    else{const sf=Math.min(tx.qty/(totalQty||1),1);totalCost-=totalCost*sf;totalQty-=tx.qty;if(totalQty<0)totalQty=0;if(totalCost<0)totalCost=0;}
   });
-  S[type][i].qty  = parseFloat(totalQty.toFixed(8));
-  S[type][i].cost = totalQty>0 ? parseFloat((totalCost/totalQty).toFixed(6)) : 0;
+  S[type][i].qty=parseFloat(totalQty.toFixed(8));
+  S[type][i].cost=totalQty>0?parseFloat((totalCost/totalQty).toFixed(6)):0;
 }
-
-// Re-run recalc for all holdings that have transactions on load, to fix any stale stored values
-function recalcAll(){
-  ['us','asx','cry','met'].forEach(type=>{
-    S[type].forEach((item,i)=>{ if((item.txns||[]).length) recalcFromTxns(type,i); });
-  });
-}
-
+function recalcAll(){['us','asx','cry','met'].forEach(type=>{S[type].forEach((item,i)=>{if((item.txns||[]).length)recalcFromTxns(type,i);});});}
 function upField(t,i,field,v){S[t][i][field]=parseFloat(v)||0;save();rows(t);renderAllHoldings();}
-function delA(t,i){
-  S[t].splice(i,1);
-  if(openDrawer&&openDrawer.startsWith(t+':')) openDrawer=null;
-  save();rows(t);renderAllHoldings();
-}
+function delA(t,i){S[t].splice(i,1);if(openDrawer&&openDrawer.startsWith(t+':'))openDrawer=null;save();rows(t);renderAllHoldings();}
 
 function renderCash(){
-  const body=document.getElementById('cashB');
-  if(!body) return;
+  const body=document.getElementById('cashB');if(!body)return;
   const total=S.cash.reduce((s,a)=>s+(a.balance||0),0);
-  if(!S.cash.length){
-    body.innerHTML='<tr><td colspan="3" style="text-align:center;color:var(--text4);padding:20px;">No cash accounts yet</td></tr>';
-  } else {
-    body.innerHTML = S.cash.map((item,i)=>`<tr>
-      <td style="font-weight:500;color:var(--text);">${(item.name||'—').replace(/</g,'&lt;')}</td>
-      <td class="r valbold" style="font-size:15px;color:var(--text);">$${f(item.balance||0)}</td>
-      <td style="text-align:right;white-space:nowrap;min-width:150px;">
-        <input class="ni" type="number" step="any" value="${parseFloat(item.balance)||0}" style="width:90px;margin-right:6px;" onchange="upCashBal(${i},this.value)">
-        <button class="del" onclick="delCash(${i})">&#x2715;</button>
-      </td>
-    </tr>`).join('');
-  }
-  const el=document.getElementById('cashSecTot');
-  if(el) el.textContent=total>0?'$'+f(total)+' AUD':'';
+  if(!S.cash.length){body.innerHTML='<tr><td colspan="3" style="text-align:center;color:var(--text4);padding:20px;">No cash accounts yet</td></tr>';}
+  else{body.innerHTML=S.cash.map((item,i)=>`<tr><td style="font-weight:500;color:var(--text);">${(item.name||'—').replace(/</g,'&lt;')}</td><td class="r valbold" style="font-size:15px;color:var(--text);">$${f(item.balance||0)}</td><td style="text-align:right;white-space:nowrap;min-width:150px;"><input class="ni" type="number" step="any" value="${parseFloat(item.balance)||0}" style="width:90px;margin-right:6px;" onchange="upCashBal(${i},this.value)"><button class="del" onclick="delCash(${i})">&#x2715;</button></td></tr>`).join('');}
+  const el=document.getElementById('cashSecTot');if(el)el.textContent=total>0?'$'+f(total)+' AUD':'';
 }
-function upCashName(i,v){S.cash[i].name=v;save();}
 function upCashBal(i,v){S.cash[i].balance=parseFloat(v)||0;save();renderCash();}
 function delCash(i){S.cash.splice(i,1);save();renderCash();}
-function showCashAdd(){document.getElementById('cashAR').style.display='flex';}
-function hideCashAdd(){document.getElementById('cashAR').style.display='none';}
-function addCash(){
-  const nm=document.getElementById('cashNm').value.trim();
-  const bal=parseFloat(document.getElementById('cashBal').value)||0;
-  if(!nm)return;
-  S.cash.push({name:nm,balance:bal});
-  save();hideCashAdd();
-  document.getElementById('cashNm').value='';document.getElementById('cashBal').value='';
-  renderCash();
-}
 
-// ── Transaction & Fees ledger ────────────────────────────────────
 function fyLabel(){
-  const now=new Date();
-  const fyStart=now.getMonth()>=6?now.getFullYear():now.getFullYear()-1;
+  const now=new Date();const fyStart=now.getMonth()>=6?now.getFullYear():now.getFullYear()-1;
   return{label:`FY${fyStart}/${String(fyStart+1).slice(2)}`,start:new Date(fyStart,6,1),end:new Date(fyStart+1,5,30,23,59,59)};
 }
 
 function renderFees(){
-  try {
-    const body = document.getElementById('feesB');
-    if(!body) return;
-
-    // Populate account filter dropdown
-    const filterEl = document.getElementById('ledgerAccountFilter');
-    if(filterEl) {
-      const prev = filterEl.value;
-      filterEl.innerHTML = '<option value="">All accounts</option>' +
-        S.cash.map((a,i) => `<option value="${i}">${a.name}</option>`).join('');
-      if(prev && filterEl.querySelector(`option[value="${prev}"]`)) filterEl.value = prev;
-    }
-    const selectedAcct = filterEl ? filterEl.value : '';
-    const showBalance  = selectedAcct !== '';
-    const acctIndex    = showBalance ? parseInt(selectedAcct) : null;
-
-    // Show/hide balance column header and current balance display
-    const balHeader  = document.getElementById('balanceColHeader');
-    const balDisplay = document.getElementById('ledgerBalanceDisplay');
-    if(balHeader)  balHeader.style.display  = showBalance ? '' : 'none';
-    if(balDisplay) balDisplay.style.display = showBalance ? 'flex' : 'none';
-    if(showBalance) {
-      const balAmtEl = document.getElementById('ledgerBalanceAmt');
-      if(balAmtEl) balAmtEl.textContent = '$' + f(S.cash[acctIndex]?.balance || 0) + ' AUD';
-    }
-
-    const fy = fyLabel();
-    const entries = [];
-
-    // Manual fees
-    S.fees.forEach((item, orig) => {
-      entries.push({
-        date:item.date||'', desc:item.desc||'—', type:'fee', amount:item.amount||0,
-        isDebit:true, orig, deletable:true, reversible:false,
-        txnId:item.txnId||'—', isBrokerageFee:false, cashAcct:item.cashAcct??null
-      });
-    });
-
-    // Income
-    (S.income||[]).forEach((item, orig) => {
-      entries.push({
-        date:item.date||'',
-        desc:`${item.type} — ${item.source}${item.franking>0?' (Franking: $'+f(item.franking)+')':''}`,
-        type:'income', amount:item.amount||0,
-        isDebit:false, orig, deletable:true, reversible:false,
-        txnId:item.txnId||'—', isBrokerageFee:false, cashAcct:item.cashAcct??null
-      });
-    });
-
-    // Contributions
-    (S.contributions||[]).forEach((item, orig) => {
-      entries.push({
-        date:item.date||'',
-        desc:`${item.type} contribution — ${item.member}`,
-        type:'contribution', amount:item.amount||0,
-        isDebit:false, orig, deletable:true, reversible:false,
-        txnId:item.txnId||'—', isBrokerageFee:false, cashAcct:item.cashAcct??null
-      });
-    });
-
-    // Trades, cash movements, brokerage fees from holdings
-    ['us','asx','cry','met'].forEach(assetType => {
-      S[assetType].forEach((item, assetIdx) => {
-        (item.txns||[]).forEach((tx, txnIdx) => {
-          const total = tx.price * tx.qty;
-          const txId  = tx.txnId || '—';
-          const ca    = tx.cashAcct != null ? tx.cashAcct : null;
-          entries.push({
-            date:tx.date||'',
-            desc:`${tx.side==='buy'?'Buy':'Sell'} ${f(tx.qty,tx.qty%1===0?0:4)} ${item.ticker}${item.name?' — '+item.name:''}`,
-            type:'trade', amount:total, isDebit:tx.side==='buy',
-            deletable:false, reversible:true,
-            assetType, assetIdx, txnIdx,
-            txnId:txId, isBrokerageFee:false, cashAcct:ca
-          });
-          if(ca != null && S.cash[ca]) {
-            const cashTotal = tx.qty*tx.price + (tx.side==='buy' ? tx.fee||0 : -(tx.fee||0));
-            entries.push({
-              date:tx.date||'',
-              desc:`Cash ${tx.side==='buy'?'debit':'credit'} — ${item.ticker} via ${S.cash[ca].name}`,
-              type:'cash-movement', amount:Math.abs(cashTotal), isDebit:tx.side==='buy',
-              deletable:false, reversible:false,
-              txnId:txId, isBrokerageFee:false, cashAcct:ca
-            });
-          }
-          if(tx.fee > 0) {
-            entries.push({
-              date:tx.date||'',
-              desc:`Brokerage — ${item.ticker} ${tx.side}`,
-              type:'fee', amount:tx.fee, isDebit:true,
-              deletable:false, reversible:false,
-              txnId:txId, isBrokerageFee:true, cashAcct:ca
-            });
-          }
-        });
-      });
-    });
-
-    // Filter by account if selected
-    let filtered = showBalance
-      ? entries.filter(e => e.cashAcct === acctIndex)
-      : entries;
-
-    // Sort: ascending for balance calc
-    filtered.sort((a,b) => new Date(a.date) - new Date(b.date));
-
-    // Compute running balance (forward from 0)
-    if(showBalance) {
-      let running = 0;
-      filtered.forEach(e => {
-        const credit = !e.isDebit || e.type==='income' || e.type==='contribution';
-        running += credit ? e.amount : -e.amount;
-        e._runningBalance = running;
-      });
-    }
-
-    // Reverse for display (newest first)
+  try{
+    const body=document.getElementById('feesB');if(!body)return;
+    const filterEl=document.getElementById('ledgerAccountFilter');
+    if(filterEl){const prev=filterEl.value;filterEl.innerHTML='<option value="">All accounts</option>'+S.cash.map((a,i)=>`<option value="${i}">${a.name}</option>`).join('');if(prev&&filterEl.querySelector(`option[value="${prev}"]`))filterEl.value=prev;}
+    const selectedAcct=filterEl?filterEl.value:'';
+    const showBalance=selectedAcct!=='';
+    const acctIndex=showBalance?parseInt(selectedAcct):null;
+    const balHeader=document.getElementById('balanceColHeader');
+    const balDisplay=document.getElementById('ledgerBalanceDisplay');
+    if(balHeader)balHeader.style.display=showBalance?'':'none';
+    if(balDisplay)balDisplay.style.display=showBalance?'flex':'none';
+    if(showBalance){const balAmtEl=document.getElementById('ledgerBalanceAmt');if(balAmtEl)balAmtEl.textContent='$'+f(S.cash[acctIndex]?.balance||0)+' AUD';}
+    const fy=fyLabel();const entries=[];
+    S.fees.forEach((item,orig)=>{entries.push({date:item.date||'',desc:item.desc||'—',type:'fee',amount:item.amount||0,isDebit:true,orig,deletable:true,reversible:false,txnId:item.txnId||'—',isBrokerageFee:false,cashAcct:item.cashAcct??null});});
+    (S.income||[]).forEach((item,orig)=>{entries.push({date:item.date||'',desc:`${item.type} — ${item.source}${item.franking>0?' (Franking: $'+f(item.franking)+')':''}`,type:'income',amount:item.amount||0,isDebit:false,orig,deletable:true,reversible:false,txnId:item.txnId||'—',isBrokerageFee:false,cashAcct:item.cashAcct??null});});
+    (S.contributions||[]).forEach((item,orig)=>{entries.push({date:item.date||'',desc:`${item.type} contribution — ${item.member}`,type:'contribution',amount:item.amount||0,isDebit:false,orig,deletable:true,reversible:false,txnId:item.txnId||'—',isBrokerageFee:false,cashAcct:item.cashAcct??null});});
+    ['us','asx','cry','met'].forEach(assetType=>{S[assetType].forEach((item,assetIdx)=>{(item.txns||[]).forEach((tx,txnIdx)=>{const total=tx.price*tx.qty;const txId=tx.txnId||'—';const ca=tx.cashAcct!=null?tx.cashAcct:null;entries.push({date:tx.date||'',desc:`${tx.side==='buy'?'Buy':'Sell'} ${f(tx.qty,tx.qty%1===0?0:4)} ${item.ticker}${item.name?' — '+item.name:''}`,type:'trade',amount:total,isDebit:tx.side==='buy',deletable:false,reversible:true,assetType,assetIdx,txnIdx,txnId:txId,isBrokerageFee:false,cashAcct:ca});if(ca!=null&&S.cash[ca]){const cashTotal=tx.qty*tx.price+(tx.side==='buy'?tx.fee||0:-(tx.fee||0));entries.push({date:tx.date||'',desc:`Cash ${tx.side==='buy'?'debit':'credit'} — ${item.ticker} via ${S.cash[ca].name}`,type:'cash-movement',amount:Math.abs(cashTotal),isDebit:tx.side==='buy',deletable:false,reversible:false,txnId:txId,isBrokerageFee:false,cashAcct:ca});}if(tx.fee>0){entries.push({date:tx.date||'',desc:`Brokerage — ${item.ticker} ${tx.side}`,type:'fee',amount:tx.fee,isDebit:true,deletable:false,reversible:false,txnId:txId,isBrokerageFee:true,cashAcct:ca});}});});});
+    let filtered=showBalance?entries.filter(e=>e.cashAcct===acctIndex):entries;
+    filtered.sort((a,b)=>new Date(a.date)-new Date(b.date));
+    if(showBalance){let running=0;filtered.forEach(e=>{const credit=!e.isDebit||e.type==='income'||e.type==='contribution';running+=credit?e.amount:-e.amount;e._runningBalance=running;});}
     filtered.reverse();
-
-    // FY fees total (from all entries, not filtered)
-    const fyFees = entries
-      .filter(e => e.type==='fee' && e.isDebit && (() => { const d=new Date(e.date); return d>=fy.start&&d<=fy.end; })())
-      .reduce((s,e) => s+e.amount, 0);
-    document.getElementById('feesFyLabel').textContent = fy.label + ' total fees:';
-    document.getElementById('feesTotal').textContent   = fyFees > 0 ? '-$'+f(fyFees) : '$0.00';
-    document.getElementById('feesSecTot').textContent  = fyFees > 0 ? '-$'+f(fyFees)+' fees this FY' : '';
-
-    const TYPE_LABELS = {
-      trade:          '<span class="badge b-blue"  style="font-size:9px;">Trade</span>',
-      fee:            '<span class="badge b-red"   style="font-size:9px;">Fee</span>',
-      income:         '<span class="badge b-green" style="font-size:9px;">Income</span>',
-      contribution:   '<span class="badge b-teal"  style="font-size:9px;">Contribution</span>',
-      'cash-movement':'<span class="badge b-gray"  style="font-size:9px;">Cash</span>'
-    };
-
-    const cols = showBalance ? 7 : 6;
-    body.innerHTML = filtered.length ? filtered.map(e => {
-      const d = e.date ? new Date(e.date).toLocaleDateString('en-AU',{day:'2-digit',month:'short',year:'numeric'}) : '—';
-      const credit    = !e.isDebit || e.type==='income' || e.type==='contribution';
-      const amtCol    = `<span style="color:${credit?'var(--gain-pos)':'var(--gain-neg)'};">${credit?'+':'-'}$${f(e.amount)}</span>`;
-      const idStr     = e.txnId || '—';
-      const idDisplay = e.isBrokerageFee ? `${idStr} (FEE)` : idStr;
-      const idBadge   = `<span title="${idDisplay}" style="font-size:9px;font-family:monospace;color:var(--text3);cursor:default;border-bottom:1px dashed var(--text4);white-space:nowrap;">${idDisplay.length>16?idDisplay.slice(0,16)+'…':idDisplay}</span>`;
-      const balCell   = showBalance
-        ? `<td class="r" style="font-weight:600;color:${(e._runningBalance||0)>=0?'var(--gain-pos)':'var(--gain-neg)'};">$${f(Math.abs(e._runningBalance||0))}</td>`
-        : '';
+    const fyFees=entries.filter(e=>e.type==='fee'&&e.isDebit&&(()=>{const d=new Date(e.date);return d>=fy.start&&d<=fy.end;})()).reduce((s,e)=>s+e.amount,0);
+    document.getElementById('feesFyLabel').textContent=fy.label+' total fees:';
+    document.getElementById('feesTotal').textContent=fyFees>0?'-$'+f(fyFees):'$0.00';
+    document.getElementById('feesSecTot').textContent=fyFees>0?'-$'+f(fyFees)+' fees this FY':'';
+    const TYPE_LABELS={trade:'<span class="badge b-blue" style="font-size:9px;">Trade</span>',fee:'<span class="badge b-red" style="font-size:9px;">Fee</span>',income:'<span class="badge b-green" style="font-size:9px;">Income</span>',contribution:'<span class="badge b-teal" style="font-size:9px;">Contribution</span>','cash-movement':'<span class="badge b-gray" style="font-size:9px;">Cash</span>'};
+    const cols=showBalance?7:6;
+    body.innerHTML=filtered.length?filtered.map(e=>{
+      const d=e.date?new Date(e.date).toLocaleDateString('en-AU',{day:'2-digit',month:'short',year:'numeric'}):'—';
+      const credit=!e.isDebit||e.type==='income'||e.type==='contribution';
+      const amtCol=`<span style="color:${credit?'var(--gain-pos)':'var(--gain-neg)'};">${credit?'+':'-'}$${f(e.amount)}</span>`;
+      const idStr=e.txnId||'—';const idDisplay=e.isBrokerageFee?`${idStr} (FEE)`:idStr;
+      const idBadge=`<span title="${idDisplay}" style="font-size:9px;font-family:monospace;color:var(--text3);cursor:default;border-bottom:1px dashed var(--text4);white-space:nowrap;">${idDisplay.length>16?idDisplay.slice(0,16)+'…':idDisplay}</span>`;
+      const balCell=showBalance?`<td class="r" style="font-weight:600;color:${(e._runningBalance||0)>=0?'var(--gain-pos)':'var(--gain-neg)'};">$${f(Math.abs(e._runningBalance||0))}</td>`:'';
       let actions;
-      if(e.deletable && e.type==='income')           actions = `<button class="del" style="opacity:1;" onclick="delIncome(${e.orig})">&#x2715;</button>`;
-      else if(e.deletable && e.type==='contribution')actions = `<button class="del" style="opacity:1;" onclick="delContribution(${e.orig})">&#x2715;</button>`;
-      else if(e.deletable)                           actions = `<button class="del" style="opacity:1;" onclick="delFee(${e.orig})">&#x2715;</button>`;
-      else if(e.reversible)                          actions = `<button onclick="reverseTxn('${e.assetType}',${e.assetIdx},${e.txnIdx})" style="font-size:10px;font-weight:600;padding:2px 8px;border:1px solid rgba(248,113,113,0.4);border-radius:99px;background:rgba(248,113,113,0.12);color:#f87171;cursor:pointer;font-family:inherit;">↩ Reverse</button>`;
-      else                                           actions = '<span style="color:var(--text4);font-size:10px;">—</span>';
-      return `<tr title="ID: ${idDisplay}"><td>${idBadge}</td><td>${d}</td><td>${e.desc}</td><td>${TYPE_LABELS[e.type]||''}</td><td class="r valbold">${amtCol}</td>${balCell}<td style="text-align:right;min-width:90px;">${actions}</td></tr>`;
-    }).join('') : `<tr><td colspan="${cols}" style="text-align:center;color:var(--text4);padding:16px;">${showBalance?'No entries linked to this account yet':'No transactions yet'}</td></tr>`;
-
-  } catch(err) { console.error('renderFees error:', err); }
+      if(e.deletable&&e.type==='income')actions=`<button class="del" style="opacity:1;" onclick="delIncome(${e.orig})">&#x2715;</button>`;
+      else if(e.deletable&&e.type==='contribution')actions=`<button class="del" style="opacity:1;" onclick="delContribution(${e.orig})">&#x2715;</button>`;
+      else if(e.deletable)actions=`<button class="del" style="opacity:1;" onclick="delFee(${e.orig})">&#x2715;</button>`;
+      else if(e.reversible)actions=`<button onclick="reverseTxn('${e.assetType}',${e.assetIdx},${e.txnIdx})" style="font-size:10px;font-weight:600;padding:2px 8px;border:1px solid rgba(248,113,113,0.4);border-radius:99px;background:rgba(248,113,113,0.12);color:#f87171;cursor:pointer;font-family:inherit;">↩ Reverse</button>`;
+      else actions='<span style="color:var(--text4);font-size:10px;">—</span>';
+      return`<tr title="ID: ${idDisplay}"><td>${idBadge}</td><td>${d}</td><td>${e.desc}</td><td>${TYPE_LABELS[e.type]||''}</td><td class="r valbold">${amtCol}</td>${balCell}<td style="text-align:right;min-width:90px;">${actions}</td></tr>`;
+    }).join(''):`<tr><td colspan="${cols}" style="text-align:center;color:var(--text4);padding:16px;">${showBalance?'No entries linked to this account yet':'No transactions yet'}</td></tr>`;
+  }catch(err){console.error('renderFees error:',err);}
 }
 
+function delIncome(i){S.income.splice(i,1);save();renderFees();}
+function delContribution(i){S.contributions.splice(i,1);save();renderFees();}
 
-
-function reverseTxn(assetType, assetIdx, txnIdx) {
-  const item = S[assetType][assetIdx];
-  if(!item||!item.txns) return;
-  const tx = item.txns[txnIdx];
-  if(!tx) return;
-
-  const label = `${tx.side==='buy'?'Buy':'Sell'} ${f(tx.qty,tx.qty%1===0?0:4)} ${item.ticker}`;
-  if(!confirm(`Reverse "${label}"?\n\nThis will:\n• Remove the transaction from trade history\n• Recalculate avg cost & qty\n${tx.cashAcct!=null?'• Refund $'+f(tx.qty*tx.price+(tx.side==='buy'?tx.fee||0:-(tx.fee||0)))+' to '+S.cash[tx.cashAcct].name:''}${tx.fee>0?'\n• Remove the brokerage fee entry':''}\n\nThis cannot be undone.`)) return;
-
-  // 1. Refund cash account
-  if(tx.cashAcct!=null && S.cash[tx.cashAcct]) {
-    const total = tx.qty * tx.price;
-    const withFee = tx.side==='buy' ? total + (tx.fee||0) : total - (tx.fee||0);
-    // Reverse the original debit/credit
-    S.cash[tx.cashAcct].balance = (S.cash[tx.cashAcct].balance||0) + (tx.side==='buy' ? withFee : -withFee);
-    renderCash();
-  }
-
-  // 2. Remove matching brokerage fee from S.fees if it exists
-  if(tx.fee>0) {
-    // Match on the standardised desc format used when saving
-    const brokerageDesc = `Brokerage — ${item.ticker} ${tx.side} ${tx.date}`;
-    let feeIdx = S.fees.findIndex(fe =>
-      fe.cat==='Transaction Fee' &&
-      fe.desc===brokerageDesc &&
-      Math.abs((fe.amount||0) - tx.fee) < 0.01
-    );
-    // Fallback: match by amount + date + Transaction Fee cat (catches legacy entries)
-    if(feeIdx < 0) {
-      feeIdx = S.fees.findIndex(fe =>
-        fe.cat==='Transaction Fee' &&
-        fe.date===tx.date &&
-        Math.abs((fe.amount||0) - tx.fee) < 0.01
-      );
-    }
-    if(feeIdx >= 0) S.fees.splice(feeIdx, 1);
-  }
-
-  // 3. Remove the transaction and recalc
-  item.txns.splice(txnIdx, 1);
-  recalcFromTxns(assetType, assetIdx);
-  save();
-  rows(assetType);
-  renderAllHoldings();
-  renderFees();
-  summary();
+function reverseTxn(assetType,assetIdx,txnIdx){
+  const item=S[assetType][assetIdx];if(!item||!item.txns)return;
+  const tx=item.txns[txnIdx];if(!tx)return;
+  const label=`${tx.side==='buy'?'Buy':'Sell'} ${f(tx.qty,tx.qty%1===0?0:4)} ${item.ticker}`;
+  if(!confirm(`Reverse "${label}"?\n\nThis will:\n• Remove the transaction from trade history\n• Recalculate avg cost & qty\n${tx.cashAcct!=null?'• Refund $'+f(tx.qty*tx.price+(tx.side==='buy'?tx.fee||0:-(tx.fee||0)))+' to '+S.cash[tx.cashAcct].name:''}${tx.fee>0?'\n• Remove the brokerage fee entry':''}\n\nThis cannot be undone.`))return;
+  if(tx.cashAcct!=null&&S.cash[tx.cashAcct]){const total=tx.qty*tx.price;const withFee=tx.side==='buy'?total+(tx.fee||0):total-(tx.fee||0);S.cash[tx.cashAcct].balance=(S.cash[tx.cashAcct].balance||0)+(tx.side==='buy'?withFee:-withFee);renderCash();}
+  if(tx.fee>0){const brokerageDesc=`Brokerage — ${item.ticker} ${tx.side} ${tx.date}`;let feeIdx=S.fees.findIndex(fe=>fe.cat==='Transaction Fee'&&fe.desc===brokerageDesc&&Math.abs((fe.amount||0)-tx.fee)<0.01);if(feeIdx<0)feeIdx=S.fees.findIndex(fe=>fe.cat==='Transaction Fee'&&fe.date===tx.date&&Math.abs((fe.amount||0)-tx.fee)<0.01);if(feeIdx>=0)S.fees.splice(feeIdx,1);}
+  item.txns.splice(txnIdx,1);recalcFromTxns(assetType,assetIdx);save();rows(assetType);renderAllHoldings();renderFees();summary();
 }
 function delFee(i){S.fees.splice(i,1);save();renderFees();}
-function showFeesAdd(){
-  document.getElementById('feesAR').style.display='flex';
-  document.getElementById('feesDate').value=new Date().toISOString().slice(0,10);
-}
+function showFeesAdd(){document.getElementById('feesAR').style.display='flex';document.getElementById('feesDate').value=new Date().toISOString().slice(0,10);}
 function hideFeesAdd(){document.getElementById('feesAR').style.display='none';}
 function addFee(){
-  const date=document.getElementById('feesDate').value;
-  const desc=document.getElementById('feesDesc').value.trim();
-  const cat=document.getElementById('feesCat').value;
-  const amount=parseFloat(document.getElementById('feesAmt').value)||0;
+  const date=document.getElementById('feesDate').value;const desc=document.getElementById('feesDesc').value.trim();
+  const cat=document.getElementById('feesCat').value;const amount=parseFloat(document.getElementById('feesAmt').value)||0;
   if(!desc||!amount)return;
-  S.fees.push({date, desc, cat, amount, txnId:generateTxnId(date)});
-  save();hideFeesAdd();
-  document.getElementById('feesDesc').value='';document.getElementById('feesAmt').value='';
-  renderFees();
+  S.fees.push({date,desc,cat,amount,txnId:generateTxnId(date)});
+  save();hideFeesAdd();document.getElementById('feesDesc').value='';document.getElementById('feesAmt').value='';renderFees();
 }
 
-// ── Watchlist ────────────────────────────────────────────────────
 function renderWl(){
   const body=document.getElementById('wlB');
   if(!S.wl.length){body.innerHTML='<tr><td colspan="8" style="text-align:center;color:var(--text4);padding:16px;">No items yet — add a share, crypto or metal to watch</td></tr>';return;}
   body.innerHTML=S.wl.map((item,i)=>{
-    const key='wl:'+item.type+':'+item.ticker;
-    const p=S.prices[key];
-    const price=p?p.price:null,chg=p?p.change:null;
-    const cc=chg>0?'pos':chg<0?'neg':'';
-    const cs=chg!==null?(chg>0?'+':'')+f(chg,2)+'%':'—';
+    const key='wl:'+item.type+':'+item.ticker;const p=S.prices[key];const price=p?p.price:null,chg=p?p.change:null;
+    const cc=chg>0?'pos':chg<0?'neg':'';const cs=chg!==null?(chg>0?'+':'')+f(chg,2)+'%':'—';
     const typeBadge={us:'<span class="wl-type" style="color:#378ADD;">US</span>',asx:'<span class="wl-type" style="color:#639922;">ASX</span>',crypto:'<span class="wl-type" style="color:#BA7517;">Crypto</span>',metal:'<span class="wl-type" style="color:#888780;">Metal</span>'}[item.type]||'';
     let vsTarget='<span class="dim">—</span>';
-    if(price!==null&&item.target>0){
-      const diff=price-item.target,pct=(diff/item.target)*100;
-      const absPct=Math.abs(pct);
-      const sign=diff>=0?'+':'';
-      if(absPct<=3){vsTarget=`<span class="wl-near">${sign}${f(pct,1)}% · Near target</span>`;}
-      else if(diff>0){vsTarget=`<span class="wl-above">${sign}${f(pct,1)}% above</span>`;}
-      else{vsTarget=`<span class="wl-below">${f(pct,1)}% below</span>`;}
-    }
+    if(price!==null&&item.target>0){const diff=price-item.target,pct=(diff/item.target)*100;const absPct=Math.abs(pct);const sign=diff>=0?'+':'';if(absPct<=3){vsTarget=`<span class="wl-near">${sign}${f(pct,1)}% · Near target</span>`;}else if(diff>0){vsTarget=`<span class="wl-above">${sign}${f(pct,1)}% above</span>`;}else{vsTarget=`<span class="wl-below">${f(pct,1)}% below</span>`;}}
     const priceDisp=price!==null?'$'+f(price):'<span class="dim">—</span>';
-    const targetDisp=item.target>0?'$'+f(item.target):'<span class="dim">No target</span>';
     return`<tr><td><div class="sym">${item.ticker}</div></td><td><div class="aname">${item.name}</div></td><td>${typeBadge}</td><td class="r valbold">${priceDisp}</td><td class="r ${cc}">${cs}</td><td class="r"><input class="ni" type="number" step="any" value="${item.target||''}" placeholder="0.00" onchange="upWlTarget(${i},this.value)"></td><td class="r">${vsTarget}</td><td><button class="del" onclick="delWl(${i})">&#x2715;</button></td></tr>`;
   }).join('');
 }
@@ -1509,35 +1229,24 @@ function delWl(i){S.wl.splice(i,1);save();renderWl();}
 function showWlAdd(){document.getElementById('wlAR').style.display='flex';}
 function hideWlAdd(){document.getElementById('wlAR').style.display='none';}
 function addWl(){
-  const tk=document.getElementById('wlTk').value.trim().toUpperCase();
-  const nm=document.getElementById('wlNm').value.trim()||tk;
-  const type=document.getElementById('wlType').value;
-  const target=parseFloat(document.getElementById('wlTarget').value)||0;
-  if(!tk)return;
-  S.wl.push({ticker:tk,name:nm,type,target});
-  save();hideWlAdd();
-  document.getElementById('wlTk').value='';document.getElementById('wlNm').value='';document.getElementById('wlTarget').value='';
-  renderWl();
+  const tk=document.getElementById('wlTk').value.trim().toUpperCase();const nm=document.getElementById('wlNm').value.trim()||tk;
+  const type=document.getElementById('wlType').value;const target=parseFloat(document.getElementById('wlTarget').value)||0;
+  if(!tk)return;S.wl.push({ticker:tk,name:nm,type,target});save();hideWlAdd();
+  document.getElementById('wlTk').value='';document.getElementById('wlNm').value='';document.getElementById('wlTarget').value='';renderWl();
 }
 async function fetchWl(){
-  if(!S.wl.length){setDot('wlDot','stale');return;}
-  setDot('wlDot','loading');
-  let ok=false;
-  // Group by type for efficient fetching
-  const usItems=S.wl.filter(w=>w.type==='us');
-  const asxItems=S.wl.filter(w=>w.type==='asx');
-  const cryptoItems=S.wl.filter(w=>w.type==='crypto');
-  const metalItems=S.wl.filter(w=>w.type==='metal');
-  const r=S.audUsd;
+  if(!S.wl.length){setDot('wlDot','stale');return;}setDot('wlDot','loading');let ok=false;
+  const usItems=S.wl.filter(w=>w.type==='us');const asxItems=S.wl.filter(w=>w.type==='asx');
+  const cryptoItems=S.wl.filter(w=>w.type==='crypto');const metalItems=S.wl.filter(w=>w.type==='metal');const r=S.audUsd;
   await Promise.all([
     ...usItems.map(async w=>{try{const res=await fetch(`https://finnhub.io/api/v1/quote?symbol=${w.ticker}&token=${FINHUB_KEY}`);const d=await res.json();if(d&&d.c&&d.c>0){S.prices['wl:us:'+w.ticker]={price:d.c/r,change:d.pc>0?((d.c-d.pc)/d.pc*100):0};ok=true;}}catch(e){}}),
     ...asxItems.map(async w=>{try{const res=await fetch(`https://finnhub.io/api/v1/quote?symbol=${w.ticker}.AX&token=${FINHUB_KEY}`);const d=await res.json();if(d&&d.c&&d.c>0){S.prices['wl:asx:'+w.ticker]={price:d.c,change:d.pc>0?((d.c-d.pc)/d.pc*100):0};ok=true;}}catch(e){}}),
     cryptoItems.length?fetch(`https://api.coingecko.com/api/v3/simple/price?ids=${cryptoItems.map(w=>CID[w.ticker]||w.ticker.toLowerCase()).join(',')}&vs_currencies=aud&include_24hr_change=true`).then(r=>r.json()).then(d=>{cryptoItems.forEach(w=>{const id=CID[w.ticker]||w.ticker.toLowerCase();if(d[id]){S.prices['wl:crypto:'+w.ticker]={price:d[id].aud,change:d[id].aud_24h_change};ok=true;}});}).catch(()=>{}):Promise.resolve(),
     ...metalItems.map(async w=>{try{const res=await fetch(`https://api.gold-api.com/price/${w.ticker}`);const d=await res.json();if(d&&d.price>0){const pa=d.price/r;const pv=d.prev_close_price>0?d.prev_close_price/r:null;S.prices['wl:metal:'+w.ticker]={price:pa,change:pv?((pa-pv)/pv*100):null};ok=true;}}catch(e){}}),
   ]);
-  setDot('wlDot',ok?'live':'err');
-  renderWl();
+  setDot('wlDot',ok?'live':'err');renderWl();
 }
+
 function summary(){
   const showAud=document.getElementById('audToggle').checked,r=S.audUsd;
   let usU=0,asxA=0,cryA=0,metA=0,usCU=0,asxCA=0,cryCA=0,metCA=0;
@@ -1546,58 +1255,44 @@ function summary(){
   S.cry.forEach(item=>{const p=S.prices['cry:'+item.ticker];if(p&&item.qty){cryA+=p.price*item.qty;if(item.cost)cryCA+=item.cost*item.qty;}});
   S.met.forEach(item=>{const p=S.prices['met:'+item.ticker];if(p&&item.qty){metA+=p.price*item.qty;if(item.cost)metCA+=item.cost*item.qty;}});
   const cashA=S.cash.reduce((s,a)=>s+(a.balance||0),0);
-  const usA=usU/r,usCA=usCU,total=usA+asxA+cryA+metA+cashA,totalCost=usCA+asxCA+cryCA+metCA;
+  const usA=usU/r,total=usA+asxA+cryA+metA+cashA,totalCost=usCU+asxCA+cryCA+metCA;
   function glStr(val,cost){if(!cost||!val)return'';const gl=val-cost,pct=cost>0?(gl/cost)*100:0;const cls=gl>0?'gain-pos':gl<0?'gain-neg':'gain-neu';const sign=gl>=0?'+':'';return`<span class="${cls}">${sign}$${f(Math.abs(gl))} (${sign}${f(pct,1)}%)</span>`;}
   document.getElementById('tot').textContent=total>0?'$'+f(total):'—';
-  if(total>0) animateValue(document.getElementById('tot'), total);
-  if(usA>0) animateValue(document.getElementById('usT'), usA);
-  else document.getElementById('usT').textContent='—';
-  document.getElementById('usGL').innerHTML=usCA>0?glStr(usA,usCA):'';
-  if(asxA>0) animateValue(document.getElementById('asxT'), asxA);
-  else document.getElementById('asxT').textContent='—';
+  if(total>0)animateValue(document.getElementById('tot'),total);
+  if(usA>0)animateValue(document.getElementById('usT'),usA);else document.getElementById('usT').textContent='—';
+  document.getElementById('usGL').innerHTML=usCU>0?glStr(usA,usCU):'';
+  if(asxA>0)animateValue(document.getElementById('asxT'),asxA);else document.getElementById('asxT').textContent='—';
   document.getElementById('asxGL').innerHTML=asxCA>0?glStr(asxA,asxCA):'';
-  if(cryA>0) animateValue(document.getElementById('crypT'), cryA);
-  else document.getElementById('crypT').textContent='—';
+  if(cryA>0)animateValue(document.getElementById('crypT'),cryA);else document.getElementById('crypT').textContent='—';
   document.getElementById('crypGL').innerHTML=cryCA>0?glStr(cryA,cryCA):'';
-  if(metA>0) animateValue(document.getElementById('metT'), metA);
-  else document.getElementById('metT').textContent='—';
+  if(metA>0)animateValue(document.getElementById('metT'),metA);else document.getElementById('metT').textContent='—';
   document.getElementById('metGL').innerHTML=metCA>0?glStr(metA,metCA):'';
-  if(cashA>0) animateValue(document.getElementById('cashT'), cashA);
-  else document.getElementById('cashT').textContent='—';
-  // Sub-row: invested, cash, rate
-  const invested = usA+asxA+cryA+metA;
-  const subInv = document.getElementById('tot-invested');
-  const subCash = document.getElementById('tot-cash');
-  const subRate = document.getElementById('tot-rate');
-  if(subInv) subInv.textContent = invested>0?'$'+f(invested):'—';
-  if(subCash) subCash.textContent = cashA>0?'$'+f(cashA):'—';
-  if(subRate) subRate.textContent = S.audUsd.toFixed(4);
+  if(cashA>0)animateValue(document.getElementById('cashT'),cashA);else document.getElementById('cashT').textContent='—';
+  const invested=usA+asxA+cryA+metA;
+  const subInv=document.getElementById('tot-invested');const subCash=document.getElementById('tot-cash');const subRate=document.getElementById('tot-rate');
+  if(subInv)subInv.textContent=invested>0?'$'+f(invested):'—';
+  if(subCash)subCash.textContent=cashA>0?'$'+f(cashA):'—';
+  if(subRate)subRate.textContent=S.audUsd.toFixed(4);
   document.getElementById('cashSecTot').textContent=cashA>0?'$'+f(cashA)+' AUD':'';
-  const usD=showAud?usA:usU,usC=showAud?'AUD':'USD';
-  document.getElementById('usSecTot').textContent=usU>0?'$'+f(usD)+' '+usC:'';
+  document.getElementById('usSecTot').textContent=usU>0?'$'+f(showAud?usA:usU)+' '+(showAud?'AUD':'USD'):'';
   document.getElementById('asxSecTot').textContent=asxA>0?'$'+f(asxA)+' AUD':'';
   document.getElementById('crypSecTot').textContent=cryA>0?'$'+f(cryA)+' AUD':'';
   document.getElementById('metSecTot').textContent=metA>0?'$'+f(metA)+' AUD':'';
   if(total>0){
-    const up=v=>((v/total)*100).toFixed(1)+'%';
-    const pct=v=>total>0?((v/total)*100).toFixed(0)+'%':'0%';
+    const up=v=>((v/total)*100).toFixed(1)+'%';const pct=v=>total>0?((v/total)*100).toFixed(0)+'%':'0%';
     document.getElementById('allocBar').innerHTML=`<div class="alloc-seg" style="background:#378ADD;width:${up(usA)};min-width:${usA>0?'4px':'0'}"></div><div class="alloc-seg" style="background:#639922;width:${up(asxA)};min-width:${asxA>0?'4px':'0'}"></div><div class="alloc-seg" style="background:#BA7517;width:${up(cryA)};min-width:${cryA>0?'4px':'0'}"></div><div class="alloc-seg" style="background:#888780;width:${up(metA)};min-width:${metA>0?'4px':'0'}"></div><div class="alloc-seg" style="background:#397968;width:${up(cashA)};min-width:${cashA>0?'4px':'0'}"></div>`;
     document.getElementById('usAllocVal').textContent=usA>0?'$'+f(usA):'—';
     document.getElementById('asxAllocVal').textContent=asxA>0?'$'+f(asxA):'—';
     document.getElementById('crypAllocVal').textContent=cryA>0?'$'+f(cryA):'—';
     document.getElementById('metAllocVal').textContent=metA>0?'$'+f(metA):'—';
     document.getElementById('cashAllocVal').textContent=cashA>0?'$'+f(cashA):'—';
-    document.getElementById('usAlloc').textContent=pct(usA);
-    document.getElementById('asxAlloc').textContent=pct(asxA);
-    document.getElementById('crypAlloc').textContent=pct(cryA);
-    document.getElementById('metAlloc').textContent=pct(metA);
-    document.getElementById('cashAlloc').textContent=pct(cashA);
+    document.getElementById('usAlloc').textContent=pct(usA);document.getElementById('asxAlloc').textContent=pct(asxA);
+    document.getElementById('crypAlloc').textContent=pct(cryA);document.getElementById('metAlloc').textContent=pct(metA);document.getElementById('cashAlloc').textContent=pct(cashA);
   }
-  updatePie();
-  setTimeout(applyRowTints, 100);
-  // Save daily snapshot once we have live prices
-  if(total > 0 && Object.keys(S.prices).length > 0) saveSnapshot(total);
+  updatePie();setTimeout(applyRowTints,100);
+  if(total>0&&Object.keys(S.prices).length>0)saveSnapshot(total);
 }
+
 function updatePie(){
   const labels=[],data=[],colors=[];let ci=0;
   S.us.forEach(item=>{const p=S.prices['us:'+item.ticker];if(p&&item.qty){const v=(p.price*item.qty)/S.audUsd;if(v>0){labels.push(item.ticker);data.push(parseFloat(v.toFixed(2)));colors.push(PIE_COLORS[ci%PIE_COLORS.length]);ci++;}}});
@@ -1607,1051 +1302,356 @@ function updatePie(){
   S.cash.forEach(item=>{if(item.balance>0){labels.push(item.name);data.push(parseFloat(item.balance.toFixed(2)));colors.push('#397968');ci++;}});
   if(!data.length)return;
   const gt=data.reduce((a,b)=>a+b,0);
-  const isDark=document.body.classList.contains('dark');
   document.getElementById('pieLegend').innerHTML=labels.map((l,i)=>{const pct=gt>0?((data[i]/gt)*100).toFixed(1):0;return`<div class="pie-leg-row"><div class="pie-leg-left"><div class="pie-leg-sw" style="background:${colors[i]}"></div><span>${l}</span></div><span style="font-weight:500;">${pct}%</span></div>`;}).join('');
   if(pieChart){pieChart.data.labels=labels;pieChart.data.datasets[0].data=data;pieChart.data.datasets[0].backgroundColor=colors;pieChart.update();}
   else{pieChart=new Chart(document.getElementById('pieChart'),{type:'doughnut',data:{labels,datasets:[{data,backgroundColor:colors,borderWidth:2,borderColor:'transparent',hoverOffset:4}]},options:{responsive:true,maintainAspectRatio:false,cutout:'65%',plugins:{legend:{display:false},tooltip:{callbacks:{label:(ctx)=>{const pct=gt>0?((ctx.parsed/gt)*100).toFixed(1):0;return ctx.label+': $'+f(ctx.parsed)+' ('+pct+'%)';}}}}}});}
 }
 
-// ── Price fetchers ──────────────────────────────────────────────
 function setDot(id,s){document.getElementById(id).className='dot dot-'+s;}
 function showErr(type,msg){const el=document.getElementById(type+'Err');if(el)el.innerHTML=`<div class="err-note">${msg}</div>`;}
 function clearErr(type){const el=document.getElementById(type+'Err');if(el)el.innerHTML='';}
 
 async function fetchRate(){
-  // Try multiple free FX sources in order
-  const sources = [
-    // Source 1: Frankfurter (ECB rates, very reliable)
-    async () => {
-      const r = await fetch('https://api.frankfurter.app/latest?from=USD&to=AUD');
-      const d = await r.json();
-      if(d.rates && d.rates.AUD) return 1 / d.rates.AUD;
-      return null;
-    },
-    // Source 2: CoinGecko (uses crypto market rate, slightly different)
-    async () => {
-      const r = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=usd&vs_currencies=aud');
-      const d = await r.json();
-      if(d.usd && d.usd.aud) return 1 / d.usd.aud;
-      return null;
-    },
+  const sources=[
+    async()=>{const r=await fetch('https://api.frankfurter.app/latest?from=USD&to=AUD');const d=await r.json();if(d.rates&&d.rates.AUD)return 1/d.rates.AUD;return null;},
+    async()=>{const r=await fetch('https://api.coingecko.com/api/v3/simple/price?ids=usd&vs_currencies=aud');const d=await r.json();if(d.usd&&d.usd.aud)return 1/d.usd.aud;return null;},
   ];
-  for(const source of sources){
-    try{
-      const rate = await source();
-      if(rate && rate > 0.5 && rate < 1.2){ // sanity check
-        S.audUsd = rate;
-        return;
-      }
-    } catch(e){}
-  }
-  // All sources failed — keep existing rate (don't reset to default)
+  for(const source of sources){try{const rate=await source();if(rate&&rate>0.5&&rate<1.2){S.audUsd=rate;return;}}catch(e){}}
 }
 async function fetchUS(){
-  setDot('usDot','loading');clearErr('us');
-  const tickers=S.us.map(a=>a.ticker);if(!tickers.length){setDot('usDot','stale');return;}
+  setDot('usDot','loading');clearErr('us');const tickers=S.us.map(a=>a.ticker);if(!tickers.length){setDot('usDot','stale');return;}
   let ok=false;
   await Promise.all(tickers.map(async tk=>{try{const r=await fetch(`https://finnhub.io/api/v1/quote?symbol=${tk}&token=${FINHUB_KEY}`);const d=await r.json();if(d&&d.c&&d.c>0){S.prices['us:'+tk]={price:d.c,change:d.pc>0?((d.c-d.pc)/d.pc*100):0};ok=true;}}catch(e){}}));
-  setDot('usDot',ok?'live':'err');if(!ok)showErr('us','Could not load US prices. Market may be closed or rate limit reached.');rows('us');
+  setDot('usDot',ok?'live':'err');if(!ok)showErr('us','Could not load US prices.');rows('us');
 }
 async function fetchASX(){
-  setDot('asxDot','loading');clearErr('asx');
-  const tickers=S.asx.map(a=>a.ticker);if(!tickers.length){setDot('asxDot','stale');return;}
+  setDot('asxDot','loading');clearErr('asx');const tickers=S.asx.map(a=>a.ticker);if(!tickers.length){setDot('asxDot','stale');return;}
   let ok=false;
   await Promise.all(tickers.map(async tk=>{try{const r=await fetch(`https://finnhub.io/api/v1/quote?symbol=${tk}.AX&token=${FINHUB_KEY}`);const d=await r.json();if(d&&d.c&&d.c>0){S.prices['asx:'+tk]={price:d.c,change:d.pc>0?((d.c-d.pc)/d.pc*100):0};ok=true;}}catch(e){}}));
-  setDot('asxDot',ok?'live':'err');if(!ok)showErr('asx','Could not load ASX prices. Market may be closed or rate limit reached.');rows('asx');
+  setDot('asxDot',ok?'live':'err');if(!ok)showErr('asx','Could not load ASX prices.');rows('asx');
 }
 async function fetchCry(){
-  setDot('crypDot','loading');
-  const coins=S.cry.map(a=>CID[a.ticker.toUpperCase()]||a.ticker.toLowerCase());if(!coins.length){setDot('crypDot','stale');return;}
+  setDot('crypDot','loading');const coins=S.cry.map(a=>CID[a.ticker.toUpperCase()]||a.ticker.toLowerCase());if(!coins.length){setDot('crypDot','stale');return;}
   try{const r=await fetch(`https://api.coingecko.com/api/v3/simple/price?ids=${coins.join(',')}&vs_currencies=aud&include_24hr_change=true`);const d=await r.json();S.cry.forEach(item=>{const id=CID[item.ticker.toUpperCase()]||item.ticker.toLowerCase();if(d[id])S.prices['cry:'+item.ticker]={price:d[id].aud,change:d[id].aud_24h_change};});setDot('crypDot','live');}catch(e){setDot('crypDot','err');}
   rows('cry');
 }
 async function fetchMetals(){
-  setDot('metDot','loading');clearErr('met');
-  if(!S.met.length){setDot('metDot','stale');return;}
-  let ok=false;
-  await Promise.all(S.met.map(async item=>{
-    try{const r=await fetch(`https://api.gold-api.com/price/${item.ticker.toUpperCase()}`);const d=await r.json();if(d&&d.price&&d.price>0){const pa=d.price/S.audUsd;const pv=d.prev_close_price>0?d.prev_close_price/S.audUsd:null;S.prices['met:'+item.ticker]={price:pa,change:pv?((pa-pv)/pv*100):null};ok=true;}}catch(e){}
-  }));
-  setDot('metDot',ok?'live':'err');if(!ok)showErr('met','Could not load metal prices. Try again shortly.');rows('met');
+  setDot('metDot','loading');clearErr('met');if(!S.met.length){setDot('metDot','stale');return;}let ok=false;
+  await Promise.all(S.met.map(async item=>{try{const r=await fetch(`https://api.gold-api.com/price/${item.ticker.toUpperCase()}`);const d=await r.json();if(d&&d.price&&d.price>0){const pa=d.price/S.audUsd;const pv=d.prev_close_price>0?d.prev_close_price/S.audUsd:null;S.prices['met:'+item.ticker]={price:pa,change:pv?((pa-pv)/pv*100):null};ok=true;}}catch(e){}}));
+  setDot('metDot',ok?'live':'err');if(!ok)showErr('met','Could not load metal prices.');rows('met');
 }
 
-// ── Public widget sync (JSONBin public bin) ─────────────────────
-const WIDGET_BIN_ID  = '69b3f88eaa77b81da9dfacfc';
-const WIDGET_BIN_URL = `https://api.jsonbin.io/v3/b/${WIDGET_BIN_ID}`;
-
-async function syncWidget() {
-  // Calculate current totals (same logic as summary())
-  const r = S.audUsd;
-  let usA=0, asxA=0, cryA=0, metA=0;
+const WIDGET_BIN_ID='69b3f88eaa77b81da9dfacfc';
+const WIDGET_BIN_URL=`https://api.jsonbin.io/v3/b/${WIDGET_BIN_ID}`;
+async function syncWidget(){
+  const r=S.audUsd;let usA=0,asxA=0,cryA=0,metA=0;
   S.us.forEach(item=>{const p=S.prices['us:'+item.ticker];if(p&&item.qty)usA+=p.price*item.qty/r;});
   S.asx.forEach(item=>{const p=S.prices['asx:'+item.ticker];if(p&&item.qty)asxA+=p.price*item.qty;});
   S.cry.forEach(item=>{const p=S.prices['cry:'+item.ticker];if(p&&item.qty)cryA+=p.price*item.qty;});
   S.met.forEach(item=>{const p=S.prices['met:'+item.ticker];if(p&&item.qty)metA+=p.price*item.qty;});
-  const cashA = S.cash.reduce((s,a)=>s+(a.balance||0),0);
-  const total = usA+asxA+cryA+metA+cashA;
-
-  // Build watchlist snapshot with current prices
-  const watchlist = S.wl.map(item=>{
-    let price = null;
-    if(item.type==='us'){const p=S.prices['us:'+item.ticker];if(p)price=parseFloat((p.price/r).toFixed(2));}
-    else if(item.type==='asx'){const p=S.prices['asx:'+item.ticker];if(p)price=parseFloat(p.price.toFixed(2));}
-    else if(item.type==='crypto'){const p=S.prices['cry:'+item.ticker];if(p)price=parseFloat(p.price.toFixed(2));}
-    else if(item.type==='metal'){const p=S.prices['met:'+item.ticker];if(p)price=parseFloat(p.price.toFixed(2));}
-    const vsTarget = price&&item.target ? parseFloat(((price-item.target)/item.target*100).toFixed(1)) : null;
-    return {ticker:item.ticker, name:item.name, type:item.type, price, target:item.target||null, vsTarget};
-  });
-
-  // Pre-formatted string for KWGT — pipe separated, no newlines
-  const watchlistText = watchlist.length ? watchlist.map(item=>{
-    const priceStr = item.price != null ? '$'+item.price.toLocaleString('en-AU',{minimumFractionDigits:2,maximumFractionDigits:2}) : '—';
-    const vsStr = item.vsTarget != null ? (item.vsTarget>=0?'+':'')+item.vsTarget+'%' : '';
-    return item.ticker+' '+priceStr+(vsStr?' '+vsStr:'');
-  }).join(' | ') : 'No watchlist items';
-
-  const payload = {
-    total: parseFloat(total.toFixed(2)),
-    us: parseFloat(usA.toFixed(2)),
-    asx: parseFloat(asxA.toFixed(2)),
-    crypto: parseFloat(cryA.toFixed(2)),
-    metals: parseFloat(metA.toFixed(2)),
-    cash: parseFloat(cashA.toFixed(2)),
-    watchlist,
-    watchlistText,
-    updated: new Date().toLocaleString('en-AU',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'})
-  };
-
-  try {
-    await fetch(WIDGET_BIN_URL, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json', 'X-Access-Key': BIN_KEY },
-      body: JSON.stringify(payload)
-    });
-  } catch(e) { console.warn('Widget sync failed', e); }
+  const cashA=S.cash.reduce((s,a)=>s+(a.balance||0),0);const total=usA+asxA+cryA+metA+cashA;
+  const watchlist=S.wl.map(item=>{let price=null;if(item.type==='us'){const p=S.prices['us:'+item.ticker];if(p)price=parseFloat((p.price/r).toFixed(2));}else if(item.type==='asx'){const p=S.prices['asx:'+item.ticker];if(p)price=parseFloat(p.price.toFixed(2));}else if(item.type==='crypto'){const p=S.prices['cry:'+item.ticker];if(p)price=parseFloat(p.price.toFixed(2));}else if(item.type==='metal'){const p=S.prices['met:'+item.ticker];if(p)price=parseFloat(p.price.toFixed(2));}const vsTarget=price&&item.target?parseFloat(((price-item.target)/item.target*100).toFixed(1)):null;return{ticker:item.ticker,name:item.name,type:item.type,price,target:item.target||null,vsTarget};});
+  const watchlistText=watchlist.length?watchlist.map(item=>{const priceStr=item.price!=null?'$'+item.price.toLocaleString('en-AU',{minimumFractionDigits:2,maximumFractionDigits:2}):'—';const vsStr=item.vsTarget!=null?(item.vsTarget>=0?'+':'')+item.vsTarget+'%':'';return item.ticker+' '+priceStr+(vsStr?' '+vsStr:'');}).join(' | '):'No watchlist items';
+  const payload={total:parseFloat(total.toFixed(2)),us:parseFloat(usA.toFixed(2)),asx:parseFloat(asxA.toFixed(2)),crypto:parseFloat(cryA.toFixed(2)),metals:parseFloat(metA.toFixed(2)),cash:parseFloat(cashA.toFixed(2)),watchlist,watchlistText,updated:new Date().toLocaleString('en-AU',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'})};
+  try{await fetch(WIDGET_BIN_URL,{method:'PUT',headers:{'Content-Type':'application/json','X-Access-Key':BIN_KEY},body:JSON.stringify(payload)});}catch(e){console.warn('Widget sync failed',e);}
 }
 
 async function refreshAll(){
   const btn=document.getElementById('rfBtn'),icon=document.getElementById('rfIcon');
   btn.disabled=true;icon.classList.add('spin');
-  try {
-    await fetchRate();
-    await Promise.all([fetchUS(),fetchASX(),fetchCry(),fetchMetals(),fetchWl()]);
-    document.getElementById('lastUp') && (document.getElementById('lastUp').textContent='Updated '+new Date().toLocaleTimeString('en-AU',{hour:'2-digit',minute:'2-digit'})+' · AUD/USD '+S.audUsd.toFixed(4));
-    summary();
-    renderAllHoldings();
-    syncWidget();
-  } catch(e) {
-    console.warn('refreshAll error:', e);
-  } finally {
-    btn.disabled=false;
-    icon.classList.remove('spin');
-  }
+  try{await fetchRate();await Promise.all([fetchUS(),fetchASX(),fetchCry(),fetchMetals(),fetchWl()]);summary();renderAllHoldings();syncWidget();}
+  catch(e){console.warn('refreshAll error:',e);}
+  finally{btn.disabled=false;icon.classList.remove('spin');}
 }
 
-// ── Add / remove holdings ───────────────────────────────────────
 function showAdd(t){document.getElementById(t+'AR').style.display='flex';}
 function hideAdd(t){document.getElementById(t+'AR').style.display='none';}
-function addA(t){
-  const tk=document.getElementById(t+'Tk').value.trim().toUpperCase();
-  const nm=document.getElementById(t+'Nm').value.trim()||tk;
-  const qt=parseFloat(document.getElementById(t+'Qt').value)||0;
-  const cost=parseFloat(document.getElementById(t+'Cost').value)||0;
-  if(!tk)return;
-  S[t].push({ticker:tk,name:nm,qty:qt,cost,txns:[]});
-  save();hideAdd(t);
-  ['Tk','Nm','Qt','Cost'].forEach(x=>document.getElementById(t+x).value='');
-  rows(t);
-}
-// audToggle handled by delegated listener below
 
-// ── Dark mode ────────────────────────────────────────────────────
+const TYPE_BADGE={us:'<span class="badge b-blue" style="font-size:9px;">US</span>',asx:'<span class="badge b-green" style="font-size:9px;">ASX</span>',cry:'<span class="badge b-amber" style="font-size:9px;">Crypto</span>',met:'<span class="badge b-gray" style="font-size:9px;">Metal</span>'};
 
-// ── Unified holdings table ───────────────────────────────────────
-const TYPE_BADGE = {
-  us:  '<span class="badge b-blue" style="font-size:9px;">US</span>',
-  asx: '<span class="badge b-green" style="font-size:9px;">ASX</span>',
-  cry: '<span class="badge b-amber" style="font-size:9px;">Crypto</span>',
-  met: '<span class="badge b-gray" style="font-size:9px;">Metal</span>',
-};
-
-function renderAllHoldings() {
-  const body = document.getElementById('allHoldingsB');
-  if(!body) return;
-  const showAud = document.getElementById('audToggle').checked;
-  const r = S.audUsd;
-  const allRows = [];
-
-  ['us','asx','cry','met'].forEach(type => {
-    S[type].forEach((item, i) => {
-      const priceKey = (type==='us'?'us:':type==='asx'?'asx:':type==='cry'?'cry:':'met:')+item.ticker;
-      const p = S.prices[priceKey];
-      const price = p ? p.price : null;
-      const chg   = p ? p.change : null;
-      let dp = price;
-      let val = price !== null ? price * item.qty : null;
-      if(type==='us' && price!==null){ dp = showAud ? price/r : price; val = showAud ? (price*item.qty)/r : price*item.qty; }
-
-      const hasCost = item.cost && item.cost > 0;
-      let gl=null, glPct=null;
-      if(hasCost && val!==null){
-        const tc = item.cost * item.qty;
-        gl = val - tc; glPct = tc>0?(gl/tc)*100:0;
-      }
-
-      const cc  = chg>0?'pos':chg<0?'neg':'';
-      const cs  = chg!==null?(chg>0?'+':'')+f(chg,2)+'%':'—';
-      const isF = type==='cry'||type==='met';
-      const txCount = (item.txns||[]).length;
-      const txBadge = txCount>0?` <span style="font-size:10px;color:var(--text4);font-weight:400;">${txCount} trade${txCount>1?'s':''}</span>`:'';
-      const costDisp = item.cost>0 ? item.cost : '';
-      const isOpen = openDrawer === type+':'+i;
-      const drawerHtml = isOpen ? buildDrawer(type,i,item,showAud,r) : '';
-      const valAUD = type==='us' ? (showAud ? val : (val!==null?val/r:null)) : val;
-
-      allRows.push({
-        valAUD: valAUD||0,
-        html: `<tr class="holding-row${isOpen?' open':''}" onclick="toggleDrawer('${type}',${i})">
-          <td><div class="sym">${item.ticker}${txBadge}</div></td>
-          <td class="mob-hide"><div class="aname">${item.name}</div></td>
-          <td class="mob-hide">${TYPE_BADGE[type]||''}</td>
-          <td class="r"><input class="ni" type="number" step="${isF?'any':'1'}" value="${item.qty}" onclick="event.stopPropagation()" onchange="upField('${type}',${i},'qty',this.value)"></td>
-          <td class="r">${price!==null?'$'+f(dp):'<span class="dim">—</span>'}</td>
-          <td class="r ${cc} mob-hide">${cs}</td>
-          <td class="r mob-hide"><input class="ni" type="number" step="any" value="${costDisp}" placeholder="0.00" onclick="event.stopPropagation()" onchange="upField('${type}',${i},'cost',this.value)"${txCount>0?' title="Auto from transactions" style="color:var(--text3)"':''}></td>
-          <td class="r valbold">${val!==null?'$'+f(val):'<span class="dim">—</span>'}</td>
-          <td class="r mob-hide">${glChip(gl,glPct)}</td>
-          <td><button class="del" onclick="event.stopPropagation();delA('${type}',${i})">&#x2715;</button></td>
-        </tr>${drawerHtml?`<tr class="tx-row"><td colspan="10">${drawerHtml}</td></tr>`:''}`
-      });
+function renderAllHoldings(){
+  const body=document.getElementById('allHoldingsB');if(!body)return;
+  const showAud=document.getElementById('audToggle').checked;const r=S.audUsd;const allRows=[];
+  ['us','asx','cry','met'].forEach(type=>{
+    S[type].forEach((item,i)=>{
+      const priceKey=(type==='us'?'us:':type==='asx'?'asx:':type==='cry'?'cry:':'met:')+item.ticker;
+      const p=S.prices[priceKey];const price=p?p.price:null;const chg=p?p.change:null;
+      let dp=price;let val=price!==null?price*item.qty:null;
+      if(type==='us'&&price!==null){dp=showAud?price/r:price;val=showAud?(price*item.qty)/r:price*item.qty;}
+      const hasCost=item.cost&&item.cost>0;let gl=null,glPct=null;
+      if(hasCost&&val!==null){const tc=item.cost*item.qty;gl=val-tc;glPct=tc>0?(gl/tc)*100:0;}
+      const cc=chg>0?'pos':chg<0?'neg':'';const cs=chg!==null?(chg>0?'+':'')+f(chg,2)+'%':'—';
+      const isF=type==='cry'||type==='met';const txCount=(item.txns||[]).length;
+      const txBadge=txCount>0?` <span style="font-size:10px;color:var(--text4);font-weight:400;">${txCount} trade${txCount>1?'s':''}</span>`:'';
+      const costDisp=item.cost>0?item.cost:'';const isOpen=openDrawer===type+':'+i;
+      const drawerHtml=isOpen?buildDrawer(type,i,item,showAud,r):'';
+      const valAUD=type==='us'?(showAud?val:(val!==null?val/r:null)):val;
+      allRows.push({valAUD:valAUD||0,html:`<tr class="holding-row${isOpen?' open':''}" onclick="toggleDrawer('${type}',${i})"><td><div class="sym">${item.ticker}${txBadge}</div></td><td class="mob-hide"><div class="aname">${item.name}</div></td><td class="mob-hide">${TYPE_BADGE[type]||''}</td><td class="r"><input class="ni" type="number" step="${isF?'any':'1'}" value="${item.qty}" onclick="event.stopPropagation()" onchange="upField('${type}',${i},'qty',this.value)"></td><td class="r">${price!==null?'$'+f(dp):'<span class="dim">—</span>'}</td><td class="r ${cc} mob-hide">${cs}</td><td class="r mob-hide"><input class="ni" type="number" step="any" value="${costDisp}" placeholder="0.00" onclick="event.stopPropagation()" onchange="upField('${type}',${i},'cost',this.value)"${txCount>0?' title="Auto from transactions" style="color:var(--text3)"':''}></td><td class="r valbold">${val!==null?'$'+f(val):'<span class="dim">—</span>'}</td><td class="r mob-hide">${glChip(gl,glPct)}</td><td><button class="del" onclick="event.stopPropagation();delA('${type}',${i})">&#x2715;</button></td></tr>${drawerHtml?`<tr class="tx-row"><td colspan="10">${drawerHtml}</td></tr>`:''}`});
     });
   });
-
-  allRows.sort((a,b) => b.valAUD - a.valAUD);
-  body.innerHTML = allRows.length
-    ? allRows.map(r=>r.html).join('')
-    : '<tr><td colspan="10" style="text-align:center;color:var(--text4);padding:20px;">No holdings yet — tap + Add to get started</td></tr>';
-
-  const dot = document.getElementById('allDot');
-  const anyLive = Object.keys(S.prices).length > 0;
-  if(dot) dot.className = 'dot ' + (anyLive ? 'dot-live' : 'dot-stale');
-  const allTotal = allRows.reduce((s,row)=>s+row.valAUD,0);
-  const totEl = document.getElementById('allSecTot');
-  if(totEl) totEl.textContent = allTotal>0 ? '$'+f(allTotal)+' AUD' : '';
-  setTimeout(applyRowTints, 50);
+  allRows.sort((a,b)=>b.valAUD-a.valAUD);
+  body.innerHTML=allRows.length?allRows.map(r=>r.html).join(''):'<tr><td colspan="10" style="text-align:center;color:var(--text4);padding:20px;">No holdings yet — tap + Add to get started</td></tr>';
+  const dot=document.getElementById('allDot');const anyLive=Object.keys(S.prices).length>0;
+  if(dot)dot.className='dot '+(anyLive?'dot-live':'dot-stale');
+  const allTotal=allRows.reduce((s,row)=>s+row.valAUD,0);
+  const totEl=document.getElementById('allSecTot');if(totEl)totEl.textContent=allTotal>0?'$'+f(allTotal)+' AUD':'';
+  setTimeout(applyRowTints,50);
 }
 
 // ── Smart Add Modal ──────────────────────────────────────────────
-let smartMode = 'new';     // 'new' | 'txn' | 'cash' | 'fees'
-let smartCategory = 'us';  // for new holdings
-let smartFoundType = null; // type of existing holding found
-let smartFoundIdx  = null;
+let smartMode='new',smartCategory='us',smartFoundType=null,smartFoundIdx=null;
+const MODAL_QTY_LABELS={us:'Qty (shares)',asx:'Qty (shares)',cry:'Qty (coins)',met:'Qty (oz)'};
+const MODAL_COST_LABELS={us:'Avg cost (AUD)',asx:'Avg cost (AUD)',cry:'Avg cost (AUD)',met:'Avg cost (AUD/oz)'};
+const MODAL_HINTS={us:'Price fetched from Finnhub automatically.',asx:'Use ASX ticker without .AX (e.g. CBA).',cry:'Use CoinGecko symbol (e.g. BTC, ETH).',met:'Use XAU, XAG, XPT or XPD.'};
 
-const MODAL_QTY_LABELS  = { us:'Qty (shares)', asx:'Qty (shares)', cry:'Qty (coins)', met:'Qty (oz)' };
-const MODAL_COST_LABELS = { us:'Avg cost (AUD)', asx:'Avg cost (AUD)', cry:'Avg cost (AUD)', met:'Avg cost (AUD/oz)' };
-const MODAL_HINTS       = { us:'Price fetched from Finnhub automatically.', asx:'Use ASX ticker without .AX (e.g. CBA).', cry:'Use CoinGecko symbol (e.g. BTC, ETH).', met:'Use XAU, XAG, XPT or XPD.' };
-
-function openAddModal() {
-  smartMode = 'new'; smartCategory = 'us'; smartFoundType = null; smartFoundIdx = null;
-  ['modal-smart-ticker','modal-name','modal-qty','modal-cost',
-   'modal-cash-name','modal-cash-bal','modal-fees-desc','modal-fees-amt',
-   'modal-txn-qty','modal-txn-price','modal-txn-fee',
-   'modal-income-amt','modal-income-source','modal-income-franking',
-   'modal-contrib-amt','modal-contrib-member'].forEach(id => {
-    const el = document.getElementById(id); if(el) el.value = '';
-  });
-  const today = new Date().toISOString().slice(0,10);
-  ['modal-fees-date','modal-txn-date','modal-income-date','modal-contrib-date'].forEach(id => {
-    const el = document.getElementById(id); if(el) el.value = today;
-  });
-  document.getElementById('modal-ticker-status').textContent = '';
-  document.getElementById('modal-ticker-status').style.color = '';
-  // Populate cash account dropdowns
-  _populateAccountSelects();
-  _renderSmartModal();
-  const _modal = document.getElementById('addModal');
-  _modal.style.display = 'flex';
-  _modal.style.visibility = 'visible';
-  _modal.classList.add('open');
-  setTimeout(() => document.getElementById('modal-smart-ticker').focus(), 80);
+function openAddModal(){
+  smartMode='new';smartCategory='us';smartFoundType=null;smartFoundIdx=null;
+  ['modal-smart-ticker','modal-name','modal-qty','modal-cost','modal-cash-name','modal-cash-bal','modal-fees-desc','modal-fees-amt','modal-txn-qty','modal-txn-price','modal-txn-fee','modal-income-amt','modal-income-source','modal-income-franking','modal-contrib-amt','modal-contrib-member'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  const today=new Date().toISOString().slice(0,10);
+  ['modal-fees-date','modal-txn-date','modal-income-date','modal-contrib-date'].forEach(id=>{const el=document.getElementById(id);if(el)el.value=today;});
+  document.getElementById('modal-ticker-status').textContent='';document.getElementById('modal-ticker-status').style.color='';
+  _populateAccountSelects();_renderSmartModal();
+  const _modal=document.getElementById('addModal');_modal.style.display='flex';_modal.style.visibility='visible';_modal.classList.add('open');
+  setTimeout(()=>document.getElementById('modal-smart-ticker').focus(),80);
 }
-
-function _populateAccountSelects() {
-  const opts = '<option value="">— Don\'t adjust cash —</option>' +
-    S.cash.map((a,i) => `<option value="${i}">${a.name} ($${f(a.balance||0)} AUD)</option>`).join('');
-  const txnSel = document.getElementById('modal-txn-account');
-  const newSel = document.getElementById('modal-new-account');
-  if(txnSel) txnSel.innerHTML = opts;
-  if(newSel) newSel.innerHTML = opts;
+function _populateAccountSelects(){
+  const opts='<option value="">— Don\'t adjust cash —</option>'+S.cash.map((a,i)=>`<option value="${i}">${a.name} ($${f(a.balance||0)} AUD)</option>`).join('');
+  const txnSel=document.getElementById('modal-txn-account');const newSel=document.getElementById('modal-new-account');
+  if(txnSel)txnSel.innerHTML=opts;if(newSel)newSel.innerHTML=opts;
 }
-
-function updateTxnAccountLabel() {
-  const side = document.getElementById('modal-txn-side').value;
-  const lbl  = document.getElementById('modal-txn-acct-label');
-  if(lbl) lbl.textContent = side === 'buy' ? 'Deduct from cash account' : 'Credit to cash account';
-}
-
-function closeAddModal(e) {
-  if(e && e.target !== document.getElementById('addModal')) return;
-  const _modal = document.getElementById('addModal');
-  _modal.classList.remove('open');
-  _modal.style.display = 'none';
-  _modal.style.visibility = 'hidden';
-}
-
-function onSmartTickerInput(raw) {
-  const tk = raw.trim().toUpperCase();
-  // Override manual edits — clear cash/fees mode if user types
-  if(smartMode === 'cash' || smartMode === 'fees') {
-    setSmartMode('new');
-  }
-  // Check if ticker exists in portfolio
-  smartFoundType = null; smartFoundIdx = null;
-  for(const type of ['us','asx','cry','met']) {
-    const idx = S[type].findIndex(h => h.ticker === tk);
-    if(idx >= 0) { smartFoundType = type; smartFoundIdx = idx; break; }
-  }
-  const status = document.getElementById('modal-ticker-status');
-  if(!tk) {
-    status.textContent = ''; smartMode = 'new';
-  } else if(smartFoundType) {
-    const h = S[smartFoundType][smartFoundIdx];
-    status.textContent = '✓ Found: ' + h.name + ' — adding transaction';
-    status.style.color = '#397968';
-    smartMode = 'txn';
-  } else {
-    status.textContent = 'New holding — select category below';
-    status.style.color = 'var(--text3)';
-    smartMode = 'new';
-  }
+function updateTxnAccountLabel(){const side=document.getElementById('modal-txn-side').value;const lbl=document.getElementById('modal-txn-acct-label');if(lbl)lbl.textContent=side==='buy'?'Deduct from cash account':'Credit to cash account';}
+function closeAddModal(e){if(e&&e.target!==document.getElementById('addModal'))return;const _modal=document.getElementById('addModal');_modal.classList.remove('open');_modal.style.display='none';_modal.style.visibility='hidden';}
+function onSmartTickerInput(raw){
+  const tk=raw.trim().toUpperCase();
+  if(smartMode==='cash'||smartMode==='fees')setSmartMode('new');
+  smartFoundType=null;smartFoundIdx=null;
+  for(const type of['us','asx','cry','met']){const idx=S[type].findIndex(h=>h.ticker===tk);if(idx>=0){smartFoundType=type;smartFoundIdx=idx;break;}}
+  const status=document.getElementById('modal-ticker-status');
+  if(!tk){status.textContent='';smartMode='new';}
+  else if(smartFoundType){status.textContent='✓ Found: '+S[smartFoundType][smartFoundIdx].name+' — adding transaction';status.style.color='#397968';smartMode='txn';}
+  else{status.textContent='New holding — select category below';status.style.color='var(--text3)';smartMode='new';}
   _renderSmartModal();
 }
-
-function setSmartMode(mode) {
-  smartMode = mode;
-  const noTicker = ['cash','fees','income','contribution'];
-  if(noTicker.includes(mode)) {
-    document.getElementById('modal-smart-ticker').value = '';
-    document.getElementById('modal-ticker-status').textContent = '';
-  }
-  // Pre-fill today's date for date fields
-  const today = new Date().toISOString().slice(0,10);
-  if(mode === 'fees') { const d=document.getElementById('modal-fees-date'); if(d&&!d.value) d.value=today; }
-  if(mode === 'income') { const d=document.getElementById('modal-income-date'); if(d&&!d.value) d.value=today; }
-  if(mode === 'contribution') { const d=document.getElementById('modal-contrib-date'); if(d&&!d.value) d.value=today; }
+function setSmartMode(mode){
+  smartMode=mode;const noTicker=['cash','fees','income','contribution'];
+  if(noTicker.includes(mode)){document.getElementById('modal-smart-ticker').value='';document.getElementById('modal-ticker-status').textContent='';}
+  const today=new Date().toISOString().slice(0,10);
+  if(mode==='fees'){const d=document.getElementById('modal-fees-date');if(d&&!d.value)d.value=today;}
+  if(mode==='income'){const d=document.getElementById('modal-income-date');if(d&&!d.value)d.value=today;}
+  if(mode==='contribution'){const d=document.getElementById('modal-contrib-date');if(d&&!d.value)d.value=today;}
   _renderSmartModal();
 }
-
-function setSmartCategory(cat) {
-  smartCategory = cat;
-  ['us','asx','cry','met'].forEach(c => {
-    const b = document.getElementById('scat-'+c);
-    if(b) b.classList.toggle('active', c === cat);
-  });
-  document.getElementById('modal-qty-label') && (document.getElementById('modal-qty-label').textContent = MODAL_QTY_LABELS[cat]);
-  document.getElementById('modal-cost-label') && (document.getElementById('modal-cost-label').textContent = MODAL_COST_LABELS[cat]);
-  document.getElementById('modal-hint') && (document.getElementById('modal-hint').textContent = MODAL_HINTS[cat]);
+function setSmartCategory(cat){
+  smartCategory=cat;
+  ['us','asx','cry','met'].forEach(c=>{const b=document.getElementById('scat-'+c);if(b)b.classList.toggle('active',c===cat);});
+  document.getElementById('modal-qty-label')&&(document.getElementById('modal-qty-label').textContent=MODAL_QTY_LABELS[cat]);
+  document.getElementById('modal-cost-label')&&(document.getElementById('modal-cost-label').textContent=MODAL_COST_LABELS[cat]);
+  document.getElementById('modal-hint')&&(document.getElementById('modal-hint').textContent=MODAL_HINTS[cat]);
 }
-
-function _renderSmartModal() {
-  const isTxn    = smartMode === 'txn';
-  const isCash   = smartMode === 'cash';
-  const isFees   = smartMode === 'fees';
-  const isIncome = smartMode === 'income';
-  const isContrib= smartMode === 'contribution';
-  const isNew    = smartMode === 'new';
-  const noTicker = isCash || isFees || isIncome || isContrib;
-
-  // Title & subtitle
-  const titles = { txn:'Add transaction', cash:'Add cash account', fees:'Add fee', income:'Record income', contribution:'Record contribution' };
-  const subs = {
-    txn: `Adding trade for ${S[smartFoundType]?.[smartFoundIdx]?.name || ''}`,
-    cash: 'Enter account name and current balance',
-    fees: 'Log a fee to your FY ledger',
-    income: 'Record dividend, interest or other fund income',
-    contribution: 'Record a member contribution to the fund'
-  };
-  document.getElementById('modal-title').textContent = titles[smartMode] || 'Add to portfolio';
-  document.getElementById('modal-sub').textContent   = subs[smartMode]   || 'Type a ticker — or choose a type below';
-
-  // Ticker row & quick buttons: hide for non-ticker modes
-  document.getElementById('modal-ticker-row').style.display   = noTicker ? 'none' : 'block';
-  document.getElementById('modal-quick-btns').style.display   = noTicker ? 'none' : 'flex';
-  document.getElementById('modal-cat-row').style.display      = isNew    ? 'block' : 'none';
-  if(isNew) setSmartCategory(smartCategory);
-
-  document.getElementById('modal-divider').style.display = (isNew||isTxn||isCash||isFees||isIncome||isContrib) ? 'block' : 'none';
-
-  // Show/hide field panels
-  document.getElementById('modal-new-holding').style.display        = isNew    ? 'block' : 'none';
-  document.getElementById('modal-txn-fields').style.display         = isTxn   ? 'block' : 'none';
-  document.getElementById('modal-cash-fields').style.display        = isCash  ? 'block' : 'none';
-  document.getElementById('modal-fees-fields').style.display        = isFees  ? 'block' : 'none';
-  document.getElementById('modal-income-fields').style.display      = isIncome? 'block' : 'none';
-  document.getElementById('modal-contribution-fields').style.display= isContrib?'block' : 'none';
-
-  // Populate cash account dropdowns for income and contributions
-  if(isIncome || isContrib) {
-    const opts = '<option value="">— Don\'t adjust cash —</option>' +
-      S.cash.map((a,i)=>`<option value="${i}">${a.name} ($${f(a.balance||0)} AUD)</option>`).join('');
-    const incAcct = document.getElementById('modal-income-account');
-    const ctbAcct = document.getElementById('modal-contrib-account');
-    if(incAcct) incAcct.innerHTML = opts;
-    if(ctbAcct) ctbAcct.innerHTML = opts;
+function _renderSmartModal(){
+  const isTxn=smartMode==='txn',isCash=smartMode==='cash',isFees=smartMode==='fees',isIncome=smartMode==='income',isContrib=smartMode==='contribution',isNew=smartMode==='new';
+  const noTicker=isCash||isFees||isIncome||isContrib;
+  const titles={txn:'Add transaction',cash:'Add cash account',fees:'Add fee',income:'Record income',contribution:'Record contribution'};
+  const subs={txn:'Adding trade for '+(S[smartFoundType]?.[smartFoundIdx]?.name||''),cash:'Enter account name and current balance',fees:'Log a fee to your FY ledger',income:'Record dividend, interest or other fund income',contribution:'Record a member contribution to the fund'};
+  document.getElementById('modal-title').textContent=titles[smartMode]||'Add to portfolio';
+  document.getElementById('modal-sub').textContent=subs[smartMode]||'Type a ticker — or choose a type below';
+  document.getElementById('modal-ticker-row').style.display=noTicker?'none':'block';
+  document.getElementById('modal-quick-btns').style.display=noTicker?'none':'flex';
+  document.getElementById('modal-cat-row').style.display=isNew?'block':'none';
+  if(isNew)setSmartCategory(smartCategory);
+  document.getElementById('modal-divider').style.display=(isNew||isTxn||isCash||isFees||isIncome||isContrib)?'block':'none';
+  document.getElementById('modal-new-holding').style.display=isNew?'block':'none';
+  document.getElementById('modal-txn-fields').style.display=isTxn?'block':'none';
+  document.getElementById('modal-cash-fields').style.display=isCash?'block':'none';
+  document.getElementById('modal-fees-fields').style.display=isFees?'block':'none';
+  document.getElementById('modal-income-fields').style.display=isIncome?'block':'none';
+  document.getElementById('modal-contribution-fields').style.display=isContrib?'block':'none';
+  if(isIncome||isContrib){const opts='<option value="">— Don\'t adjust cash —</option>'+S.cash.map((a,i)=>`<option value="${i}">${a.name} ($${f(a.balance||0)} AUD)</option>`).join('');const incAcct=document.getElementById('modal-income-account');const ctbAcct=document.getElementById('modal-contrib-account');if(incAcct)incAcct.innerHTML=opts;if(ctbAcct)ctbAcct.innerHTML=opts;}
+  ['cash','fees','income','contribution'].forEach(m=>{const b=document.getElementById('qbtn-'+m);if(b){b.style.background=smartMode===m?'#397968':'';b.style.color=smartMode===m?'#fff':'';b.style.borderColor=smartMode===m?'#397968':'';}});
+}
+function submitAddModal(){
+  if(smartMode==='txn'){
+    const date=document.getElementById('modal-txn-date').value;const side=document.getElementById('modal-txn-side').value;
+    const qty=parseFloat(document.getElementById('modal-txn-qty').value)||0;const price=parseFloat(document.getElementById('modal-txn-price').value)||0;
+    const fee=parseFloat(document.getElementById('modal-txn-fee').value)||0;const acctIdx=document.getElementById('modal-txn-account').value;
+    if(!qty||!price)return;
+    if(!S[smartFoundType][smartFoundIdx].txns)S[smartFoundType][smartFoundIdx].txns=[];
+    const _txnId=generateTxnId(date);
+    S[smartFoundType][smartFoundIdx].txns.push({date,side,qty,price,fee,cashAcct:acctIdx!==''?parseInt(acctIdx):null,txnId:_txnId});
+    recalcFromTxns(smartFoundType,smartFoundIdx);
+    if(acctIdx!==''){const idx=parseInt(acctIdx);const tradeTotal=qty*price;const totalWithFee=side==='buy'?tradeTotal+fee:tradeTotal-fee;S.cash[idx].balance=(S.cash[idx].balance||0)+(side==='buy'?-totalWithFee:totalWithFee);renderCash();}
+    save();rows(smartFoundType);renderAllHoldings();renderFees();
+  }else if(smartMode==='fees'){
+    const date=document.getElementById('modal-fees-date').value;const desc=document.getElementById('modal-fees-desc').value.trim();
+    const cat=document.getElementById('modal-fees-cat').value;const amount=parseFloat(document.getElementById('modal-fees-amt').value)||0;
+    if(!desc||!amount)return;S.fees.push({date,desc,cat,amount,txnId:generateTxnId(date)});save();renderFees();
+  }else if(smartMode==='cash'){
+    const nm=document.getElementById('modal-cash-name').value.trim();const bal=parseFloat(document.getElementById('modal-cash-bal').value)||0;
+    if(!nm)return;S.cash.push({name:nm,balance:bal});save();renderCash();
+  }else if(smartMode==='income'){
+    const date=document.getElementById('modal-income-date').value;const amt=parseFloat(document.getElementById('modal-income-amt').value)||0;
+    const source=document.getElementById('modal-income-source').value.trim();const type=document.getElementById('modal-income-type').value;
+    const franking=parseFloat(document.getElementById('modal-income-franking').value)||0;const acctIdx=document.getElementById('modal-income-account').value;
+    if(!amt||!source)return;const txnId=generateTxnId(date);S.income.push({date,source,type,amount:amt,franking,txnId});
+    if(acctIdx!==''){const idx=parseInt(acctIdx);S.cash[idx].balance=(S.cash[idx].balance||0)+amt;renderCash();}
+    save();renderFees();
+  }else if(smartMode==='contribution'){
+    const date=document.getElementById('modal-contrib-date').value;const amt=parseFloat(document.getElementById('modal-contrib-amt').value)||0;
+    const member=document.getElementById('modal-contrib-member').value.trim();const type=document.getElementById('modal-contrib-type').value;
+    const acctIdx=document.getElementById('modal-contrib-account').value;
+    if(!amt||!member)return;const txnId=generateTxnId(date);S.contributions.push({date,member,type,amount:amt,txnId});
+    if(acctIdx!==''){const idx=parseInt(acctIdx);S.cash[idx].balance=(S.cash[idx].balance||0)+amt;renderCash();}
+    save();renderFees();
+  }else{
+    const tk=document.getElementById('modal-smart-ticker').value.trim().toUpperCase();const nm=document.getElementById('modal-name').value.trim()||tk;
+    const qt=parseFloat(document.getElementById('modal-qty').value)||0;const cost=parseFloat(document.getElementById('modal-cost').value)||0;
+    const acctIdx=document.getElementById('modal-new-account').value;
+    if(!tk)return;S[smartCategory].push({ticker:tk,name:nm,qty:qt,cost,txns:[]});
+    if(acctIdx!==''&&qt>0&&cost>0){const idx=parseInt(acctIdx);S.cash[idx].balance=(S.cash[idx].balance||0)-(qt*cost);renderCash();}
+    save();rows(smartCategory);
   }
-
-  // Quick button highlight
-  ['cash','fees','income','contribution'].forEach(m => {
-    const b = document.getElementById('qbtn-'+m);
-    if(b) {
-      b.style.background  = smartMode===m ? '#397968' : '';
-      b.style.color       = smartMode===m ? '#fff' : '';
-      b.style.borderColor = smartMode===m ? '#397968' : '';
-    }
-  });
+  const _m=document.getElementById('addModal');_m.classList.remove('open');_m.style.display='none';_m.style.visibility='hidden';
 }
 
-function submitAddModal() {
-  if(smartMode === 'txn') {
-    const ticker  = document.getElementById('modal-smart-ticker').value.trim().toUpperCase();
-    const date    = document.getElementById('modal-txn-date').value;
-    const side    = document.getElementById('modal-txn-side').value;
-    const qty     = parseFloat(document.getElementById('modal-txn-qty').value)||0;
-    const price   = parseFloat(document.getElementById('modal-txn-price').value)||0;
-    const fee     = parseFloat(document.getElementById('modal-txn-fee').value)||0;
-    const acctIdx = document.getElementById('modal-txn-account').value;
-    if(!qty || !price) return;
-    // Save transaction
-    if(!S[smartFoundType][smartFoundIdx].txns) S[smartFoundType][smartFoundIdx].txns = [];
-    const _acct = document.getElementById('modal-txn-account').value;
-    const _txnId = generateTxnId(date);
-    S[smartFoundType][smartFoundIdx].txns.push({date, side, qty, price, fee, cashAcct:_acct!==''?parseInt(_acct):null, txnId:_txnId});
-    recalcFromTxns(smartFoundType, smartFoundIdx);
-    // Adjust cash balance
-    if(acctIdx !== '') {
-      const idx = parseInt(acctIdx);
-      const tradeTotal = qty * price;
-      const totalWithFee = side==='buy' ? tradeTotal + fee : tradeTotal - fee;
-      S.cash[idx].balance = (S.cash[idx].balance||0) + (side==='buy' ? -totalWithFee : totalWithFee);
-      renderCash();
-    }
-    save(); rows(smartFoundType); renderAllHoldings(); renderFees();
-  } else if(smartMode === 'fees') {
-    const date   = document.getElementById('modal-fees-date').value;
-    const desc   = document.getElementById('modal-fees-desc').value.trim();
-    const cat    = document.getElementById('modal-fees-cat').value;
-    const amount = parseFloat(document.getElementById('modal-fees-amt').value)||0;
-    if(!desc || !amount) return;
-    S.fees.push({date, desc, cat, amount, txnId:generateTxnId(date)});
-    save(); renderFees();
-  } else if(smartMode === 'cash') {
-    const nm  = document.getElementById('modal-cash-name').value.trim();
-    const bal = parseFloat(document.getElementById('modal-cash-bal').value)||0;
-    if(!nm) return;
-    S.cash.push({name:nm, balance:bal});
-    save(); renderCash();
-  } else if(smartMode === 'income') {
-    const date     = document.getElementById('modal-income-date').value;
-    const amt      = parseFloat(document.getElementById('modal-income-amt').value)||0;
-    const source   = document.getElementById('modal-income-source').value.trim();
-    const type     = document.getElementById('modal-income-type').value;
-    const franking = parseFloat(document.getElementById('modal-income-franking').value)||0;
-    const acctIdx  = document.getElementById('modal-income-account').value;
-    if(!amt || !source) return;
-    const txnId = generateTxnId(date);
-    S.income.push({date, source, type, amount:amt, franking, txnId});
-    // Credit cash account
-    if(acctIdx !== '') {
-      const idx = parseInt(acctIdx);
-      S.cash[idx].balance = (S.cash[idx].balance||0) + amt;
-      renderCash();
-    }
-    save(); renderFees();
-  } else if(smartMode === 'contribution') {
-    const date    = document.getElementById('modal-contrib-date').value;
-    const amt     = parseFloat(document.getElementById('modal-contrib-amt').value)||0;
-    const member  = document.getElementById('modal-contrib-member').value.trim();
-    const type    = document.getElementById('modal-contrib-type').value;
-    const acctIdx = document.getElementById('modal-contrib-account').value;
-    if(!amt || !member) return;
-    const txnId = generateTxnId(date);
-    S.contributions.push({date, member, type, amount:amt, txnId});
-    // Credit cash account
-    if(acctIdx !== '') {
-      const idx = parseInt(acctIdx);
-      S.cash[idx].balance = (S.cash[idx].balance||0) + amt;
-      renderCash();
-    }
-    save(); renderFees();
-  } else {
-    // New holding
-    const tk      = document.getElementById('modal-smart-ticker').value.trim().toUpperCase();
-    const nm      = document.getElementById('modal-name').value.trim() || tk;
-    const qt      = parseFloat(document.getElementById('modal-qty').value)||0;
-    const cost    = parseFloat(document.getElementById('modal-cost').value)||0;
-    const acctIdx = document.getElementById('modal-new-account').value;
-    if(!tk) return;
-    S[smartCategory].push({ticker:tk, name:nm, qty:qt, cost, txns:[]});
-    // Deduct initial cost from selected cash account
-    if(acctIdx !== '' && qt > 0 && cost > 0) {
-      const idx = parseInt(acctIdx);
-      const total = qt * cost;
-      S.cash[idx].balance = (S.cash[idx].balance||0) - total;
-      renderCash();
-    }
-    save(); rows(smartCategory);
-  }
-  // Close modal and reset inline styles
-  const _m = document.getElementById('addModal');
-  _m.classList.remove('open');
-  _m.style.display = 'none';
-  _m.style.visibility = 'hidden';
-}
-document.addEventListener('keydown', e => { if(e.key==='Escape') { const m=document.getElementById('addModal'); m.classList.remove('open'); m.style.display='none'; m.style.visibility='hidden'; }});
-
-// ── Swyftx CSV Import ────────────────────────────────────────────
-function importSwyftxCSV(input) {
-  const file = input.files[0];
-  if(!file) return;
-  input.value = '';
-
-  const reader = new FileReader();
-  reader.onload = function(e) {
-    try {
-      const text = e.target.result;
-      const rawLines = text.split('\n').map(l => l.trim()).filter(l => l && !l.match(/^[A-Za-z ]+$/));
-      if(rawLines.length < 2) { alert('CSV appears empty.'); return; }
-
-      const headerIdx = rawLines.findIndex(l => l.toLowerCase().includes('date') && (l.toLowerCase().includes('event') || l.toLowerCase().includes('type')));
-      if(headerIdx === -1) { alert('Could not find header row in CSV.'); return; }
-
-      const headers = rawLines[headerIdx].split(',').map(h => h.trim().replace(/^"|"$/g,'').toLowerCase());
-      const col = name => headers.findIndex(h => h === name);
-      const colInc = name => headers.findIndex(h => h.includes(name));
-
-      const iDate  = col('date');
-      const iEvent = col('event') >= 0 ? col('event') : col('type');
-      const iAsset = col('asset');
-      const iAmt   = col('amount');
-      const iAud   = col('aud value') >= 0 ? col('aud value') : col('value');
-      const iFee   = col('fee amount') >= 0 ? col('fee amount') : colInc('fee');
-      const iUID   = col('uuid') >= 0 ? col('uuid') : col('transaction id');
-
-      // Pre-scan trade count
-      let tradeCount = 0;
-      for(let i = headerIdx+1; i < rawLines.length; i++) {
-        const c = rawLines[i].split(',');
-        const ev = (c[iEvent]||'').toLowerCase().trim();
-        const as = (c[iAsset]||'').trim().toUpperCase();
-        if((ev==='buy'||ev==='sell') && as && as!=='AUD') tradeCount++;
-      }
-      if(tradeCount === 0) { alert('No buy/sell trades found in this CSV.'); return; }
-
-      // Ask which cash account to deduct from
-      let cashAcctIdx = null;
-      if(S.cash.length > 0) {
-        const opts = S.cash.map((a,i) => `${i+1}. ${a.name} ($${f(a.balance||0)} AUD)`).join('\n');
-        const ans = prompt(
-          `Found ${tradeCount} trade${tradeCount!==1?'s':''} to import.\n\nDeduct from which cash account?\n\n${opts}\n\nEnter number, or 0 to skip:`
-        );
-        if(ans === null) return;
-        const n = parseInt(ans);
-        if(n >= 1 && n <= S.cash.length) cashAcctIdx = n - 1;
-      }
-
-      // Capture function references for use inside loop
-      const _genId = window.generateTxnId || generateTxnId;
-      const _recalc = window.recalcFromTxns || recalcFromTxns;
-      let imported=0, skipped=0, ignored=0;
-
-      for(let i = headerIdx+1; i < rawLines.length; i++) {
-        const cols = rawLines[i].split(',');
-        const clean = cols.map(c => (c||'').trim().replace(/^"|"$/g,''));
-
-        const event  = (clean[iEvent]||'').toLowerCase().trim();
-        const asset  = (clean[iAsset]||'').trim().toUpperCase();
-        const amount = parseFloat(clean[iAmt]||0);
-        const audVal = parseFloat(clean[iAud]||0);
-        const fee    = parseFloat(iFee>=0 ? clean[iFee]||0 : 0);
-        const rawDate= clean[iDate]||'';
-        const uid    = iUID>=0 ? (clean[iUID]||'').trim() : '';
-
-        if(event!=='buy' && event!=='sell') { ignored++; continue; }
-        if(!asset || !amount || !audVal || asset==='AUD') { ignored++; continue; }
-
-        // Parse DD/MM/YYYY
-        let date = '';
-        if(rawDate.includes('/')) {
-          const p = rawDate.split('/');
-          date = `${p[2]}-${p[1].padStart(2,'0')}-${p[0].padStart(2,'0')}`;
-        } else { date = rawDate.slice(0,10); }
-        if(!date || date.startsWith('NaN') || date.length<10) { ignored++; continue; }
-
-        const price = amount>0 ? audVal/amount : 0;
-        if(!price) { ignored++; continue; }
-
-        // Skip dupes by UUID
-        if(uid) {
-          const isDupe = S.cry.concat(S.us,S.asx,S.met).some(h=>(h.txns||[]).some(t=>t.swyftxId===uid));
-          if(isDupe) { skipped++; continue; }
-        }
-
-        // Find or create holding
-        let idx = S.cry.findIndex(h => h.ticker===asset);
-        if(idx===-1) { S.cry.push({ticker:asset,name:asset,qty:0,cost:0,txns:[]}); idx=S.cry.length-1; }
-        if(!S.cry[idx].txns) S.cry[idx].txns=[];
-
-        S.cry[idx].txns.push({date,side:event,qty:amount,price,fee,txnId:_genId(date),swyftxId:uid,cashAcct:cashAcctIdx});
-
-        // Adjust cash balance
-        if(cashAcctIdx!==null && S.cash[cashAcctIdx]) {
-          const total = event==='buy' ? audVal+fee : -(audVal-fee);
-          S.cash[cashAcctIdx].balance = (S.cash[cashAcctIdx].balance||0) - total;
-        }
-
-        _recalc('cry', idx);
-        imported++;
-      }
-
-      if(imported>0) { save(); rows('cry'); renderAllHoldings(); renderCash(); renderFees(); summary(); }
-
-      const cashMsg = cashAcctIdx!==null
-        ? `\nDeducted from: ${S.cash[cashAcctIdx].name} (balance now $${f(S.cash[cashAcctIdx].balance||0)})`
-        : '';
-
-      alert(`✓ Swyftx import complete!\n\n${imported} trade${imported!==1?'s':''} imported\n${skipped} already in tracker (skipped)\n${ignored} non-trade rows ignored${cashMsg}`);
-
-    } catch(err) {
-      console.error('CSV import error:', err);
-      alert(`Import failed: ${err.message}`);
-    }
-  };
-  reader.readAsText(file);
-}
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){const m=document.getElementById('addModal');m.classList.remove('open');m.style.display='none';m.style.visibility='hidden';}});
 
 // ── Mobile sidebar ───────────────────────────────────────────────
-function openMobileSidebar() {
-  document.getElementById('sidebar').classList.add('mobile-open');
-  document.getElementById('sidebarOverlay').classList.add('visible');
-  document.body.style.overflow = 'hidden';
-}
-function closeMobileSidebar() {
-  document.getElementById('sidebar').classList.remove('mobile-open');
-  document.getElementById('sidebarOverlay').classList.remove('visible');
-  document.body.style.overflow = '';
-}
+function openMobileSidebar(){document.getElementById('sidebar').classList.add('mobile-open');document.getElementById('sidebarOverlay').classList.add('visible');document.body.style.overflow='hidden';}
+function closeMobileSidebar(){document.getElementById('sidebar').classList.remove('mobile-open');document.getElementById('sidebarOverlay').classList.remove('visible');document.body.style.overflow='';}
+function toggleSidebar(){const sb=document.getElementById('sidebar');const collapsed=sb.classList.toggle('collapsed');localStorage.setItem('smsf_sb_collapsed',collapsed?'1':'0');if(pieChart)setTimeout(()=>pieChart.resize(),280);if(historyChart)setTimeout(()=>historyChart.resize(),280);}
 
-// ── Sidebar toggle ──────────────────────────────────────────────
-function toggleSidebar() {
-  const sb = document.getElementById('sidebar');
-  const collapsed = sb.classList.toggle('collapsed');
-  localStorage.setItem('smsf_sb_collapsed', collapsed ? '1' : '0');
-  if(pieChart) setTimeout(()=>pieChart.resize(), 280);
-  if(historyChart) setTimeout(()=>historyChart.resize(), 280);
-}
-
-// ── Tabs ─────────────────────────────────────────────────────────
-
-// ── Smooth tab transitions ───────────────────────────────────────
-function switchTab(name) {
-  document.querySelectorAll('.tab-btn').forEach((b,i) => {
-    const tabs = ['portfolio','fees','watchlist'];
-    b.classList.toggle('active', tabs[i] === name);
-  });
-  ['portfolio','fees','watchlist'].forEach(t => {
-    const sb = document.getElementById('sb-'+t);
-    if(sb) sb.classList.toggle('active', t === name);
-    const bn = document.getElementById('bn-'+t);
-    if(bn) bn.classList.toggle('active', t === name);
-  });
-  document.querySelectorAll('.tab-panel').forEach(p => {
-    if(p.id === 'tab-'+name) {
-      p.classList.add('active','entering');
-      setTimeout(()=>p.classList.remove('entering'), 220);
-    } else {
-      p.classList.remove('active','entering');
-    }
-  });
-  // Show + Add button only on portfolio and transactions tabs
-  const addBtn = document.getElementById('topbarAddBtn');
-  if(addBtn) addBtn.style.display = (name === 'watchlist') ? 'none' : '';
-  // Re-render fees ledger when switching to transactions tab
-  if(name === 'fees') {
-    try { renderFees(); } catch(e) { console.error('renderFees error:', e); }
-  }
-  // Re-render cash when switching to portfolio tab
-  if(name === 'portfolio') {
-    try { renderCash(); } catch(e) { console.error('renderCash error:', e); }
-  }
+function switchTab(name){
+  document.querySelectorAll('.tab-btn').forEach((b,i)=>{const tabs=['portfolio','fees','watchlist'];b.classList.toggle('active',tabs[i]===name);});
+  ['portfolio','fees','watchlist'].forEach(t=>{const sb=document.getElementById('sb-'+t);if(sb)sb.classList.toggle('active',t===name);const bn=document.getElementById('bn-'+t);if(bn)bn.classList.toggle('active',t===name);});
+  document.querySelectorAll('.tab-panel').forEach(p=>{if(p.id==='tab-'+name){p.classList.add('active','entering');setTimeout(()=>p.classList.remove('entering'),220);}else{p.classList.remove('active','entering');}});
+  const addBtn=document.getElementById('topbarAddBtn');if(addBtn)addBtn.style.display=(name==='watchlist')?'none':'';
+  if(name==='fees'){try{renderFees();}catch(e){console.error('renderFees error:',e);}}
+  if(name==='portfolio'){try{renderCash();}catch(e){console.error('renderCash error:',e);}}
   closeMobileSidebar();
-  if(name === 'portfolio') {
-    if(pieChart) setTimeout(()=>pieChart.resize(), 50);
-    if(historyChart) setTimeout(()=>historyChart.resize(), 50);
-  }
+  if(name==='portfolio'){if(pieChart)setTimeout(()=>pieChart.resize(),50);if(historyChart)setTimeout(()=>historyChart.resize(),50);}
 }
 
-// ── Animated number counter ─────────────────────────────────────
-function animateValue(el, newVal, prefix='$', decimals=2) {
-  if(!el) return;
-  const raw = el.getAttribute('data-raw');
-  const oldVal = raw ? parseFloat(raw) : null;
-  el.setAttribute('data-raw', newVal);
-  if(oldVal === null || isNaN(oldVal) || oldVal === newVal) {
-    el.textContent = prefix + f(newVal, decimals);
-    return;
-  }
-  // Flash colour
-  const dir = newVal > oldVal ? 'up' : 'down';
-  el.classList.remove('flash-up','flash-down');
-  void el.offsetWidth;
-  el.classList.add('flash-'+dir);
-  setTimeout(()=>el.classList.remove('flash-up','flash-down'), 1200);
-  // Count up/down
-  const duration = 600, steps = 30, increment = (newVal - oldVal) / steps;
-  let current = oldVal, step = 0;
-  const timer = setInterval(()=>{
-    step++;
-    current += increment;
-    if(step >= steps){ current = newVal; clearInterval(timer); }
-    el.textContent = prefix + f(current, decimals);
-  }, duration / steps);
+function animateValue(el,newVal,prefix='$',decimals=2){
+  if(!el)return;const raw=el.getAttribute('data-raw');const oldVal=raw?parseFloat(raw):null;el.setAttribute('data-raw',newVal);
+  if(oldVal===null||isNaN(oldVal)||oldVal===newVal){el.textContent=prefix+f(newVal,decimals);return;}
+  const dir=newVal>oldVal?'up':'down';el.classList.remove('flash-up','flash-down');void el.offsetWidth;el.classList.add('flash-'+dir);setTimeout(()=>el.classList.remove('flash-up','flash-down'),1200);
+  const duration=600,steps=30,increment=(newVal-oldVal)/steps;let current=oldVal,step=0;
+  const timer=setInterval(()=>{step++;current+=increment;if(step>=steps){current=newVal;clearInterval(timer);}el.textContent=prefix+f(current,decimals);},duration/steps);
 }
 
-// ── Market session indicator ────────────────────────────────────
-function updateSessions() {
-  const now = new Date();
-  const utc = now.getTime() + now.getTimezoneOffset() * 60000;
-
-  const sessions = [
-    { name: 'ASX',   tz: 10,  open: [10,0],  close: [16,12], label: 'ASX' },
-    { name: 'NYSE',  tz: -5,  open: [9,30],   close: [16,0],  label: 'NYSE' },
-    { name: 'LSE',   tz: 0,   open: [8,0],    close: [16,30], label: 'LSE' },
-    { name: 'Crypto',tz: null, open: null,     close: null,    label: '₿ Crypto' },
-  ];
-
-  // Check if weekday
-  const isWeekday = d => d.getDay() !== 0 && d.getDay() !== 6;
-
-  const html = sessions.map(s => {
-    if(s.tz === null) {
-      // Crypto always open
-      return `<div class="session-pill session-open"><span class="session-dot"></span>${s.label} 24/7</div>`;
-    }
-    const local = new Date(utc + s.tz * 3600000);
-    const mins = local.getHours() * 60 + local.getMinutes();
-    const openMins  = s.open[0]  * 60 + s.open[1];
-    const closeMins = s.close[0] * 60 + s.close[1];
-    const preMins   = openMins - 90;
-    const weekday   = isWeekday(local);
-
-    let state, label;
-    if(!weekday) {
-      state = 'closed'; label = s.label + ' Closed';
-    } else if(mins >= openMins && mins < closeMins) {
-      // Time remaining
-      const rem = closeMins - mins;
-      const h = Math.floor(rem/60), m = rem%60;
-      label = s.label + ' Open · closes ' + (h>0?h+'h ':'') + m+'m';
-      state = 'open';
-    } else if(mins >= preMins && mins < openMins && weekday) {
-      const rem = openMins - mins;
-      label = s.label + ' Pre-market · opens ' + rem+'m';
-      state = 'pre';
-    } else {
-      state = 'closed'; label = s.label + ' Closed';
-    }
-    return `<div class="session-pill session-${state}"><span class="session-dot"></span>${label}</div>`;
+function updateSessions(){
+  const now=new Date();const utc=now.getTime()+now.getTimezoneOffset()*60000;
+  const sessions=[{name:'ASX',tz:10,open:[10,0],close:[16,12],label:'ASX'},{name:'NYSE',tz:-5,open:[9,30],close:[16,0],label:'NYSE'},{name:'LSE',tz:0,open:[8,0],close:[16,30],label:'LSE'},{name:'Crypto',tz:null,open:null,close:null,label:'₿ Crypto'}];
+  const isWeekday=d=>d.getDay()!==0&&d.getDay()!==6;
+  const html=sessions.map(s=>{
+    if(s.tz===null)return`<div class="session-pill session-open"><span class="session-dot"></span>${s.label} 24/7</div>`;
+    const local=new Date(utc+s.tz*3600000);const mins=local.getHours()*60+local.getMinutes();
+    const openMins=s.open[0]*60+s.open[1];const closeMins=s.close[0]*60+s.close[1];const preMins=openMins-90;const weekday=isWeekday(local);
+    let state,label;
+    if(!weekday){state='closed';label=s.label+' Closed';}
+    else if(mins>=openMins&&mins<closeMins){const rem=closeMins-mins;const h=Math.floor(rem/60),m=rem%60;label=s.label+' Open · closes '+(h>0?h+'h ':'')+m+'m';state='open';}
+    else if(mins>=preMins&&mins<openMins&&weekday){const rem=openMins-mins;label=s.label+' Pre-market · opens '+rem+'m';state='pre';}
+    else{state='closed';label=s.label+' Closed';}
+    return`<div class="session-pill session-${state}"><span class="session-dot"></span>${label}</div>`;
   }).join('');
-
-  document.getElementById('sessions').innerHTML = html;
+  document.getElementById('sessions').innerHTML=html;
 }
 
-// ── Colour-coded rows ───────────────────────────────────────────
-// Store previous prices to detect direction on refresh
-const prevPrices = {};
-function applyRowTints() {
-  document.querySelectorAll('tr.holding-row').forEach(tr => {
-    const sym = tr.querySelector('.sym');
-    if(!sym) return;
-    // Find the value cell (second to last td before delete button)
-    const tds = tr.querySelectorAll('td');
-    if(tds.length < 2) return;
-    // Get 24h change cell — it's the one with class pos/neg
-    const changeCell = [...tds].find(td => td.classList.contains('pos') || td.classList.contains('neg'));
-    if(!changeCell) return;
+function applyRowTints(){
+  document.querySelectorAll('tr.holding-row').forEach(tr=>{
+    const changeCell=[...tr.querySelectorAll('td')].find(td=>td.classList.contains('pos')||td.classList.contains('neg'));
+    if(!changeCell)return;
     tr.classList.remove('tint-up','tint-down','row-up','row-down');
-    if(changeCell.classList.contains('pos')) tr.classList.add('tint-up');
-    else if(changeCell.classList.contains('neg')) tr.classList.add('tint-down');
+    if(changeCell.classList.contains('pos'))tr.classList.add('tint-up');
+    else if(changeCell.classList.contains('neg'))tr.classList.add('tint-down');
   });
 }
 
-// ── Portfolio value history ─────────────────────────────────────
-let historyChart = null;
-const HISTORY_KEY = 'smsf_history';
-const MAX_SNAPSHOTS = 90; // keep up to 90 daily snapshots
-
-function saveSnapshot(totalValue) {
-  if(!totalValue || totalValue <= 0) return;
-  const today = new Date().toISOString().slice(0,10);
-  let history = [];
-  try { history = JSON.parse(localStorage.getItem(HISTORY_KEY)||'[]'); } catch(e){}
-  // Update today's entry or append
-  const last = history[history.length-1];
-  if(last && last.d === today) { last.v = totalValue; }
-  else { history.push({d:today, v:totalValue}); }
-  // Trim to max
-  if(history.length > MAX_SNAPSHOTS) history = history.slice(-MAX_SNAPSHOTS);
-  localStorage.setItem(HISTORY_KEY, JSON.stringify(history));
-  renderHistoryChart(history);
+let historyChart=null;const HISTORY_KEY='smsf_history';const MAX_SNAPSHOTS=90;
+function saveSnapshot(totalValue){
+  if(!totalValue||totalValue<=0)return;const today=new Date().toISOString().slice(0,10);let history=[];
+  try{history=JSON.parse(localStorage.getItem(HISTORY_KEY)||'[]');}catch(e){}
+  const last=history[history.length-1];if(last&&last.d===today){last.v=totalValue;}else{history.push({d:today,v:totalValue});}
+  if(history.length>MAX_SNAPSHOTS)history=history.slice(-MAX_SNAPSHOTS);
+  localStorage.setItem(HISTORY_KEY,JSON.stringify(history));renderHistoryChart(history);
+}
+function renderHistoryChart(history){
+  if(!history){try{history=JSON.parse(localStorage.getItem(HISTORY_KEY)||'[]');}catch(e){history=[];}}
+  const el=document.getElementById('historyChart');const meta=document.getElementById('historyMeta');
+  if(!history.length){meta.textContent='No history yet — refresh prices to record first snapshot';return;}
+  const labels=history.map(h=>{const d=new Date(h.d);return d.toLocaleDateString('en-AU',{day:'numeric',month:'short'});});
+  const data=history.map(h=>h.v);const first=data[0],last=data[data.length-1];
+  const change=last-first;const changePct=first>0?(change/first*100):0;const sign=change>=0?'+':'';
+  meta.innerHTML=`${history.length} snapshot${history.length>1?'s':''} &nbsp;·&nbsp; <span style="color:${change>=0?'var(--gain-pos)':'var(--gain-neg)'};font-weight:700;">${sign}$${f(Math.abs(change))} (${sign}${changePct.toFixed(1)}%)</span> since first recorded`;
+  const lineColor='#59d0a3';const fillColor='rgba(89,208,163,0.08)';const gridColor='rgba(255,255,255,0.06)';const textColor='#6e6e6a';
+  if(historyChart){historyChart.data.labels=labels;historyChart.data.datasets[0].data=data;historyChart.update();return;}
+  historyChart=new Chart(el,{type:'line',data:{labels,datasets:[{data,borderColor:lineColor,backgroundColor:fillColor,borderWidth:2,pointRadius:history.length>30?0:3,pointHoverRadius:5,fill:true,tension:0.3}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>' $'+f(ctx.parsed.y)}}},scales:{x:{grid:{color:gridColor},ticks:{color:textColor,maxTicksLimit:8,font:{size:11}}},y:{grid:{color:gridColor},ticks:{color:textColor,font:{size:11},callback:v=>'$'+f(v)}}}}});
 }
 
-function renderHistoryChart(history) {
-  if(!history) {
-    try { history = JSON.parse(localStorage.getItem(HISTORY_KEY)||'[]'); } catch(e){ history=[]; }
-  }
-  const el = document.getElementById('historyChart');
-  const meta = document.getElementById('historyMeta');
-  if(!history.length){ meta.textContent='No history yet — refresh prices to record first snapshot'; return; }
-  const labels = history.map(h => {
-    const d = new Date(h.d);
-    return d.toLocaleDateString('en-AU',{day:'numeric',month:'short'});
-  });
-  const data = history.map(h => h.v);
-  const first = data[0], last = data[data.length-1];
-  const change = last - first;
-  const changePct = first > 0 ? (change/first*100) : 0;
-  const sign = change >= 0 ? '+' : '';
-  meta.innerHTML = `${history.length} snapshot${history.length>1?'s':''} &nbsp;·&nbsp; <span style="color:${change>=0?'var(--gain-pos)':'var(--gain-neg)'};font-weight:700;">${sign}$${f(Math.abs(change))} (${sign}${changePct.toFixed(1)}%)</span> since first recorded`;
-  const isDark = document.body.classList.contains('dark');
-  const lineColor = '#59d0a3';
-  const fillColor = isDark ? 'rgba(89,208,163,0.15)' : 'rgba(89,208,163,0.08)';
-  const gridColor = isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)';
-  const textColor = isDark ? '#6e6e6a' : '#aaa';
-  if(historyChart) {
-    historyChart.data.labels = labels;
-    historyChart.data.datasets[0].data = data;
-    historyChart.update();
-    return;
-  }
-  historyChart = new Chart(el, {
-    type: 'line',
-    data: {
-      labels,
-      datasets: [{
-        data,
-        borderColor: lineColor,
-        backgroundColor: fillColor,
-        borderWidth: 2,
-        pointRadius: history.length > 30 ? 0 : 3,
-        pointHoverRadius: 5,
-        fill: true,
-        tension: 0.3
-      }]
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      plugins: {
-        legend: { display: false },
-        tooltip: {
-          callbacks: {
-            label: ctx => ' $' + f(ctx.parsed.y)
-          }
-        }
-      },
-      scales: {
-        x: { grid: { color: gridColor }, ticks: { color: textColor, maxTicksLimit: 8, font:{size:11} } },
-        y: { grid: { color: gridColor }, ticks: { color: textColor, font:{size:11}, callback: v => '$'+f(v) } }
-      }
-    }
-  });
+function exportCSV(){
+  const fy=fyLabel();const rows=[['Date','Type','Ticker / Account','Name','Side','Qty','Price','Total (AUD)','Fee (AUD)','Category','Description']];
+  ['us','asx','cry','met'].forEach(type=>{S[type].forEach(item=>{(item.txns||[]).forEach(tx=>{const d=new Date(tx.date);if(d<fy.start||d>fy.end)return;const audTotal=tx.price*tx.qty;rows.push([tx.date,type.toUpperCase(),item.ticker,item.name,tx.side,tx.qty,tx.price.toFixed(2),audTotal.toFixed(2),tx.fee||0,'Transaction','']);});});});
+  S.fees.forEach(fee=>{const d=new Date(fee.date);if(d<fy.start||d>fy.end)return;rows.push([fee.date,'FEE','','','','','',fee.amount||0,fee.amount||0,fee.cat||'',fee.desc||'']);});
+  const header=rows.shift();rows.sort((a,b)=>a[0].localeCompare(b[0]));rows.unshift(header);
+  const csv=rows.map(r=>r.map(v=>`"${String(v).replace(/"/g,'""')}"`).join(',')).join('\n');
+  const blob=new Blob([csv],{type:'text/csv'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=`SMSF_${fy.label.replace('/','_')}.csv`;a.click();URL.revokeObjectURL(url);
 }
 
-// ── CSV export (current FY) ─────────────────────────────────────
-function exportCSV() {
-  const fy = fyLabel();
-  const rows = [['Date','Type','Ticker / Account','Name','Side','Qty','Price','Total (AUD)','Fee (AUD)','Category','Description']];
-
-  // Transactions from holdings
-  ['us','asx','cry','met'].forEach(type => {
-    S[type].forEach(item => {
-      (item.txns||[]).forEach(tx => {
-        const d = new Date(tx.date);
-        if(d < fy.start || d > fy.end) return;
-        // All prices stored in AUD
-        const audTotal = tx.price * tx.qty;
-        rows.push([tx.date, type.toUpperCase(), item.ticker, item.name, tx.side, tx.qty, tx.price.toFixed(2), audTotal.toFixed(2), tx.fee||0, 'Transaction', '']);
-      });
-    });
-  });
-
-  // Fees ledger
-  S.fees.forEach(fee => {
-    const d = new Date(fee.date);
-    if(d < fy.start || d > fy.end) return;
-    rows.push([fee.date, 'FEE', '', '', '', '', '', fee.amount||0, fee.amount||0, fee.cat||'', fee.desc||'']);
-  });
-
-  // Sort by date
-  const header = rows.shift();
-  rows.sort((a,b) => a[0].localeCompare(b[0]));
-  rows.unshift(header);
-
-  const csv = rows.map(r => r.map(v => `"${String(v).replace(/"/g,'""')}"`).join(',')).join('\n');
-  const blob = new Blob([csv], {type:'text/csv'});
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = `SMSF_${fy.label.replace('/','_')}.csv`;
-  a.click();
-  URL.revokeObjectURL(url);
-}
-
-// ── Boot ─────────────────────────────────────────────────────────
-document.addEventListener('DOMContentLoaded', function() {
-document.getElementById('todayDate').textContent = new Date().toLocaleDateString('en-AU',{weekday:'short',day:'numeric',month:'long',year:'numeric'});
-function updateSidebarMode() {
-  const sb = document.getElementById('sidebar');
-  if(window.innerWidth > 800) {
-    sb.classList.add('desktop-visible');
-    sb.classList.remove('mobile-open');
-    document.getElementById('sidebarOverlay').classList.remove('visible');
-    document.body.style.overflow = '';
-  } else {
-    sb.classList.remove('desktop-visible');
-  }
-}
-updateSidebarMode();
-window.addEventListener('resize', updateSidebarMode);
-if(localStorage.getItem('smsf_sb_collapsed') === '1') {
-  document.getElementById('sidebar').classList.add('collapsed');
-}
-
-// ── Transaction ID utilities ────────────────────────────────────
-function _txnDateStr(date) {
-  // Format date as YYYYMMDD
-  const d = date ? new Date(date) : new Date();
-  const y = d.getFullYear();
-  const m = String(d.getMonth()+1).padStart(2,'0');
-  const day = String(d.getDate()).padStart(2,'0');
-  return `${y}${m}${day}`;
-}
-
-function _nextSeqForDate(dateStr) {
-  // Find all existing IDs for this date across all txns and fees
-  let max = 0;
-  ['us','asx','cry','met'].forEach(t => {
-    (S[t]||[]).forEach(item => {
-      (item.txns||[]).forEach(tx => {
-        if(tx.txnId && tx.txnId.startsWith('TXN-'+dateStr+'-')) {
-          const n = parseInt(tx.txnId.split('-')[2])||0;
-          if(n > max) max = n;
-        }
-      });
-    });
-  });
-  (S.fees||[]).forEach(fe => {
-    if(fe.txnId && fe.txnId.startsWith('TXN-'+dateStr+'-')) {
-      const n = parseInt(fe.txnId.split('-')[2])||0;
-      if(n > max) max = n;
-    }
-  });
-  return String(max + 1).padStart(3, '0');
-}
-
-function generateTxnId(date) {
-  const ds = _txnDateStr(date);
-  const seq = _nextSeqForDate(ds);
-  return `TXN-${ds}-${seq}`;
-}
-
-function migrateIds() {
-  let changed = false;
-  // 1. Strip all auto-generated brokerage fees from S.fees (duplicates — now rendered live)
-  const before = (S.fees||[]).length;
-  S.fees = (S.fees||[]).filter(fe => !fe.txRef);
-  if(S.fees.length !== before) changed = true;
-
-  // 2. Assign IDs to all txns that don't have one
-  ['us','asx','cry','met'].forEach(t => {
-    (S[t]||[]).forEach(item => {
-      (item.txns||[]).forEach(tx => {
-        if(!tx.txnId) { tx.txnId = generateTxnId(tx.date); changed = true; }
-      });
-    });
-  });
-
-  // 3. Assign IDs to all manual fees that don't have one
-  (S.fees||[]).forEach(fe => {
-    if(!fe.txnId) { fe.txnId = generateTxnId(fe.date); changed = true; }
-  });
-
-  // 4. Assign IDs to income entries
-  (S.income||[]).forEach(item => {
-    if(!item.txnId) { item.txnId = generateTxnId(item.date); changed = true; }
-  });
-
-  // 5. Assign IDs to contributions
-  (S.contributions||[]).forEach(item => {
-    if(!item.txnId) { item.txnId = generateTxnId(item.date); changed = true; }
-  });
-
+function migrateIds(){
+  let changed=false;const before=(S.fees||[]).length;S.fees=(S.fees||[]).filter(fe=>!fe.txRef);if(S.fees.length!==before)changed=true;
+  ['us','asx','cry','met'].forEach(t=>{(S[t]||[]).forEach(item=>{(item.txns||[]).forEach(tx=>{if(!tx.txnId){tx.txnId=generateTxnId(tx.date);changed=true;}});});});
+  (S.fees||[]).forEach(fe=>{if(!fe.txnId){fe.txnId=generateTxnId(fe.date);changed=true;}});
+  (S.income||[]).forEach(item=>{if(!item.txnId){item.txnId=generateTxnId(item.date);changed=true;}});
+  (S.contributions||[]).forEach(item=>{if(!item.txnId){item.txnId=generateTxnId(item.date);changed=true;}});
   return changed;
 }
 
-cloudLoad();
-// Safety net — always enable refresh button after 5s no matter what
-setTimeout(() => {
-  const btn = document.getElementById('rfBtn');
-  if(btn) btn.disabled = false;
-}, 5000);
-renderHistoryChart();
-updateSessions();
-setInterval(updateSessions, 60000);
-}); // end DOMContentLoaded
+// ── Boot ─────────────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded',function(){
+  document.getElementById('todayDate').textContent=new Date().toLocaleDateString('en-AU',{weekday:'short',day:'numeric',month:'long',year:'numeric'});
+  function updateSidebarMode(){
+    const sb=document.getElementById('sidebar');
+    if(window.innerWidth>800){sb.classList.add('desktop-visible');sb.classList.remove('mobile-open');document.getElementById('sidebarOverlay').classList.remove('visible');document.body.style.overflow='';}
+    else{sb.classList.remove('desktop-visible');}
+  }
+  updateSidebarMode();window.addEventListener('resize',updateSidebarMode);
+  if(localStorage.getItem('smsf_sb_collapsed')==='1')document.getElementById('sidebar').classList.add('collapsed');
+  cloudLoad();
+  setTimeout(()=>{const btn=document.getElementById('rfBtn');if(btn)btn.disabled=false;},5000);
+  renderHistoryChart();updateSessions();setInterval(updateSessions,60000);
+});
 
-// ── Delegated event listeners (replaces all inline onclick) ──────
-document.addEventListener('click', function(e) {
-  const el = e.target.closest('[data-action]');
-  if(!el) return;
-  const action = el.getAttribute('data-action');
-  switch(action) {
-    case 'toggleSidebar':     toggleSidebar(); break;
-    case 'openAddModal':      openAddModal(); break;
-    case 'closeAddModal':     closeAddModal(); break;
-    case 'closeModalOverlay': if(e.target === el) closeAddModal(); break;
-    case 'submitAddModal':    submitAddModal(); break;
-    case 'refreshAll':        refreshAll(); break;
-    case 'triggerSwyftxCSV':  document.getElementById('swyftxCSVInput').click(); break;
-    case 'exportCSV':         exportCSV(); break;
-    case 'openMobileSidebar': openMobileSidebar(); break;
-    case 'closeMobileSidebar':closeMobileSidebar(); break;
-    case 'showFeesAdd':       showFeesAdd(); break;
-    case 'hideFeesAdd':       hideFeesAdd(); break;
-    case 'addFee':            addFee(); break;
-    case 'showWlAdd':         showWlAdd(); break;
-    case 'hideWlAdd':         hideWlAdd(); break;
-    case 'addWl':             addWl(); break;
-    case 'switchTab':         switchTab(el.getAttribute('data-tab')); break;
-    case 'setSmartMode':      setSmartMode(el.getAttribute('data-mode')); break;
-    case 'setSmartCategory':  setSmartCategory(el.getAttribute('data-cat')); break;
-    case 'setSmartCategory':  setSmartCategory(el.getAttribute('data-cat')); break;
+// ── Delegated event listeners ────────────────────────────────────
+document.addEventListener('click',function(e){
+  const el=e.target.closest('[data-action]');if(!el)return;
+  const action=el.getAttribute('data-action');
+  switch(action){
+    case 'toggleSidebar':     toggleSidebar();break;
+    case 'openAddModal':      openAddModal();break;
+    case 'closeAddModal':     closeAddModal();break;
+    case 'closeModalOverlay': if(e.target===el)closeAddModal();break;
+    case 'submitAddModal':    submitAddModal();break;
+    case 'refreshAll':        refreshAll();break;
+    case 'triggerSwyftxCSV':  document.getElementById('swyftxCSVInput').click();break;
+    case 'exportCSV':         exportCSV();break;
+    case 'openMobileSidebar': openMobileSidebar();break;
+    case 'closeMobileSidebar':closeMobileSidebar();break;
+    case 'showFeesAdd':       showFeesAdd();break;
+    case 'hideFeesAdd':       hideFeesAdd();break;
+    case 'addFee':            addFee();break;
+    case 'showWlAdd':         showWlAdd();break;
+    case 'hideWlAdd':         hideWlAdd();break;
+    case 'addWl':             addWl();break;
+    case 'switchTab':         switchTab(el.getAttribute('data-tab'));break;
+    case 'setSmartMode':      setSmartMode(el.getAttribute('data-mode'));break;
+    case 'setSmartCategory':  setSmartCategory(el.getAttribute('data-cat'));break;
   }
 });
-
-document.addEventListener('input', function(e) {
-  if(e.target.id === 'modal-smart-ticker') onSmartTickerInput(e.target.value);
+document.addEventListener('input',function(e){if(e.target.id==='modal-smart-ticker')onSmartTickerInput(e.target.value);});
+document.addEventListener('change',function(e){
+  if(e.target.id==='audToggle'){['us','asx','cry','met','cash','fees','wl'].forEach(t=>rows(t));renderAllHoldings();}
+  if(e.target.id==='modal-txn-side')updateTxnAccountLabel();
 });
-
-document.addEventListener('change', function(e) {
-  if(e.target.id === 'audToggle') {
-    ['us','asx','cry','met','cash','fees','wl'].forEach(t=>rows(t));
-    renderAllHoldings();
-  }
-  if(e.target.id === 'modal-txn-side') updateTxnAccountLabel();
-});
-
 </script>
-
 </body>
 </html>
