@@ -2159,6 +2159,9 @@ function importSwyftxCSV(input) {
         if(n >= 1 && n <= S.cash.length) cashAcctIdx = n - 1;
       }
 
+      // Capture function references for use inside loop
+      const _genId = window.generateTxnId || generateTxnId;
+      const _recalc = window.recalcFromTxns || recalcFromTxns;
       let imported=0, skipped=0, ignored=0;
 
       for(let i = headerIdx+1; i < rawLines.length; i++) {
@@ -2198,7 +2201,7 @@ function importSwyftxCSV(input) {
         if(idx===-1) { S.cry.push({ticker:asset,name:asset,qty:0,cost:0,txns:[]}); idx=S.cry.length-1; }
         if(!S.cry[idx].txns) S.cry[idx].txns=[];
 
-        S.cry[idx].txns.push({date,side:event,qty:amount,price,fee,txnId:generateTxnId(date),swyftxId:uid,cashAcct:cashAcctIdx});
+        S.cry[idx].txns.push({date,side:event,qty:amount,price,fee,txnId:_genId(date),swyftxId:uid,cashAcct:cashAcctIdx});
 
         // Adjust cash balance
         if(cashAcctIdx!==null && S.cash[cashAcctIdx]) {
@@ -2206,7 +2209,7 @@ function importSwyftxCSV(input) {
           S.cash[cashAcctIdx].balance = (S.cash[cashAcctIdx].balance||0) - total;
         }
 
-        recalcFromTxns('cry', idx);
+        _recalc('cry', idx);
         imported++;
       }
 
