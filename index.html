@@ -290,8 +290,8 @@ tr.tint-down td{background:rgba(239,68,68,0.05)!important;}
 
 .dm-pill.on 
 /* ── Add Holding Modal ── */
-.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,5,20,0.7);z-index:200;align-items:center;justify-content:center;backdrop-filter:blur(4px);}
-.modal-overlay.open{display:flex;}
+.modal-overlay{display:none;visibility:hidden;position:fixed;inset:0;background:rgba(0,5,20,0.7);z-index:200;align-items:center;justify-content:center;}
+.modal-overlay.open{display:flex;visibility:visible;backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);}
 .modal{background:var(--surface);border:1px solid var(--border4);border-radius:20px;padding:24px;width:460px;max-width:calc(100vw - 32px);position:relative;backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);box-shadow:0 24px 64px rgba(0,0,0,0.5);}
 .modal-title{font-size:16px;font-weight:700;color:var(--text);margin-bottom:4px;}
 .modal-sub{font-size:12px;color:var(--text3);margin-bottom:18px;}
@@ -373,10 +373,7 @@ tr.tint-down td{background:rgba(239,68,68,0.05)!important;}
       <span class="sb-label">Watchlist</span>
     </button>
     <div class="sb-section" style="margin-top:8px;">Tools</div>
-    <button class="sb-item" data-action="openAddModal" title="Add holding / trade">
-      <svg width="15" height="15" viewBox="0 0 16 16" fill="none" style="flex-shrink:0;"><circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="1.5"/><path d="M8 5v6M5 8h6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
-      <span class="sb-label">Add holding / trade</span>
-    </button>
+
     <button class="sb-item" data-action="exportCSV" title="Export CSV">
       <svg width="15" height="15" viewBox="0 0 16 16" fill="none" style="flex-shrink:0;"><path d="M3 12h10M8 3v7M5 7l3 3 3-3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
       <span class="sb-label">Export CSV</span>
@@ -402,11 +399,7 @@ tr.tint-down td{background:rgba(239,68,68,0.05)!important;}
     Watchlist
     <div class="bn-dot"></div>
   </button>
-  <button class="bn-item" data-action="openAddModal">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 8v8M8 12h8"/></svg>
-    Add
-    <div class="bn-dot" style="opacity:0!important;"></div>
-  </button>
+
 
 </nav>
 
@@ -429,7 +422,7 @@ tr.tint-down td{background:rgba(239,68,68,0.05)!important;}
     </div>
     <div class="top-actions">
       <label class="aud-pill"><input type="checkbox" id="audToggle" checked><span>US in AUD</span></label>
-      <button class="addbtn" data-action="openAddModal" style="background:#397968;color:#fff;border-color:#397968;font-weight:600;">+ Add</button>
+      <button class="addbtn" id="topbarAddBtn" data-action="openAddModal" style="background:#397968;color:#fff;border-color:#397968;font-weight:600;">+ Add</button>
       <button class="rfbtn" id="rfBtn" data-action="refreshAll" disabled>
         <svg id="rfIcon" width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" style="flex-shrink:0;"><path d="M2 8a6 6 0 1 0 1.5-3.9M2 4v4h4"/></svg>
         Refresh prices
@@ -616,11 +609,11 @@ tr.tint-down td{background:rgba(239,68,68,0.05)!important;}
   <!-- Cash (kept separate — no price feed) -->
   <div class="section">
     <div class="sec-head">
-      <div class="sec-title"><span class="badge b-teal">AUD</span>Cash</div>
-      <div class="sec-right"><span class="sec-tot" id="cashSecTot"></span></div>
+      <div class="sec-title"><span class="badge b-teal">AUD</span>Cash accounts</div>
+      <div class="sec-right"><span class="sec-tot" id="cashSecTot"></span><button class="addbtn" onclick="openAddModal();setTimeout(()=>setSmartMode('cash'),50);">+ Add account</button></div>
     </div>
     <div class="tbl-wrap"><table>
-      <thead><tr><th>Account name</th><th class="r">Balance (AUD)</th><th style="width:28px"></th></tr></thead>
+      <thead><tr><th>Account name</th><th class="r">Balance (AUD)</th><th class="r" style="width:140px;">Edit / Remove</th></tr></thead>
       <tbody id="cashB"></tbody>
     </table></div>
   </div>
@@ -649,7 +642,7 @@ tr.tint-down td{background:rgba(239,68,68,0.05)!important;}
   <div class="section">
     <div class="sec-head">
       <div class="sec-title"><span class="badge b-red">AUD</span>Transaction &amp; fees ledger</div>
-      <div class="sec-right"><span class="sec-tot" id="feesSecTot"></span><button class="csvbtn" data-action="exportCSV">⬇ Export FY CSV</button><button class="addbtn" data-action="showFeesAdd">+ Add fee</button></div>
+      <div class="sec-right"><span class="sec-tot" id="feesSecTot"></span><button class="addbtn" data-action="openAddModal" style="background:#397968;color:#fff;border-color:#397968;font-weight:600;">+ Add</button><button class="csvbtn" data-action="exportCSV">⬇ Export FY CSV</button><button class="addbtn" data-action="showFeesAdd">+ Add fee</button></div>
     </div>
     <div class="fees-summary">
       <span class="fees-fy" id="feesFyLabel"></span>
@@ -714,11 +707,7 @@ tr.tint-down td{background:rgba(239,68,68,0.05)!important;}
 
   </div> <!-- /tab-watchlist -->
 
-  <div class="footer">Prices: Finnhub (US &amp; ASX) · gold-api.com (metals) · CoinGecko (crypto). Cash and fees entered manually. Portfolio synced to cloud via JSONBin. Verify all figures with your SMSF accountant.</div>
-</div>
-
-<!-- Smart Add Modal -->
-<div class="modal-overlay" id="addModal" data-action="closeModalOverlay">
+<div class="modal-overlay" id="addModal" style="display:none;visibility:hidden;" data-action="closeModalOverlay">
   <div class="modal">
     <button class="modal-close" data-action="closeAddModal">✕</button>
     <div class="modal-title" id="modal-title">Add to portfolio</div>
@@ -728,7 +717,7 @@ tr.tint-down td{background:rgba(239,68,68,0.05)!important;}
     <div id="modal-ticker-row">
       <div class="modal-field" style="margin-bottom:8px;">
         <label class="modal-label">Ticker / symbol</label>
-        <input class="modal-input" id="modal-smart-ticker" placeholder="e.g. TSLA, BTC, XAU" oninput="onSmartTickerInput(this.value)" autocomplete="off" style="text-transform:uppercase;">
+        <input class="modal-input" id="modal-smart-ticker" placeholder="e.g. TSLA, BTC, XAU" autocomplete="off" style="text-transform:uppercase;">
       </div>
       <div id="modal-ticker-status" style="font-size:12px;margin-bottom:10px;min-height:18px;font-weight:500;"></div>
     </div>
@@ -737,6 +726,8 @@ tr.tint-down td{background:rgba(239,68,68,0.05)!important;}
     <div style="display:flex;gap:6px;margin-bottom:16px;" id="modal-quick-btns">
       <button data-action="setSmartMode" data-mode="cash" id="qbtn-cash" style="font-size:12px;font-weight:500;padding:5px 14px;border:1px solid var(--border4);border-radius:99px;background:var(--surface2);color:var(--text2);cursor:pointer;font-family:inherit;transition:all 0.15s;">+ Cash account</button>
       <button data-action="setSmartMode" data-mode="fees" id="qbtn-fees" style="font-size:12px;font-weight:500;padding:5px 14px;border:1px solid var(--border4);border-radius:99px;background:var(--surface2);color:var(--text2);cursor:pointer;font-family:inherit;transition:all 0.15s;">+ Fee entry</button>
+      <button data-action="setSmartMode" data-mode="income" id="qbtn-income" style="font-size:12px;font-weight:500;padding:5px 14px;border:1px solid var(--border4);border-radius:99px;background:var(--surface2);color:var(--text2);cursor:pointer;font-family:inherit;transition:all 0.15s;">+ Income</button>
+      <button data-action="setSmartMode" data-mode="contribution" id="qbtn-contribution" style="font-size:12px;font-weight:500;padding:5px 14px;border:1px solid var(--border4);border-radius:99px;background:var(--surface2);color:var(--text2);cursor:pointer;font-family:inherit;transition:all 0.15s;">+ Contribution</button>
     </div>
 
     <!-- Category picker — shown for new holdings only -->
@@ -858,12 +849,95 @@ tr.tint-down td{background:rgba(239,68,68,0.05)!important;}
       </div>
     </div>
 
+    <!-- Income fields -->
+    <div id="modal-income-fields" style="display:none;">
+      <div class="modal-hint" style="margin-bottom:12px;">Record dividends, distributions, interest and other fund income.</div>
+      <div class="modal-row">
+        <div class="modal-field">
+          <label class="modal-label">Date received</label>
+          <input class="modal-input" id="modal-income-date" type="date">
+        </div>
+        <div class="modal-field">
+          <label class="modal-label">Amount (AUD)</label>
+          <input class="modal-input" id="modal-income-amt" type="number" step="any" placeholder="0.00">
+        </div>
+      </div>
+      <div class="modal-row">
+        <div class="modal-field">
+          <label class="modal-label">Source (ticker or name)</label>
+          <input class="modal-input" id="modal-income-source" placeholder="e.g. TSLA, CBA, Term Deposit">
+        </div>
+        <div class="modal-field">
+          <label class="modal-label">Type</label>
+          <select class="modal-select" id="modal-income-type">
+            <option value="Dividend">Dividend</option>
+            <option value="Distribution">Distribution</option>
+            <option value="Interest">Interest</option>
+            <option value="Rental income">Rental income</option>
+            <option value="Other income">Other income</option>
+          </select>
+        </div>
+      </div>
+      <div class="modal-row">
+        <div class="modal-field">
+          <label class="modal-label">Franking credits (AUD)</label>
+          <input class="modal-input" id="modal-income-franking" type="number" step="any" placeholder="0.00">
+        </div>
+        <div class="modal-field">
+          <label class="modal-label">Credit to cash account</label>
+          <select class="modal-select" id="modal-income-account">
+            <option value="">— Don't adjust cash —</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- Contribution fields -->
+    <div id="modal-contribution-fields" style="display:none;">
+      <div class="modal-hint" style="margin-bottom:12px;">Record member contributions — concessional (pre-tax) or non-concessional (post-tax).</div>
+      <div class="modal-row">
+        <div class="modal-field">
+          <label class="modal-label">Date received</label>
+          <input class="modal-input" id="modal-contrib-date" type="date">
+        </div>
+        <div class="modal-field">
+          <label class="modal-label">Amount (AUD)</label>
+          <input class="modal-input" id="modal-contrib-amt" type="number" step="any" placeholder="0.00">
+        </div>
+      </div>
+      <div class="modal-row">
+        <div class="modal-field">
+          <label class="modal-label">Member name</label>
+          <input class="modal-input" id="modal-contrib-member" placeholder="e.g. Roland Docker">
+        </div>
+        <div class="modal-field">
+          <label class="modal-label">Type</label>
+          <select class="modal-select" id="modal-contrib-type">
+            <option value="Concessional">Concessional (pre-tax / employer)</option>
+            <option value="Non-concessional">Non-concessional (post-tax)</option>
+            <option value="Spouse">Spouse contribution</option>
+            <option value="Downsizer">Downsizer contribution</option>
+            <option value="Rollover">Rollover from another fund</option>
+          </select>
+        </div>
+      </div>
+      <div class="modal-field">
+        <label class="modal-label">Credit to cash account</label>
+        <select class="modal-select" id="modal-contrib-account">
+          <option value="">— Don't adjust cash —</option>
+        </select>
+      </div>
+    </div>
+
     <div class="modal-footer">
       <button class="addbtn" data-action="closeAddModal">Cancel</button>
       <button class="okbtn" data-action="submitAddModal" id="modal-submit-btn">Add</button>
     </div>
   </div>
 </div>
+  <div class="footer">Prices: Finnhub (US &amp; ASX) · gold-api.com (metals) · CoinGecko (crypto). Cash and fees entered manually. Portfolio synced to cloud via JSONBin. Verify all figures with your SMSF accountant.</div>
+</div>
+
 
 <script>
 // ── JSONBin config ──────────────────────────────────────────────
@@ -875,18 +949,29 @@ const HEADERS = { 'Content-Type':'application/json', 'X-Access-Key': BIN_KEY };
 // ── App config ──────────────────────────────────────────────────
 const FINHUB_KEY = 'd6pl1a9r01qo88ajl29gd6pl1a9r01qo88ajl2a0';
 const DEF = {
-  us:[{ticker:'AAPL',name:'Apple Inc',qty:10,cost:145},{ticker:'MSFT',name:'Microsoft Corp',qty:5,cost:280},{ticker:'VTS',name:'Vanguard US Total Market',qty:20,cost:210}],
-  asx:[{ticker:'CBA',name:'Commonwealth Bank',qty:15,cost:95},{ticker:'BHP',name:'BHP Group',qty:30,cost:42},{ticker:'VAS',name:'Vanguard Australia Shares',qty:50,cost:88}],
-  cry:[{ticker:'BTC',name:'Bitcoin',qty:0.05,cost:55000},{ticker:'ETH',name:'Ethereum',qty:1.2,cost:3200},{ticker:'SOL',name:'Solana',qty:10,cost:120}],
-  met:[{ticker:'XAU',name:'Gold',qty:1,cost:2800},{ticker:'XAG',name:'Silver',qty:10,cost:45}],
+  us:[
+    {ticker:'TSLA',name:'Tesla Inc',qty:10,cost:569.88,txns:[
+      {date:'2026-03-13',side:'buy',qty:10,price:569.88,fee:7.15,txnId:'TXN-20260313-001',cashAcct:null}
+    ]}
+  ],
+  asx:[],
+  cry:[
+    {ticker:'SOL',name:'Solana',qty:40,cost:128.065,txns:[
+      {date:'2026-03-13',side:'buy',qty:20,price:128.32,fee:15.40,txnId:'TXN-20260313-002',cashAcct:null},
+      {date:'2026-03-13',side:'buy',qty:20,price:127.81,fee:15.34,txnId:'TXN-20260313-003',cashAcct:null}
+    ]}
+  ],
+  met:[],
   cash:[{name:'CBA Savings',balance:10000}],
   fees:[],
+  income:[],
+  contributions:[],
   wl:[]
 };
 const CID={BTC:'bitcoin',ETH:'ethereum',SOL:'solana',ADA:'cardano',XRP:'ripple',BNB:'binancecoin',DOGE:'dogecoin',DOT:'polkadot',AVAX:'avalanche-2',MATIC:'matic-network',LINK:'chainlink',UNI:'uniswap',LTC:'litecoin',ATOM:'cosmos',NEAR:'near',SHIB:'shiba-inu',TRX:'tron',BCH:'bitcoin-cash',XLM:'stellar',ALGO:'algorand',XMR:'monero',ETC:'ethereum-classic'};
 const PIE_COLORS=['#378ADD','#185FA5','#0C447C','#639922','#aedf33','#9acc20','#BA7517','#854F0B','#633806','#534AB7','#3C3489','#1D9E75','#D85A30','#D4537E','#5F5E5A','#888780','#B4B2A9'];
 
-const S = { audUsd:0.695, prices:{}, us:[], asx:[], cry:[], met:[], cash:[], fees:[], wl:[] };
+const S = { audUsd:0.695, prices:{}, us:[], asx:[], cry:[], met:[], cash:[], fees:[], income:[], contributions:[], wl:[] };
 let pieChart = null;
 let saveTimer = null;
 
@@ -913,21 +998,28 @@ async function cloudLoad() {
     S.cash= rec.cash|| DEF.cash;
     S.fees= rec.fees|| DEF.fees;
     S.wl  = rec.wl  || DEF.wl;
+    S.income = rec.income || DEF.income;
+    S.contributions = rec.contributions || DEF.contributions;
     syncUI('synced', 'Synced · ' + new Date().toLocaleTimeString('en-AU',{hour:'2-digit',minute:'2-digit'}));
   } catch(e) {
-    // Fall back to defaults if bin is empty/new
-    S.us = DEF.us; S.asx = DEF.asx; S.cry = DEF.cry; S.met = DEF.met; S.cash = DEF.cash; S.fees = DEF.fees; S.wl = DEF.wl;
+    S.us = DEF.us; S.asx = DEF.asx; S.cry = DEF.cry; S.met = DEF.met;
+    S.cash = DEF.cash; S.fees = DEF.fees; S.wl = DEF.wl;
+    S.income = DEF.income; S.contributions = DEF.contributions;
     syncUI('err', 'Cloud unavailable — using local data');
   }
-  recalcAll();
-  migrateIds();
-  save();
-  ['us','asx','cry','met','cash','fees','wl'].forEach(t => rows(t));
-  renderAllHoldings();
-  renderFees();
-  document.getElementById('rfBtn').disabled = false;
-  // Auto-refresh prices after cloud sync
-  refreshAll();
+  try {
+    recalcAll();
+    const needsSave = migrateIds();
+    if(needsSave) save();
+    ['us','asx','cry','met','cash','fees','wl'].forEach(t => rows(t));
+    renderAllHoldings();
+    renderFees();
+    summary();
+  } catch(e) {
+    console.error('Render error after cloudLoad:', e);
+  } finally {
+    document.getElementById('rfBtn').disabled = false;
+  }
 }
 
 // ── JSONBin: save (debounced 1.5s) ─────────────────────────────
@@ -939,7 +1031,7 @@ function save() {
       const r = await fetch(BIN_URL, {
         method: 'PUT',
         headers: HEADERS,
-        body: JSON.stringify({ us:S.us, asx:S.asx, cry:S.cry, met:S.met, cash:S.cash, fees:S.fees, wl:S.wl })
+        body: JSON.stringify({ us:S.us, asx:S.asx, cry:S.cry, met:S.met, cash:S.cash, fees:S.fees, wl:S.wl, income:S.income, contributions:S.contributions })
       });
       if (!r.ok) throw new Error('HTTP ' + r.status);
       syncUI('synced', 'Saved · ' + new Date().toLocaleTimeString('en-AU',{hour:'2-digit',minute:'2-digit'}));
@@ -1104,10 +1196,22 @@ function delA(t,i){
 
 function renderCash(){
   const body=document.getElementById('cashB');
+  if(!body) return;
   const total=S.cash.reduce((s,a)=>s+(a.balance||0),0);
-  body.innerHTML=S.cash.map((item,i)=>`<tr><td><input class="ni" style="width:200px;text-align:left;" value="${item.name}" onchange="upCashName(${i},this.value)"></td><td class="r valbold"><input class="ni" style="width:120px;" type="number" step="any" value="${item.balance||''}" placeholder="0.00" onchange="upCashBal(${i},this.value)"></td><td><button class="del" onclick="delCash(${i})">&#x2715;</button></td></tr>`).join('');
-  document.getElementById('cashSecTot').textContent=total>0?'$'+f(total)+' AUD':'';
-  summary();
+  if(!S.cash.length){
+    body.innerHTML='<tr><td colspan="3" style="text-align:center;color:var(--text4);padding:20px;">No cash accounts yet</td></tr>';
+  } else {
+    body.innerHTML = S.cash.map((item,i)=>`<tr>
+      <td style="font-weight:500;color:var(--text);">${(item.name||'—').replace(/</g,'&lt;')}</td>
+      <td class="r valbold" style="font-size:15px;color:var(--text);">$${f(item.balance||0)}</td>
+      <td style="text-align:right;white-space:nowrap;min-width:150px;">
+        <input class="ni" type="number" step="any" value="${parseFloat(item.balance)||0}" style="width:90px;margin-right:6px;" onchange="upCashBal(${i},this.value)">
+        <button class="del" onclick="delCash(${i})">&#x2715;</button>
+      </td>
+    </tr>`).join('');
+  }
+  const el=document.getElementById('cashSecTot');
+  if(el) el.textContent=total>0?'$'+f(total)+' AUD':'';
 }
 function upCashName(i,v){S.cash[i].name=v;save();}
 function upCashBal(i,v){S.cash[i].balance=parseFloat(v)||0;save();renderCash();}
@@ -1132,7 +1236,9 @@ function fyLabel(){
 }
 
 function renderFees(){
+  try {
   const body=document.getElementById('feesB');
+  if(!body) return;
   const fy=fyLabel();
   const entries=[];
 
@@ -1153,7 +1259,39 @@ function renderFees(){
     });
   });
 
-  // ── All buy/sell transactions from holdings
+  // ── Income entries
+  (S.income||[]).forEach((item,orig)=>{
+    entries.push({
+      date:item.date||'',
+      desc:`${item.type} — ${item.source}${item.franking>0?' (Franking: $'+f(item.franking)+')':''}`,
+      type:'income',
+      cat:item.type,
+      amount:item.amount||0,
+      isDebit:false,
+      orig,
+      deletable:true,
+      reversible:false,
+      txnId:item.txnId||'—',
+      isBrokerageFee:false
+    });
+  });
+
+  // ── Contribution entries
+  (S.contributions||[]).forEach((item,orig)=>{
+    entries.push({
+      date:item.date||'',
+      desc:`${item.type} contribution — ${item.member}`,
+      type:'contribution',
+      cat:item.type,
+      amount:item.amount||0,
+      isDebit:false,
+      orig,
+      deletable:true,
+      reversible:false,
+      txnId:item.txnId||'—',
+      isBrokerageFee:false
+    });
+  });
   ['us','asx','cry','met'].forEach(assetType=>{
     S[assetType].forEach((item,assetIdx)=>{
       (item.txns||[]).forEach((tx,txnIdx)=>{
@@ -1174,7 +1312,22 @@ function renderFees(){
           txnId:txId,
           isBrokerageFee:false
         });
-        // Brokerage fee — same ID as trade with (FEE) suffix
+        // Cash movement entry — if cash account was linked
+        if(tx.cashAcct!=null && S.cash[tx.cashAcct]) {
+          const cashTotal = tx.qty*tx.price + (tx.side==='buy'?tx.fee||0:-(tx.fee||0));
+          entries.push({
+            date:tx.date||'',
+            desc:`Cash ${tx.side==='buy'?'debit':'credit'} — ${item.ticker} ${tx.side} via ${S.cash[tx.cashAcct].name}`,
+            type:'cash-movement',
+            cat:'Cash movement',
+            amount:Math.abs(cashTotal),
+            isDebit:tx.side==='buy',
+            deletable:false,
+            reversible:false,
+            txnId:txId,
+            isBrokerageFee:false
+          });
+        }
         if(tx.fee>0){
           entries.push({
             date:tx.date||'',
@@ -1203,27 +1356,36 @@ function renderFees(){
   document.getElementById('feesSecTot').textContent=fyFees>0?'-$'+f(fyFees)+' fees this FY':'';
 
   const TYPE_LABELS={
-    trade:'<span class="badge b-blue" style="font-size:9px;">Trade</span>',
-    fee:  '<span class="badge b-red" style="font-size:9px;">Fee</span>'
+    trade:          '<span class="badge b-blue"  style="font-size:9px;">Trade</span>',
+    fee:            '<span class="badge b-red"   style="font-size:9px;">Fee</span>',
+    income:         '<span class="badge b-green" style="font-size:9px;">Income</span>',
+    contribution:   '<span class="badge b-teal"  style="font-size:9px;">Contribution</span>',
+    'cash-movement':'<span class="badge b-gray"  style="font-size:9px;">Cash</span>'
   };
 
   body.innerHTML=entries.length?entries.map((e,ei)=>{
     const d=e.date?new Date(e.date).toLocaleDateString('en-AU',{day:'2-digit',month:'short',year:'numeric'}):'—';
-    const amtCol=e.type==='trade'
-      ? `<span style="color:${e.isDebit?'var(--gain-neg)':'var(--gain-pos)'};">${e.isDebit?'-':'+'}$${f(e.amount)}</span>`
-      : `<span style="color:var(--gain-neg);">-$${f(e.amount)}</span>`;
-    // ID tooltip — trade shows its own ID, brokerage fee shows "TXN-XXX (FEE)"
+    const isCredit = !e.isDebit || e.type==='income' || e.type==='contribution';
+    const amtColour = isCredit ? 'var(--gain-pos)' : 'var(--gain-neg)';
+    const amtSign = isCredit ? '+' : '-';
+    const amtCol = `<span style="color:${amtColour};">${amtSign}$${f(e.amount)}</span>`;
     const idStr = e.txnId || '—';
     const idDisplay = e.isBrokerageFee ? `${idStr} (FEE)` : idStr;
     const idBadge = `<span title="${idDisplay}" style="font-size:9px;font-family:monospace;color:var(--text3);cursor:default;border-bottom:1px dashed var(--text4);white-space:nowrap;">${idDisplay.length>16?idDisplay.slice(0,16)+'…':idDisplay}</span>`;
-    const actions=e.deletable
-      ? `<button class="del" style="opacity:1;" onclick="delFee(${e.orig})">&#x2715;</button>`
-      : e.reversible
-        ? `<button onclick="reverseTxn('${e.assetType}',${e.assetIdx},${e.txnIdx})" title="Reverse transaction" style="font-size:10px;font-weight:600;padding:2px 8px;border:1px solid rgba(248,113,113,0.4);border-radius:99px;background:rgba(248,113,113,0.12);color:#f87171;cursor:pointer;font-family:inherit;white-space:nowrap;">↩ Reverse</button>`
-        : '<span style="color:var(--text4);font-size:10px;">—</span>';
+    let actions;
+    if(e.deletable && e.type==='income')        actions=`<button class="del" style="opacity:1;" onclick="delIncome(${e.orig})">&#x2715;</button>`;
+    else if(e.deletable && e.type==='contribution') actions=`<button class="del" style="opacity:1;" onclick="delContribution(${e.orig})">&#x2715;</button>`;
+    else if(e.deletable)                         actions=`<button class="del" style="opacity:1;" onclick="delFee(${e.orig})">&#x2715;</button>`;
+    else if(e.reversible)                        actions=`<button onclick="reverseTxn('${e.assetType}',${e.assetIdx},${e.txnIdx})" title="Reverse transaction" style="font-size:10px;font-weight:600;padding:2px 8px;border:1px solid rgba(248,113,113,0.4);border-radius:99px;background:rgba(248,113,113,0.12);color:#f87171;cursor:pointer;font-family:inherit;white-space:nowrap;">↩ Reverse</button>`;
+    else                                         actions='<span style="color:var(--text4);font-size:10px;">—</span>';
     return`<tr title="ID: ${idDisplay}"><td>${idBadge}</td><td>${d}</td><td>${e.desc}</td><td>${TYPE_LABELS[e.type]||''}</td><td class="r valbold">${amtCol}</td><td style="text-align:right;min-width:90px;">${actions}</td></tr>`;
   }).join(''):'<tr><td colspan="6" style="text-align:center;color:var(--text4);padding:16px;">No transactions yet</td></tr>';
+  } catch(err) { console.error('renderFees error:', err); }
 }
+
+function delIncome(i){ S.income.splice(i,1); save(); renderFees(); }
+function delContribution(i){ S.contributions.splice(i,1); save(); renderFees(); }
+
 
 function reverseTxn(assetType, assetIdx, txnIdx) {
   const item = S[assetType][assetIdx];
@@ -1545,12 +1707,19 @@ async function syncWidget() {
 async function refreshAll(){
   const btn=document.getElementById('rfBtn'),icon=document.getElementById('rfIcon');
   btn.disabled=true;icon.classList.add('spin');
-  await fetchRate();
-  await Promise.all([fetchUS(),fetchASX(),fetchCry(),fetchMetals(),fetchWl()]);
-  document.getElementById('lastUp') && (document.getElementById('lastUp').textContent='Updated '+new Date().toLocaleTimeString('en-AU',{hour:'2-digit',minute:'2-digit'})+' · AUD/USD '+S.audUsd.toFixed(4));
-  summary();btn.disabled=false;icon.classList.remove('spin');
-  renderAllHoldings();
-  syncWidget();
+  try {
+    await fetchRate();
+    await Promise.all([fetchUS(),fetchASX(),fetchCry(),fetchMetals(),fetchWl()]);
+    document.getElementById('lastUp') && (document.getElementById('lastUp').textContent='Updated '+new Date().toLocaleTimeString('en-AU',{hour:'2-digit',minute:'2-digit'})+' · AUD/USD '+S.audUsd.toFixed(4));
+    summary();
+    renderAllHoldings();
+    syncWidget();
+  } catch(e) {
+    console.warn('refreshAll error:', e);
+  } finally {
+    btn.disabled=false;
+    icon.classList.remove('spin');
+  }
 }
 
 // ── Add / remove holdings ───────────────────────────────────────
@@ -1659,7 +1828,9 @@ function openAddModal() {
   smartMode = 'new'; smartCategory = 'us'; smartFoundType = null; smartFoundIdx = null;
   ['modal-smart-ticker','modal-name','modal-qty','modal-cost',
    'modal-cash-name','modal-cash-bal','modal-fees-desc','modal-fees-amt',
-   'modal-txn-qty','modal-txn-price','modal-txn-fee'].forEach(id => {
+   'modal-txn-qty','modal-txn-price','modal-txn-fee',
+   'modal-income-amt','modal-income-source','modal-income-franking',
+   'modal-contrib-amt','modal-contrib-member'].forEach(id => {
     const el = document.getElementById(id); if(el) el.value = '';
   });
   document.getElementById('modal-fees-date').value = new Date().toISOString().slice(0,10);
@@ -1669,7 +1840,10 @@ function openAddModal() {
   // Populate cash account dropdowns
   _populateAccountSelects();
   _renderSmartModal();
-  document.getElementById('addModal').classList.add('open');
+  const _modal = document.getElementById('addModal');
+  _modal.style.display = 'flex';
+  _modal.style.visibility = 'visible';
+  _modal.classList.add('open');
   setTimeout(() => document.getElementById('modal-smart-ticker').focus(), 80);
 }
 
@@ -1690,7 +1864,10 @@ function updateTxnAccountLabel() {
 
 function closeAddModal(e) {
   if(e && e.target !== document.getElementById('addModal')) return;
-  document.getElementById('addModal').classList.remove('open');
+  const _modal = document.getElementById('addModal');
+  _modal.classList.remove('open');
+  _modal.style.display = 'none';
+  _modal.style.visibility = 'hidden';
 }
 
 function onSmartTickerInput(raw) {
@@ -1723,19 +1900,21 @@ function onSmartTickerInput(raw) {
 
 function setSmartMode(mode) {
   smartMode = mode;
-  // Clear ticker if switching to cash/fees
-  if(mode === 'cash' || mode === 'fees') {
+  const noTicker = ['cash','fees','income','contribution'];
+  if(noTicker.includes(mode)) {
     document.getElementById('modal-smart-ticker').value = '';
     document.getElementById('modal-ticker-status').textContent = '';
-    const d = mode === 'fees' ? document.getElementById('modal-fees-date') : null;
-    if(d && !d.value) d.value = new Date().toISOString().slice(0,10);
   }
+  // Pre-fill today's date for date fields
+  const today = new Date().toISOString().slice(0,10);
+  if(mode === 'fees') { const d=document.getElementById('modal-fees-date'); if(d&&!d.value) d.value=today; }
+  if(mode === 'income') { const d=document.getElementById('modal-income-date'); if(d&&!d.value) d.value=today; }
+  if(mode === 'contribution') { const d=document.getElementById('modal-contrib-date'); if(d&&!d.value) d.value=today; }
   _renderSmartModal();
 }
 
 function setSmartCategory(cat) {
   smartCategory = cat;
-  // Update category button active states
   ['us','asx','cry','met'].forEach(c => {
     const b = document.getElementById('scat-'+c);
     if(b) b.classList.toggle('active', c === cat);
@@ -1746,42 +1925,60 @@ function setSmartCategory(cat) {
 }
 
 function _renderSmartModal() {
-  const isTxn  = smartMode === 'txn';
-  const isCash = smartMode === 'cash';
-  const isFees = smartMode === 'fees';
-  const isNew  = smartMode === 'new';
+  const isTxn    = smartMode === 'txn';
+  const isCash   = smartMode === 'cash';
+  const isFees   = smartMode === 'fees';
+  const isIncome = smartMode === 'income';
+  const isContrib= smartMode === 'contribution';
+  const isNew    = smartMode === 'new';
+  const noTicker = isCash || isFees || isIncome || isContrib;
 
-  // Title
-  document.getElementById('modal-title').textContent =
-    isTxn ? 'Add transaction' : isCash ? 'Add cash account' : isFees ? 'Add fee' : 'Add to portfolio';
-  document.getElementById('modal-sub').textContent =
-    isTxn ? `Adding trade for ${S[smartFoundType][smartFoundIdx]?.name || ''}` :
-    isCash ? 'Enter account name and current balance' :
-    isFees ? 'Log a fee to your FY ledger' :
-    'Type a ticker — or tap Cash / Fee below';
+  // Title & subtitle
+  const titles = { txn:'Add transaction', cash:'Add cash account', fees:'Add fee', income:'Record income', contribution:'Record contribution' };
+  const subs = {
+    txn: `Adding trade for ${S[smartFoundType]?.[smartFoundIdx]?.name || ''}`,
+    cash: 'Enter account name and current balance',
+    fees: 'Log a fee to your FY ledger',
+    income: 'Record dividend, interest or other fund income',
+    contribution: 'Record a member contribution to the fund'
+  };
+  document.getElementById('modal-title').textContent = titles[smartMode] || 'Add to portfolio';
+  document.getElementById('modal-sub').textContent   = subs[smartMode]   || 'Type a ticker — or choose a type below';
 
-  // Ticker row: hide when cash or fees
-  document.getElementById('modal-ticker-row').style.display = (isCash || isFees) ? 'none' : 'block';
-  document.getElementById('modal-quick-btns').style.display = (isCash || isFees) ? 'none' : 'flex';
-
-  // Category row: new holdings only
-  document.getElementById('modal-cat-row').style.display = isNew ? 'block' : 'none';
+  // Ticker row & quick buttons: hide for non-ticker modes
+  document.getElementById('modal-ticker-row').style.display   = noTicker ? 'none' : 'block';
+  document.getElementById('modal-quick-btns').style.display   = noTicker ? 'none' : 'flex';
+  document.getElementById('modal-cat-row').style.display      = isNew    ? 'block' : 'none';
   if(isNew) setSmartCategory(smartCategory);
 
-  // Divider
-  const hasSub = isNew || isTxn || isCash || isFees;
-  document.getElementById('modal-divider').style.display = hasSub ? 'block' : 'none';
+  document.getElementById('modal-divider').style.display = (isNew||isTxn||isCash||isFees||isIncome||isContrib) ? 'block' : 'none';
 
-  // Fields
-  document.getElementById('modal-new-holding').style.display = isNew  ? 'block' : 'none';
-  document.getElementById('modal-txn-fields').style.display  = isTxn  ? 'block' : 'none';
-  document.getElementById('modal-cash-fields').style.display = isCash ? 'block' : 'none';
-  document.getElementById('modal-fees-fields').style.display = isFees ? 'block' : 'none';
+  // Show/hide field panels
+  document.getElementById('modal-new-holding').style.display        = isNew    ? 'block' : 'none';
+  document.getElementById('modal-txn-fields').style.display         = isTxn   ? 'block' : 'none';
+  document.getElementById('modal-cash-fields').style.display        = isCash  ? 'block' : 'none';
+  document.getElementById('modal-fees-fields').style.display        = isFees  ? 'block' : 'none';
+  document.getElementById('modal-income-fields').style.display      = isIncome? 'block' : 'none';
+  document.getElementById('modal-contribution-fields').style.display= isContrib?'block' : 'none';
+
+  // Populate cash account dropdowns for income and contributions
+  if(isIncome || isContrib) {
+    const opts = '<option value="">— Don\'t adjust cash —</option>' +
+      S.cash.map((a,i)=>`<option value="${i}">${a.name} ($${f(a.balance||0)} AUD)</option>`).join('');
+    const incAcct = document.getElementById('modal-income-account');
+    const ctbAcct = document.getElementById('modal-contrib-account');
+    if(incAcct) incAcct.innerHTML = opts;
+    if(ctbAcct) ctbAcct.innerHTML = opts;
+  }
 
   // Quick button highlight
-  ['cash','fees'].forEach(m => {
+  ['cash','fees','income','contribution'].forEach(m => {
     const b = document.getElementById('qbtn-'+m);
-    if(b) { b.style.background = smartMode===m ? '#397968' : ''; b.style.color = smartMode===m ? '#fff' : ''; b.style.borderColor = smartMode===m ? '#397968' : ''; }
+    if(b) {
+      b.style.background  = smartMode===m ? '#397968' : '';
+      b.style.color       = smartMode===m ? '#fff' : '';
+      b.style.borderColor = smartMode===m ? '#397968' : '';
+    }
   });
 }
 
@@ -1824,6 +2021,39 @@ function submitAddModal() {
     if(!nm) return;
     S.cash.push({name:nm, balance:bal});
     save(); renderCash();
+  } else if(smartMode === 'income') {
+    const date     = document.getElementById('modal-income-date').value;
+    const amt      = parseFloat(document.getElementById('modal-income-amt').value)||0;
+    const source   = document.getElementById('modal-income-source').value.trim();
+    const type     = document.getElementById('modal-income-type').value;
+    const franking = parseFloat(document.getElementById('modal-income-franking').value)||0;
+    const acctIdx  = document.getElementById('modal-income-account').value;
+    if(!amt || !source) return;
+    const txnId = generateTxnId(date);
+    S.income.push({date, source, type, amount:amt, franking, txnId});
+    // Credit cash account
+    if(acctIdx !== '') {
+      const idx = parseInt(acctIdx);
+      S.cash[idx].balance = (S.cash[idx].balance||0) + amt;
+      renderCash();
+    }
+    save(); renderFees();
+  } else if(smartMode === 'contribution') {
+    const date    = document.getElementById('modal-contrib-date').value;
+    const amt     = parseFloat(document.getElementById('modal-contrib-amt').value)||0;
+    const member  = document.getElementById('modal-contrib-member').value.trim();
+    const type    = document.getElementById('modal-contrib-type').value;
+    const acctIdx = document.getElementById('modal-contrib-account').value;
+    if(!amt || !member) return;
+    const txnId = generateTxnId(date);
+    S.contributions.push({date, member, type, amount:amt, txnId});
+    // Credit cash account
+    if(acctIdx !== '') {
+      const idx = parseInt(acctIdx);
+      S.cash[idx].balance = (S.cash[idx].balance||0) + amt;
+      renderCash();
+    }
+    save(); renderFees();
   } else {
     // New holding
     const tk      = document.getElementById('modal-smart-ticker').value.trim().toUpperCase();
@@ -1844,7 +2074,7 @@ function submitAddModal() {
   }
   document.getElementById('addModal').classList.remove('open');
 }
-document.addEventListener('keydown', e => { if(e.key==='Escape') document.getElementById('addModal').classList.remove('open'); });
+document.addEventListener('keydown', e => { if(e.key==='Escape') { const m=document.getElementById('addModal'); m.classList.remove('open'); m.style.display='none'; m.style.visibility='hidden'; }});
 
 // ── Mobile sidebar ───────────────────────────────────────────────
 function openMobileSidebar() {
@@ -1889,6 +2119,17 @@ function switchTab(name) {
       p.classList.remove('active','entering');
     }
   });
+  // Show + Add button only on portfolio and transactions tabs
+  const addBtn = document.getElementById('topbarAddBtn');
+  if(addBtn) addBtn.style.display = (name === 'watchlist') ? 'none' : '';
+  // Re-render fees ledger when switching to transactions tab
+  if(name === 'fees') {
+    try { renderFees(); } catch(e) { console.error('renderFees error:', e); }
+  }
+  // Re-render cash when switching to portfolio tab
+  if(name === 'portfolio') {
+    try { renderCash(); } catch(e) { console.error('renderCash error:', e); }
+  }
   closeMobileSidebar();
   if(name === 'portfolio') {
     if(pieChart) setTimeout(()=>pieChart.resize(), 50);
@@ -2172,26 +2413,45 @@ function generateTxnId(date) {
 }
 
 function migrateIds() {
-  // 1. Strip all auto-generated brokerage fees from S.fees
-  //    (they were duplicates — now rendered live from txns)
+  let changed = false;
+  // 1. Strip all auto-generated brokerage fees from S.fees (duplicates — now rendered live)
+  const before = (S.fees||[]).length;
   S.fees = (S.fees||[]).filter(fe => !fe.txRef);
+  if(S.fees.length !== before) changed = true;
 
   // 2. Assign IDs to all txns that don't have one
   ['us','asx','cry','met'].forEach(t => {
     (S[t]||[]).forEach(item => {
       (item.txns||[]).forEach(tx => {
-        if(!tx.txnId) tx.txnId = generateTxnId(tx.date);
+        if(!tx.txnId) { tx.txnId = generateTxnId(tx.date); changed = true; }
       });
     });
   });
 
   // 3. Assign IDs to all manual fees that don't have one
   (S.fees||[]).forEach(fe => {
-    if(!fe.txnId) fe.txnId = generateTxnId(fe.date);
+    if(!fe.txnId) { fe.txnId = generateTxnId(fe.date); changed = true; }
   });
+
+  // 4. Assign IDs to income entries
+  (S.income||[]).forEach(item => {
+    if(!item.txnId) { item.txnId = generateTxnId(item.date); changed = true; }
+  });
+
+  // 5. Assign IDs to contributions
+  (S.contributions||[]).forEach(item => {
+    if(!item.txnId) { item.txnId = generateTxnId(item.date); changed = true; }
+  });
+
+  return changed;
 }
 
 cloudLoad();
+// Safety net — always enable refresh button after 5s no matter what
+setTimeout(() => {
+  const btn = document.getElementById('rfBtn');
+  if(btn) btn.disabled = false;
+}, 5000);
 renderHistoryChart();
 updateSessions();
 setInterval(updateSessions, 60000);
@@ -2221,7 +2481,12 @@ document.addEventListener('click', function(e) {
     case 'switchTab':         switchTab(el.getAttribute('data-tab')); break;
     case 'setSmartMode':      setSmartMode(el.getAttribute('data-mode')); break;
     case 'setSmartCategory':  setSmartCategory(el.getAttribute('data-cat')); break;
+    case 'setSmartCategory':  setSmartCategory(el.getAttribute('data-cat')); break;
   }
+});
+
+document.addEventListener('input', function(e) {
+  if(e.target.id === 'modal-smart-ticker') onSmartTickerInput(e.target.value);
 });
 
 document.addEventListener('change', function(e) {
@@ -2233,5 +2498,6 @@ document.addEventListener('change', function(e) {
 });
 
 </script>
+
 </body>
 </html>
