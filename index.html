@@ -591,6 +591,7 @@ tr.tint-down td{background:rgba(239,68,68,0.05)!important;}
         <option value="Transaction Fee">Transaction Fee</option><option value="Other">Other</option>
       </select>
       <input id="feesAmt" placeholder="Amount AUD" type="number" step="any" style="flex:none;width:130px;">
+      <select id="feesAcct" style="flex:none;width:160px;"><option value="">— No cash account —</option></select>
       <button class="okbtn" data-action="addFee">Add</button>
       <button class="addbtn" data-action="hideFeesAdd">Cancel</button>
     </div>
@@ -749,6 +750,9 @@ tr.tint-down td{background:rgba(239,68,68,0.05)!important;}
         <div class="modal-field"><label class="modal-label">Amount (AUD)</label><input class="modal-input" id="modal-fees-amt" type="number" step="any" placeholder="0.00"></div>
       </div>
       <div class="modal-field"><label class="modal-label">Description</label><input class="modal-input" id="modal-fees-desc" placeholder="e.g. Annual audit fee"></div>
+      <div class="modal-field"><label class="modal-label">Paid from account (optional)</label>
+        <select class="modal-select" id="modal-fees-account"><option value="">— Don't adjust cash —</option></select>
+      </div>
       <div class="modal-field"><label class="modal-label">Category</label>
         <select class="modal-select" id="modal-fees-cat">
           <option value="Accounting">Accounting</option><option value="Audit">Audit</option>
@@ -1300,14 +1304,29 @@ function reverseTxn(assetType,assetIdx,txnIdx){
   if(tx.fee>0){const brokerageDesc=`Brokerage — ${item.ticker} ${tx.side} ${tx.date}`;let feeIdx=S.fees.findIndex(fe=>fe.cat==='Transaction Fee'&&fe.desc===brokerageDesc&&Math.abs((fe.amount||0)-tx.fee)<0.01);if(feeIdx<0)feeIdx=S.fees.findIndex(fe=>fe.cat==='Transaction Fee'&&fe.date===tx.date&&Math.abs((fe.amount||0)-tx.fee)<0.01);if(feeIdx>=0)S.fees.splice(feeIdx,1);}
   item.txns.splice(txnIdx,1);recalcFromTxns(assetType,assetIdx);save();rows(assetType);renderAllHoldings();renderFees();summary();
 }
-function delFee(i){S.fees.splice(i,1);save();renderFees();}
-function showFeesAdd(){document.getElementById('feesAR').style.display='flex';document.getElementById('feesDate').value=new Date().toISOString().slice(0,10);}
+function delFee(i){
+  const fee=S.fees[i];
+  if(fee&&fee.cashAcct!=null&&S.cash[fee.cashAcct]){
+    S.cash[fee.cashAcct].balance=(S.cash[fee.cashAcct].balance||0)+fee.amount;
+    renderCash();
+  }
+  S.fees.splice(i,1);save();renderFees();
+}
+function showFeesAdd(){
+  document.getElementById('feesAR').style.display='flex';
+  document.getElementById('feesDate').value=new Date().toISOString().slice(0,10);
+  const sel=document.getElementById('feesAcct');
+  if(sel){sel.innerHTML='<option value="">— No cash account —</option>'+S.cash.map((a,i)=>`<option value="${i}">${a.name} ($${f(a.balance||0)} AUD)</option>`).join('');}
+}
 function hideFeesAdd(){document.getElementById('feesAR').style.display='none';}
 function addFee(){
   const date=document.getElementById('feesDate').value;const desc=document.getElementById('feesDesc').value.trim();
   const cat=document.getElementById('feesCat').value;const amount=parseFloat(document.getElementById('feesAmt').value)||0;
+  const acctVal=document.getElementById('feesAcct')?.value;
+  const cashAcct=acctVal!==''&&acctVal!=null?parseInt(acctVal):null;
   if(!desc||!amount)return;
-  S.fees.push({date,desc,cat,amount,txnId:generateTxnId(date)});
+  S.fees.push({date,desc,cat,amount,txnId:generateTxnId(date),cashAcct});
+  if(cashAcct!==null&&S.cash[cashAcct]){S.cash[cashAcct].balance=(S.cash[cashAcct].balance||0)-amount;renderCash();}
   save();hideFeesAdd();document.getElementById('feesDesc').value='';document.getElementById('feesAmt').value='';renderFees();
 }
 
@@ -1536,7 +1555,11 @@ function setSmartMode(mode){
   smartMode=mode;const noTicker=['cash','fees','income','contribution','transfer'];
   if(noTicker.includes(mode)){document.getElementById('modal-smart-ticker').value='';document.getElementById('modal-ticker-status').textContent='';}
   const today=new Date().toISOString().slice(0,10);
-  if(mode==='fees'){const d=document.getElementById('modal-fees-date');if(d&&!d.value)d.value=today;}
+  if(mode==='fees'){
+    const d=document.getElementById('modal-fees-date');if(d&&!d.value)d.value=today;
+    const sel=document.getElementById('modal-fees-account');
+    if(sel){sel.innerHTML='<option value="">— Don\'t adjust cash —</option>'+S.cash.map((a,i)=>`<option value="${i}">${a.name} ($${f(a.balance||0)} AUD)</option>`).join('');}
+  }
   if(mode==='income'){const d=document.getElementById('modal-income-date');if(d&&!d.value)d.value=today;}
   if(mode==='contribution'){const d=document.getElementById('modal-contrib-date');if(d&&!d.value)d.value=today;}
   if(mode==='transfer'){const d=document.getElementById('modal-transfer-date');if(d&&!d.value)d.value=today;}
@@ -1592,7 +1615,12 @@ function submitAddModal(){
   }else if(smartMode==='fees'){
     const date=document.getElementById('modal-fees-date').value;const desc=document.getElementById('modal-fees-desc').value.trim();
     const cat=document.getElementById('modal-fees-cat').value;const amount=parseFloat(document.getElementById('modal-fees-amt').value)||0;
-    if(!desc||!amount)return;S.fees.push({date,desc,cat,amount,txnId:generateTxnId(date)});save();renderFees();
+    const feeAcctVal=document.getElementById('modal-fees-account')?.value;
+    const feeCashAcct=feeAcctVal!==''&&feeAcctVal!=null?parseInt(feeAcctVal):null;
+    if(!desc||!amount)return;
+    S.fees.push({date,desc,cat,amount,txnId:generateTxnId(date),cashAcct:feeCashAcct});
+    if(feeCashAcct!==null&&S.cash[feeCashAcct]){S.cash[feeCashAcct].balance=(S.cash[feeCashAcct].balance||0)-amount;renderCash();}
+    save();renderFees();
   }else if(smartMode==='cash'){
     const nm=document.getElementById('modal-cash-name').value.trim();const bal=parseFloat(document.getElementById('modal-cash-bal').value)||0;
     if(!nm)return;S.cash.push({name:nm,balance:bal});save();renderCash();
