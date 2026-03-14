@@ -1738,12 +1738,65 @@ function renderHistoryChart(history){
 }
 
 function exportCSV(){
-  const fy=fyLabel();const rows=[['Date','Type','Ticker / Account','Name','Side','Qty','Price','Total (AUD)','Fee (AUD)','Category','Description']];
-  ['us','asx','cry','met'].forEach(type=>{S[type].forEach(item=>{(item.txns||[]).forEach(tx=>{const d=new Date(tx.date);if(d<fy.start||d>fy.end)return;const audTotal=tx.price*tx.qty;rows.push([tx.date,type.toUpperCase(),item.ticker,item.name,tx.side,tx.qty,tx.price.toFixed(2),audTotal.toFixed(2),tx.fee||0,'Transaction','']);});});});
-  S.fees.forEach(fee=>{const d=new Date(fee.date);if(d<fy.start||d>fy.end)return;rows.push([fee.date,'FEE','','','','','',fee.amount||0,fee.amount||0,fee.cat||'',fee.desc||'']);});
-  const header=rows.shift();rows.sort((a,b)=>a[0].localeCompare(b[0]));rows.unshift(header);
-  const csv=rows.map(r=>r.map(v=>`"${String(v).replace(/"/g,'""')}"`).join(',')).join('\n');
-  const blob=new Blob([csv],{type:'text/csv'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=`SMSF_${fy.label.replace('/','_')}.csv`;a.click();URL.revokeObjectURL(url);
+  const fy=fyLabel();
+  const entries=[];
+
+  // Trades + brokerage fees as separate rows
+  ['us','asx','cry','met'].forEach(type=>{
+    const typeLabel={us:'US Stock',asx:'ASX Stock',cry:'Crypto',met:'Metal'}[type];
+    S[type].forEach(item=>{
+      (item.txns||[]).forEach(tx=>{
+        const d=new Date(tx.date);if(d<fy.start||d>fy.end)return;
+        const audTotal=parseFloat((tx.price*tx.qty).toFixed(2));
+        const side=tx.side==='buy'?'Buy':'Sell';
+        const acctName=tx.cashAcct!=null&&S.cash[tx.cashAcct]?S.cash[tx.cashAcct].name:'';
+        entries.push({date:tx.date,id:tx.txnId||'—',type:'Trade',category:typeLabel,ticker:item.ticker,name:item.name,side,qty:tx.qty,price:tx.price.toFixed(4),amount:side==='Buy'?-audTotal:audTotal,account:acctName,ref:'',desc:`${side} ${tx.qty} ${item.ticker} @ $${tx.price.toFixed(2)} AUD`});
+        if(tx.fee>0){entries.push({date:tx.date,id:(tx.txnId||'—')+'-FEE',type:'Fee',category:'Brokerage',ticker:item.ticker,name:item.name,side:'',qty:'',price:'',amount:-tx.fee,account:acctName,ref:tx.txnId||'—',desc:`Brokerage — ${side} ${item.ticker}`});}
+      });
+    });
+  });
+
+  // Manual fees
+  (S.fees||[]).forEach(fee=>{
+    const d=new Date(fee.date);if(d<fy.start||d>fy.end)return;
+    const acctName=fee.cashAcct!=null&&S.cash[fee.cashAcct]?S.cash[fee.cashAcct].name:'';
+    entries.push({date:fee.date,id:fee.txnId||'—',type:'Fee',category:fee.cat||'Other',ticker:'',name:'',side:'',qty:'',price:'',amount:-fee.amount,account:acctName,ref:'',desc:fee.desc||''});
+  });
+
+  // Income
+  (S.income||[]).forEach(item=>{
+    const d=new Date(item.date);if(d<fy.start||d>fy.end)return;
+    const acctName=item.cashAcct!=null&&S.cash[item.cashAcct]?S.cash[item.cashAcct].name:'';
+    entries.push({date:item.date,id:item.txnId||'—',type:'Income',category:item.type||'Income',ticker:item.source||'',name:'',side:'',qty:'',price:'',amount:item.amount,account:acctName,ref:'',desc:`${item.type} — ${item.source}${item.franking>0?' (Franking: $'+f(item.franking)+')':''}`});
+  });
+
+  // Contributions
+  (S.contributions||[]).forEach(item=>{
+    const d=new Date(item.date);if(d<fy.start||d>fy.end)return;
+    const acctName=item.cashAcct!=null&&S.cash[item.cashAcct]?S.cash[item.cashAcct].name:'';
+    entries.push({date:item.date,id:item.txnId||'—',type:'Contribution',category:item.type||'',ticker:'',name:item.member||'',side:'',qty:'',price:'',amount:item.amount,account:acctName,ref:'',desc:`${item.type} contribution — ${item.member}`});
+  });
+
+  // Transfers (debit + credit legs)
+  (S.transfers||[]).forEach(item=>{
+    const d=new Date(item.date);if(d<fy.start||d>fy.end)return;
+    const fromName=S.cash[item.from]?.name||'';const toName=S.cash[item.to]?.name||'';
+    entries.push({date:item.date,id:(item.txnId||'—')+'-DR',type:'Transfer',category:'Internal Transfer',ticker:'',name:'',side:'Debit',qty:'',price:'',amount:-item.amount,account:fromName,ref:item.txnId||'—',desc:`Transfer to ${toName}${item.desc?' — '+item.desc:''}`});
+    entries.push({date:item.date,id:(item.txnId||'—')+'-CR',type:'Transfer',category:'Internal Transfer',ticker:'',name:'',side:'Credit',qty:'',price:'',amount:item.amount,account:toName,ref:item.txnId||'—',desc:`Transfer from ${fromName}${item.desc?' — '+item.desc:''}`});
+  });
+
+  entries.sort((a,b)=>a.date.localeCompare(b.date)||a.id.localeCompare(b.id));
+
+  const headers=['Transaction ID','Date','Type','Category','Ticker','Name','Side','Qty','Price (AUD)','Amount (AUD)','Cash Account','Reference ID','Description'];
+  const csvRows=[headers,...entries.map(e=>[
+    e.id,e.date,e.type,e.category,e.ticker,e.name,e.side,e.qty,e.price,
+    (e.amount>=0?'':'-')+'$'+Math.abs(e.amount).toLocaleString('en-AU',{minimumFractionDigits:2,maximumFractionDigits:2}),
+    e.account,e.ref,e.desc
+  ])];
+
+  const csv=csvRows.map(r=>r.map(v=>`"${String(v==null?'':v).replace(/"/g,'""')}"`).join(',')).join('\n');
+  const blob=new Blob([csv],{type:'text/csv'});const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');a.href=url;a.download=`SMSF_Ledger_${fy.label.replace('/','_')}.csv`;a.click();URL.revokeObjectURL(url);
 }
 
 function migrateIds(){
