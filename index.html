@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<meta name="theme-color" content="#f4f6f3" media="(prefers-color-scheme: light)">
-<meta name="theme-color" content="#0d1f14" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#060d1f">
+
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
@@ -16,74 +16,92 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <style>
 :root{
-  /* Fundcy-inspired: warm light grey bg, white cards, dark forest green accent */
-  --bg:#f0f0f0;--surface:#ffffff;--surface2:#f8f8f8;--surface3:#f0f0f0;--surface4:#fafafa;
-  --text:#1a1a1a;--text2:#555;--text3:#999;--text4:#ccc;
-  --border:rgba(0,0,0,0.07);--border2:rgba(0,0,0,0.05);--border3:rgba(0,0,0,0.04);--border4:rgba(0,0,0,0.12);--border5:rgba(0,0,0,0.22);
-  --alloc-bg:#e8e8e8;
-  --b-blue-bg:#dbeafe;--b-blue-c:#1e3a8a;
-  --b-green-bg:#e6faf3;--b-green-c:#1a7a5e;
+  /* Light mode — opaque white cards on space background */
+  --bg:transparent;
+  --surface:rgba(255,255,255,0.92);
+  --surface2:rgba(245,247,252,0.95);
+  --surface3:rgba(235,240,250,0.95);
+  --surface4:rgba(250,252,255,0.92);
+  --text:#0f1a2e;--text2:#3a4a6a;--text3:#6a7a9a;--text4:#aab8d0;
+  --border:rgba(15,26,46,0.1);--border2:rgba(15,26,46,0.07);
+  --border3:rgba(15,26,46,0.05);--border4:rgba(15,26,46,0.13);
+  --border5:rgba(15,26,46,0.22);
+  --alloc-bg:rgba(15,26,46,0.1);
+  --b-blue-bg:#dbeafe;--b-blue-c:#1e4a9a;
+  --b-green-bg:#d1fae5;--b-green-c:#065f46;
   --b-amber-bg:#fef3c7;--b-amber-c:#92400e;
-  --b-gray-bg:#f5f5f5;--b-gray-c:#555;
+  --b-gray-bg:#f1f5f9;--b-gray-c:#334155;
   --b-teal-bg:#ccfbf1;--b-teal-c:#0f766e;
   --b-red-bg:#fee2e2;--b-red-c:#991b1b;
-  --gl-pos-bg:#e6faf3;--gl-pos-c:#1a7a5e;
+  --gl-pos-bg:#d1fae5;--gl-pos-c:#065f46;
   --gl-neg-bg:#fee2e2;--gl-neg-c:#b91c1c;
-  --gl-neu-bg:#f5f5f5;--gl-neu-c:#777;
+  --gl-neu-bg:#f1f5f9;--gl-neu-c:#334155;
   --err-bg:#fee2e2;
-  --fees-bg:#f8f8f8;
+  --fees-bg:rgba(245,247,252,0.95);
   --okbtn-bg:#397968;--okbtn-c:#ffffff;
-  --gain-pos:#59d0a3;--gain-neg:#dc2626;
-  --accent:#397968;--accent-hover:#397968;
+  --gain-pos:#059669;--gain-neg:#dc2626;
+  --accent:#397968;--accent-hover:#2d6a57;
   --accent-light:#aedf33;
-  --sidebar-bg:#ffffff;--sidebar-text:#888;--sidebar-active:#397968;
-  --card-shadow:0 1px 3px rgba(0,0,0,0.06),0 1px 2px rgba(0,0,0,0.04);
+  --sidebar-bg:rgba(255,255,255,0.88);--sidebar-text:#6a7a9a;--sidebar-active:#397968;
+  --card-shadow:0 4px 24px rgba(0,0,0,0.18),inset 0 1px 0 rgba(255,255,255,0.8);
 }
 body.dark{
-  --bg:#141414;--surface:#1e1e1e;--surface2:#252525;--surface3:#2a2a2a;--surface4:#1a1a1a;
-  --text:#e8e8e8;--text2:#999;--text3:#666;--text4:#444;
-  --border:rgba(255,255,255,0.08);--border2:rgba(255,255,255,0.06);--border3:rgba(255,255,255,0.04);--border4:rgba(255,255,255,0.14);--border5:rgba(255,255,255,0.25);
-  --alloc-bg:#2a2a2a;
-  --b-blue-bg:#1e3a5f;--b-blue-c:#93c5fd;
-  --b-green-bg:#0a3d28;--b-green-c:#59d0a3;
-  --b-amber-bg:#2d1a00;--b-amber-c:#fcd34d;
-  --b-gray-bg:#252525;--b-gray-c:#aaa;
-  --b-teal-bg:#042f2e;--b-teal-c:#5eead4;
-  --b-red-bg:#2d0a0a;--b-red-c:#fca5a5;
-  --gl-pos-bg:#0a3d28;--gl-pos-c:#59d0a3;
-  --gl-neg-bg:#2d0a0a;--gl-neg-c:#fca5a5;
-  --gl-neu-bg:#252525;--gl-neu-c:#999;
-  --err-bg:#2d0a0a;
-  --fees-bg:#1a1a1a;
+  /* Same vars — theme is always dark */
+  --bg:transparent;
+  --surface:rgba(255,255,255,0.07);
+  --surface2:rgba(255,255,255,0.05);
+  --surface3:rgba(255,255,255,0.1);
+  --surface4:rgba(255,255,255,0.04);
+  --text:#e8edf5;--text2:#8b9bbf;--text3:#5a6a8a;--text4:#3a4a6a;
+  --border:rgba(255,255,255,0.1);--border2:rgba(255,255,255,0.07);
+  --border3:rgba(255,255,255,0.05);--border4:rgba(255,255,255,0.13);
+  --border5:rgba(255,255,255,0.22);
+  --alloc-bg:rgba(255,255,255,0.1);
+  --b-blue-bg:rgba(99,163,255,0.18);--b-blue-c:#7db8ff;
+  --b-green-bg:rgba(89,208,163,0.18);--b-green-c:#59d0a3;
+  --b-amber-bg:rgba(251,191,36,0.18);--b-amber-c:#fbbf24;
+  --b-gray-bg:rgba(255,255,255,0.1);--b-gray-c:#aab8d0;
+  --b-teal-bg:rgba(94,234,212,0.18);--b-teal-c:#5eead4;
+  --b-red-bg:rgba(248,113,113,0.18);--b-red-c:#f87171;
+  --gl-pos-bg:rgba(89,208,163,0.15);--gl-pos-c:#59d0a3;
+  --gl-neg-bg:rgba(248,113,113,0.15);--gl-neg-c:#f87171;
+  --gl-neu-bg:rgba(255,255,255,0.08);--gl-neu-c:#8b9bbf;
+  --err-bg:rgba(248,113,113,0.15);
+  --fees-bg:rgba(255,255,255,0.04);
   --okbtn-bg:#397968;--okbtn-c:#ffffff;
   --gain-pos:#59d0a3;--gain-neg:#f87171;
-  --accent:#397968;--accent-hover:#40916c;
+  --accent:#59d0a3;--accent-hover:#40b08a;
   --accent-light:#aedf33;
-  --sidebar-bg:#1e1e1e;--sidebar-text:#666;--sidebar-active:#397968;
-  --card-shadow:none;
+  --sidebar-bg:rgba(10,15,35,0.85);--sidebar-text:#5a6a8a;--sidebar-active:#397968;
+  --card-shadow:0 8px 32px rgba(0,0,0,0.3),inset 0 1px 0 rgba(255,255,255,0.1);
 }
 *{box-sizing:border-box;margin:0;padding:0;}
-body{font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);color:var(--text);transition:background 0.2s,color 0.2s;font-size:14px;-webkit-font-smoothing:antialiased;display:block;min-height:100vh;overflow-x:hidden;}
+body{font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#060d1f;color:var(--text);font-size:14px;-webkit-font-smoothing:antialiased;display:block;min-height:100vh;overflow-x:hidden;}
+body::before{content:'';position:fixed;inset:0;z-index:-1;
+  background-image:url('https://images.unsplash.com/photo-1462331940025-496dfbfc7564?w=1920&q=80&auto=format&fit=crop');
+  background-size:cover;background-position:center;background-repeat:no-repeat;}
+body::after{content:'';position:fixed;inset:0;z-index:-1;
+  background:linear-gradient(135deg,rgba(3,8,20,0.72) 0%,rgba(6,13,31,0.65) 50%,rgba(5,10,24,0.75) 100%);}
 .wrap{flex:1;padding:28px 32px;min-width:0;overflow-x:hidden;width:100%;}
 .topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.25rem;gap:8px;flex-wrap:nowrap;min-width:0;}
-.title-block h1{font-size:20px;font-weight:700;color:var(--text);line-height:1.2;letter-spacing:-0.3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}.title-block{min-width:0;flex-shrink:1;}
+.title-block h1{font-size:22px;font-weight:700;color:var(--text);line-height:1.2;letter-spacing:-0.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}.title-block{min-width:0;flex-shrink:1;}
 .top-actions{display:flex;align-items:center;gap:6px;flex-wrap:nowrap;flex-shrink:0;}
-.aud-pill{display:flex;align-items:center;gap:6px;font-size:13px;font-weight:500;color:var(--text2);background:var(--surface);border:1px solid var(--border4);border-radius:99px;padding:5px 12px;cursor:pointer;transition:background 0.15s;}
+.aud-pill{display:flex;align-items:center;gap:6px;font-size:13px;font-weight:500;color:var(--text2);background:var(--surface);border:1px solid var(--border4);border-radius:99px;padding:5px 12px;cursor:pointer;transition:all 0.15s;backdrop-filter:blur(8px);}
 .aud-pill:hover{background:var(--surface3);}
-.rfbtn{display:flex;align-items:center;gap:6px;font-size:13px;font-weight:600;color:#fff;background:#397968;border:none;border-radius:99px;padding:7px 18px;cursor:pointer;transition:background 0.15s;font-family:inherit;}
-.rfbtn:hover{background:#397968;}
+.rfbtn{display:flex;align-items:center;gap:6px;font-size:13px;font-weight:600;color:#fff;background:linear-gradient(135deg,#397968,#59d0a3);border:none;border-radius:99px;padding:7px 18px;cursor:pointer;transition:all 0.2s;font-family:inherit;box-shadow:0 4px 15px rgba(89,208,163,0.3);}
+.rfbtn:hover{background:linear-gradient(135deg,#2d6a57,#40b08a);box-shadow:0 4px 20px rgba(89,208,163,0.45);}
 .rfbtn:disabled{opacity:0.5;cursor:not-allowed;}
 .darkbtn{display:none;}
 .spin{animation:spin 0.9s linear infinite;}
 @keyframes spin{to{transform:rotate(360deg);}}
 .summary{display:grid;grid-template-columns:1.3fr 1fr 1fr;gap:12px;margin-bottom:12px;}
-.scard{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:1.25rem 1.25rem;position:relative;overflow:hidden;transition:background 0.2s;box-shadow:var(--card-shadow);}
+.scard{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:1.25rem 1.25rem;position:relative;overflow:hidden;transition:all 0.2s;box-shadow:var(--card-shadow);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);}
 .scard-accent{position:absolute;top:0;left:0;width:3px;height:100%;border-radius:3px 0 0 3px;}
-.slabel{font-size:10px;font-weight:500;color:var(--text3);margin-bottom:7px;letter-spacing:0.06em;text-transform:uppercase;}
+.slabel{font-size:10px;font-weight:500;color:var(--text3);margin-bottom:8px;letter-spacing:0.1em;text-transform:uppercase;}
 .sval{font-size:19px;font-weight:600;color:var(--text);line-height:1.2;font-variant-numeric:tabular-nums;letter-spacing:-0.3px;}
 .ssub{font-size:11px;margin-top:5px;font-weight:500;}
 .gain-pos{color:var(--gain-pos);}.gain-neg{color:var(--gain-neg);}.gain-neu{color:var(--text3);}
-.dash{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:1.1rem 1.25rem;margin-bottom:1.25rem;display:flex;gap:24px;align-items:center;transition:background 0.2s;box-shadow:var(--card-shadow);}
+.dash{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:1.1rem 1.25rem;margin-bottom:1.25rem;display:flex;gap:24px;align-items:center;transition:all 0.2s;box-shadow:var(--card-shadow);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);}
 .alloc-section{flex:1;min-width:0;}
 .alloc-bar{height:6px;background:var(--alloc-bg);border-radius:99px;overflow:hidden;display:flex;gap:2px;margin-bottom:14px;}
 .alloc-seg{height:100%;border-radius:99px;transition:width 0.5s;}
@@ -100,7 +118,7 @@ body{font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
 .pie-leg-row{display:flex;align-items:center;justify-content:space-between;font-size:11px;color:var(--text2);}
 .pie-leg-left{display:flex;align-items:center;gap:6px;}
 .pie-leg-sw{width:7px;height:7px;border-radius:2px;flex-shrink:0;}
-.section{background:var(--surface);border:1px solid var(--border);border-radius:16px;margin-bottom:10px;overflow:hidden;transition:background 0.2s;box-shadow:var(--card-shadow);}
+.section{background:var(--surface);border:1px solid var(--border);border-radius:16px;margin-bottom:10px;overflow:hidden;transition:all 0.2s;box-shadow:var(--card-shadow);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);}
 .sec-head{display:flex;align-items:center;justify-content:space-between;padding:0.85rem 1.1rem;border-bottom:1px solid var(--border2);}
 .sec-title{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;color:var(--text);letter-spacing:-0.1px;}
 .dot{width:6px;height:6px;border-radius:50%;flex-shrink:0;}
@@ -118,11 +136,11 @@ body{font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
 .b-red{background:var(--b-red-bg);color:var(--b-red-c);}
 .sec-right{display:flex;align-items:center;gap:8px;}
 .sec-tot{font-size:13px;font-weight:600;color:var(--text);}
-.addbtn{font-size:12px;font-weight:500;color:var(--text2);cursor:pointer;border:1px solid var(--border4);background:var(--surface);padding:5px 14px;border-radius:99px;transition:background 0.15s,color 0.15s;font-family:inherit;box-shadow:var(--card-shadow);}
+.addbtn{font-size:12px;font-weight:500;color:var(--text2);cursor:pointer;border:1px solid var(--border4);background:var(--surface);padding:5px 14px;border-radius:99px;transition:all 0.15s;font-family:inherit;backdrop-filter:blur(8px);}
 .addbtn:hover{background:var(--surface3);color:var(--text);}
 .tbl-wrap{overflow-x:auto;}
 table{width:100%;border-collapse:collapse;font-size:13px;}
-th{padding:8px 14px;font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:0.06em;border-bottom:1px solid var(--border2);text-align:left;white-space:nowrap;}
+th{padding:8px 14px;font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:0.08em;border-bottom:1px solid var(--border2);text-align:left;white-space:nowrap;}
 th.r,td.r{text-align:right;}
 td{padding:10px 14px;border-bottom:1px solid var(--border3);color:var(--text);vertical-align:middle;white-space:nowrap;}
 tr:last-child td{border-bottom:none;}
@@ -182,7 +200,7 @@ tr.holding-row td:first-child::before{content:'▶';font-size:8px;color:var(--te
 tr.holding-row.open td:first-child::before{transform:rotate(90deg);color:var(--accent);}
 tr.holding-row:hover td{background:var(--surface2);}
 /* ── Bottom nav (mobile only) ── */
-.bottom-nav{display:none;position:fixed;bottom:0;left:0;right:0;z-index:100;background:var(--surface);border-top:1px solid var(--border);padding:8px 0 max(8px,env(safe-area-inset-bottom));flex-direction:row;justify-content:space-around;align-items:center;}
+.bottom-nav{display:none;position:fixed;bottom:0;left:0;right:0;z-index:100;background:var(--surface);border-top:1px solid var(--border);padding:8px 0 max(8px,env(safe-area-inset-bottom));flex-direction:row;justify-content:space-around;align-items:center;backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);}
 .bn-item{display:flex;flex-direction:column;align-items:center;gap:3px;font-size:10px;font-weight:500;color:var(--text3);cursor:pointer;padding:4px 20px;border:none;background:transparent;font-family:inherit;transition:color 0.15s;}
 .bn-item.active{color:#59d0a3;}
 .bn-item svg{width:20px;height:20px;}
@@ -228,7 +246,7 @@ tr.holding-row:hover td{background:var(--surface2);}
   .summary{margin-bottom:1rem;}
 }
 /* ── Tabs ── */
-.tab-bar{display:none;gap:2px;margin-bottom:1.25rem;background:var(--surface2);border:1px solid var(--border);border-radius:99px;padding:3px;}
+.tab-bar{display:none;gap:2px;margin-bottom:1.25rem;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:99px;padding:3px;backdrop-filter:blur(8px);}
 .tab-btn{flex:1;padding:7px 16px;font-size:13px;font-weight:500;color:var(--text3);background:transparent;border:none;border-radius:99px;cursor:pointer;font-family:inherit;transition:background 0.15s,color 0.15s;}
 .tab-btn:hover{color:var(--text);background:var(--surface3);}
 .tab-btn.active{background:#fff;color:#397968;font-weight:600;}
@@ -238,7 +256,7 @@ body.dark .tab-btn.active{box-shadow:0 1px 8px rgba(64,145,108,0.35);}
 .tab-panel.active{display:block;}
 @media(max-width:800px){.tab-bar{display:none;}.tab-btn{font-size:12px;padding:6px 8px;}}
 /* ── Portfolio history chart ── */
-.history-section{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:1.1rem 1.25rem;margin-bottom:1.25rem;transition:background 0.2s;box-shadow:var(--card-shadow);}
+.history-section{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:1.1rem 1.25rem;margin-bottom:1.25rem;transition:all 0.2s;box-shadow:var(--card-shadow);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);}
 .history-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:8px;}
 .history-title{font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:0.07em;}
 .history-meta{font-size:11px;color:var(--text4);}
@@ -254,11 +272,11 @@ body.dark .tab-btn.active{box-shadow:0 1px 8px rgba(64,145,108,0.35);}
 @keyframes rowFlashDown{0%{background:rgba(239,68,68,0.18);}100%{background:transparent;}}
 tr.row-up td{animation:rowFlashUp 1.8s ease-out forwards;}
 tr.row-down td{animation:rowFlashDown 1.8s ease-out forwards;}
-tr.tint-up td{background:rgba(89,208,163,0.06)!important;}
+tr.tint-up td{background:rgba(89,208,163,0.08)!important;}
 tr.tint-down td{background:rgba(239,68,68,0.05)!important;}
 /* ── Market session indicator ── */
 .sessions{display:flex;gap:6px;flex-wrap:nowrap;margin-bottom:1rem;overflow-x:auto;scrollbar-width:none;-ms-overflow-style:none;}.sessions::-webkit-scrollbar{display:none;}
-.session-pill{display:flex;align-items:center;gap:6px;font-size:11px;font-weight:500;padding:4px 10px;border-radius:99px;border:1px solid var(--border4);color:var(--text2);background:var(--surface);}
+.session-pill{display:flex;align-items:center;gap:6px;font-size:11px;font-weight:500;padding:4px 10px;border-radius:99px;border:1px solid var(--border4);color:var(--text2);background:var(--surface);backdrop-filter:blur(8px);}
 .session-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0;}
 .session-open .session-dot{background:#59d0a3;animation:pulse 2s infinite;}
 .session-open{border-color:rgba(89,208,163,0.35);color:var(--text);}
@@ -284,35 +302,35 @@ tr.tint-down td{background:rgba(239,68,68,0.05)!important;}
 .sidebar.collapsed .sb-dm span{display:none;}
 .sidebar.collapsed .sb-dm{justify-content:center;}
 .sidebar.collapsed #sb-search{display:none;}
-.sb-toggle{position:absolute;top:18px;right:-12px;width:24px;height:24px;background:var(--surface);border:1px solid var(--border4);border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:10;transition:transform 0.25s ease;box-shadow:0 1px 4px rgba(0,0,0,0.1);}
+.sb-toggle{position:absolute;top:18px;right:-12px;width:24px;height:24px;background:rgba(10,20,50,0.9);border:1px solid rgba(255,255,255,0.15);border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:10;transition:transform 0.25s ease;box-shadow:0 4px 12px rgba(0,0,0,0.4);backdrop-filter:blur(8px);}
 .sb-toggle svg{transition:transform 0.25s ease;}
 .sidebar.collapsed .sb-toggle svg{transform:rotate(180deg);}
-.sb-logo{padding:22px 18px 18px;font-size:15px;font-weight:600;color:var(--text);display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--border);}
+.sb-logo{padding:22px 18px 18px;font-size:15px;font-weight:700;color:var(--text);display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--border);letter-spacing:0.5px;}
 .sb-logo-dot{width:32px;height:32px;background:#397968;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
 .sb-nav{flex:1;padding:10px 8px;display:flex;flex-direction:column;gap:2px;}
-.sb-item{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:8px;color:var(--text3);cursor:pointer;font-size:13px;font-weight:500;transition:background 0.15s,color 0.15s;border:none;background:transparent;font-family:inherit;width:100%;text-align:left;}
+.sb-item{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:8px;color:var(--text3);cursor:pointer;font-size:13px;font-weight:500;transition:all 0.15s;border:none;background:transparent;font-family:inherit;width:100%;text-align:left;}
 .sb-item:hover{background:var(--surface3);color:var(--text);}
 .sb-item.active{background:#f0f7f4;color:#397968;font-weight:600;}
 .sb-item svg{flex-shrink:0;}
-.sb-section{font-size:10px;font-weight:600;color:var(--text4);text-transform:uppercase;letter-spacing:0.08em;padding:12px 12px 4px;}
+.sb-section{font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:0.08em;padding:12px 12px 4px;}
 .sb-bottom{padding:10px 8px 20px;border-top:1px solid var(--border);}
 .sb-dm{display:flex;align-items:center;justify-content:space-between;padding:8px 12px;color:var(--text3);font-size:12px;font-weight:500;}
-.dm-pill{width:34px;height:19px;background:#ddd;border-radius:99px;position:relative;cursor:pointer;flex-shrink:0;transition:background 0.2s;}
+.dm-pill{width:34px;height:19px;background:rgba(0,0,0,0.15);border-radius:99px;position:relative;cursor:pointer;flex-shrink:0;transition:background 0.2s;}
 .dm-pill.on{background:#397968;}
 .dm-knob{width:15px;height:15px;background:#fff;border-radius:50%;position:absolute;top:2px;left:2px;transition:left 0.2s;}
 .dm-pill.on .dm-knob{left:17px;}
 /* ── Add Holding Modal ── */
-.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.45);z-index:200;align-items:center;justify-content:center;}
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,5,20,0.7);z-index:200;align-items:center;justify-content:center;backdrop-filter:blur(4px);}
 .modal-overlay.open{display:flex;}
-.modal{background:var(--surface);border:1px solid var(--border4);border-radius:20px;padding:24px;width:460px;max-width:calc(100vw - 32px);position:relative;}
-.modal-title{font-size:15px;font-weight:600;color:var(--text);margin-bottom:4px;}
+.modal{background:var(--surface);border:1px solid var(--border4);border-radius:20px;padding:24px;width:460px;max-width:calc(100vw - 32px);position:relative;backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);box-shadow:0 24px 64px rgba(0,0,0,0.5);}
+.modal-title{font-size:16px;font-weight:700;color:var(--text);margin-bottom:4px;}
 .modal-sub{font-size:12px;color:var(--text3);margin-bottom:18px;}
 .modal-close{position:absolute;top:14px;right:14px;background:none;border:none;color:var(--text3);font-size:18px;cursor:pointer;line-height:1;padding:2px 7px;border-radius:5px;}
 .modal-close:hover{color:var(--text);background:var(--surface3);}
 .modal-field{display:flex;flex-direction:column;gap:5px;margin-bottom:14px;}
 .modal-label{font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:0.07em;}
-.modal-input{padding:8px 12px;font-size:13px;border:1px solid var(--border4);border-radius:99px;background:var(--surface2);color:var(--text);font-family:'Inter',inherit;transition:border-color 0.15s;width:100%;}
-.modal-input:focus{outline:none;border-color:var(--accent);}
+.modal-input{padding:8px 12px;font-size:13px;border:1px solid var(--border4);border-radius:99px;background:var(--surface2);color:var(--text);font-family:'Inter',inherit;transition:all 0.15s;width:100%;}
+.modal-input:focus{outline:none;border-color:#59d0a3;box-shadow:0 0 0 3px rgba(89,208,163,0.15);}
 .modal-select{padding:8px 12px;font-size:13px;border:1px solid var(--border4);border-radius:12px;background:var(--surface2);color:var(--text);font-family:'Inter',inherit;width:100%;}
 .modal-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
 .modal-footer{display:flex;gap:8px;justify-content:flex-end;margin-top:20px;padding-top:16px;border-top:1px solid var(--border2);}
@@ -323,7 +341,7 @@ tr.tint-down td{background:rgba(239,68,68,0.05)!important;}
 .modal-hint{font-size:11px;color:var(--text4);margin-top:-10px;margin-bottom:14px;}
 
 /* ── Summary card extras ── */
-.scard-row2{display:grid;grid-template-columns:1fr 1fr 1fr;gap:0;margin-top:14px;padding-top:12px;border-top:1px solid var(--border2);}
+.scard-row2{display:grid;grid-template-columns:1fr 1fr 1fr;gap:0;margin-top:14px;padding-top:12px;border-top:1px solid rgba(255,255,255,0.08);}
 .scard-sub-col{display:flex;flex-direction:column;gap:2px;}
 .scard-sub-col:not(:last-child){border-right:1px solid var(--border2);padding-right:12px;margin-right:12px;}
 .scard-sub-label{font-size:10px;font-weight:500;color:var(--text4);text-transform:uppercase;letter-spacing:0.06em;}
@@ -332,7 +350,7 @@ tr.tint-down td{background:rgba(239,68,68,0.05)!important;}
 .sparkbar{display:flex;align-items:flex-end;gap:2px;height:40px;margin-top:12px;}
 .spark-b{border-radius:3px 3px 0 0;width:10px;flex-shrink:0;}
 .spark-dark{background:#397968;}
-.spark-light{background:#aedf33;}
+.spark-light{background:rgba(174,223,51,0.5);}
 /* Mid row — alloc + history side by side */
 .mid-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;}
 @media(max-width:800px){
@@ -376,9 +394,9 @@ tr.tint-down td{background:rgba(239,68,68,0.05)!important;}
       <svg width="15" height="15" viewBox="0 0 16 16" fill="none" style="flex-shrink:0;"><rect x="1" y="1" width="6" height="6" rx="1.5" fill="currentColor" opacity="0.9"/><rect x="9" y="1" width="6" height="6" rx="1.5" fill="currentColor" opacity="0.6"/><rect x="1" y="9" width="6" height="6" rx="1.5" fill="currentColor" opacity="0.6"/><rect x="9" y="9" width="6" height="6" rx="1.5" fill="currentColor" opacity="0.6"/></svg>
       <span class="sb-label">Portfolio</span>
     </button>
-    <button class="sb-item" id="sb-fees" data-action="switchTab" data-tab="fees" title="Fees">
+    <button class="sb-item" id="sb-fees" data-action="switchTab" data-tab="fees" title="Transactions">
       <svg width="15" height="15" viewBox="0 0 16 16" fill="none" style="flex-shrink:0;"><path d="M2 4h12M2 8h8M2 12h10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
-      <span class="sb-label">Fees</span>
+      <span class="sb-label">Transactions</span>
     </button>
     <button class="sb-item" id="sb-watchlist" data-action="switchTab" data-tab="watchlist" title="Watchlist">
       <svg width="15" height="15" viewBox="0 0 16 16" fill="none" style="flex-shrink:0;"><circle cx="8" cy="8" r="5" stroke="currentColor" stroke-width="1.5"/><circle cx="8" cy="8" r="2" fill="currentColor"/></svg>
@@ -424,6 +442,11 @@ tr.tint-down td{background:rgba(239,68,68,0.05)!important;}
     Add
     <div class="bn-dot" style="opacity:0!important;"></div>
   </button>
+  <button class="bn-item" id="bn-darkmode" data-action="toggleDark">
+    <svg id="bn-dark-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M21 12.79A9 9 0 1 1 11.21 3a7 7 0 0 0 9.79 9.79z"/></svg>
+    <span id="bn-dark-label">Dark</span>
+    <div class="bn-dot" style="opacity:0!important;"></div>
+  </button>
 </nav>
 
 <!-- Sidebar overlay (mobile) -->
@@ -462,7 +485,7 @@ tr.tint-down td{background:rgba(239,68,68,0.05)!important;}
   <!-- Tab bar -->
   <div class="tab-bar">
     <button class="tab-btn active" data-action="switchTab" data-tab="portfolio">📊 Portfolio</button>
-    <button class="tab-btn" data-action="switchTab" data-tab="fees">🧾 Fees</button>
+    <button class="tab-btn" data-action="switchTab" data-tab="fees">🧾 Transactions</button>
     <button class="tab-btn" data-action="switchTab" data-tab="watchlist">👁 Watchlist</button>
   </div>
 
@@ -601,58 +624,38 @@ tr.tint-down td{background:rgba(239,68,68,0.05)!important;}
 
   <div style="margin-bottom:12px;"></div>
 
-  <!-- US Stocks -->
+  <!-- Holdings — all asset types in one table -->
   <div class="section">
     <div class="sec-head">
-      <div class="sec-title"><span class="dot dot-stale" id="usDot"></span>US stocks<span class="badge b-blue">USD</span></div>
-      <div class="sec-right"><span class="sec-tot" id="usSecTot"></span></div>
-    </div>
-    <div id="usErr"></div>
-    <div class="tbl-wrap"><table>
-      <thead><tr><th>Ticker</th><th class="mob-hide">Name</th><th class="r">Qty</th><th class="r" id="usPH">Price (USD)</th><th class="r mob-hide">24h</th><th class="r mob-hide">Avg cost (USD)</th><th class="r" id="usVH">Value (USD)</th><th class="r mob-hide">Gain / loss</th><th style="width:28px"></th></tr></thead>
-      <tbody id="usB"></tbody>
-    </table></div>
-    </div>
-
-  <!-- ASX Stocks -->
-  <div class="section">
-    <div class="sec-head">
-      <div class="sec-title"><span class="dot dot-stale" id="asxDot"></span>ASX stocks<span class="badge b-green">AUD</span></div>
-      <div class="sec-right"><span class="sec-tot" id="asxSecTot"></span></div>
-    </div>
-    <div id="asxErr"></div>
-    <div class="tbl-wrap"><table>
-      <thead><tr><th>Ticker</th><th class="mob-hide">Name</th><th class="r">Qty</th><th class="r">Price (AUD)</th><th class="r mob-hide">24h</th><th class="r mob-hide">Avg cost (AUD)</th><th class="r">Value (AUD)</th><th class="r mob-hide">Gain / loss</th><th style="width:28px"></th></tr></thead>
-      <tbody id="asxB"></tbody>
-    </table></div>
-    </div>
-
-  <!-- Crypto -->
-  <div class="section">
-    <div class="sec-head">
-      <div class="sec-title"><span class="dot dot-stale" id="crypDot"></span>Crypto<span class="badge b-amber">AUD</span></div>
-      <div class="sec-right"><span class="sec-tot" id="crypSecTot"></span></div>
+      <div class="sec-title">
+        <span class="dot dot-stale" id="allDot"></span>
+        Holdings
+        <span class="sec-tot" id="allSecTot" style="font-size:12px;font-weight:500;color:var(--text3);margin-left:4px;"></span>
+      </div>
+      <div class="sec-right">
+        <div id="usErr" style="display:inline;"></div>
+        <div id="asxErr" style="display:inline;"></div>
+        <div id="metErr" style="display:inline;"></div>
+      </div>
     </div>
     <div class="tbl-wrap"><table>
-      <thead><tr><th>Coin</th><th class="mob-hide">Name</th><th class="r">Qty</th><th class="r">Price (AUD)</th><th class="r mob-hide">24h</th><th class="r mob-hide">Avg cost (AUD)</th><th class="r">Value (AUD)</th><th class="r mob-hide">Gain / loss</th><th style="width:28px"></th></tr></thead>
-      <tbody id="cryB"></tbody>
+      <thead><tr>
+        <th>Ticker</th>
+        <th class="mob-hide">Name</th>
+        <th class="mob-hide">Type</th>
+        <th class="r">Qty</th>
+        <th class="r">Price (AUD)</th>
+        <th class="r mob-hide">24h</th>
+        <th class="r mob-hide">Avg cost</th>
+        <th class="r">Value (AUD)</th>
+        <th class="r mob-hide">Gain / loss</th>
+        <th style="width:28px"></th>
+      </tr></thead>
+      <tbody id="allHoldingsB"></tbody>
     </table></div>
-    </div>
+  </div>
 
-  <!-- Precious Metals -->
-  <div class="section">
-    <div class="sec-head">
-      <div class="sec-title"><span class="dot dot-stale" id="metDot"></span>Precious metals<span class="badge b-gray">AUD &middot; troy oz</span></div>
-      <div class="sec-right"><span class="sec-tot" id="metSecTot"></span></div>
-    </div>
-    <div id="metErr"></div>
-    <div class="tbl-wrap"><table>
-      <thead><tr><th>Symbol</th><th class="mob-hide">Name</th><th class="r mob-hide">Qty (oz)</th><th class="r">Price (AUD/oz)</th><th class="r mob-hide">24h</th><th class="r mob-hide">Avg cost (AUD/oz)</th><th class="r">Value (AUD)</th><th class="r mob-hide">Gain / loss</th><th style="width:28px"></th></tr></thead>
-      <tbody id="metB"></tbody>
-    </table></div>
-    </div>
-
-  <!-- Cash -->
+  <!-- Cash (kept separate — no price feed) -->
   <div class="section">
     <div class="sec-head">
       <div class="sec-title"><span class="badge b-teal">AUD</span>Cash</div>
@@ -662,17 +665,32 @@ tr.tint-down td{background:rgba(239,68,68,0.05)!important;}
       <thead><tr><th>Account name</th><th class="r">Balance (AUD)</th><th style="width:28px"></th></tr></thead>
       <tbody id="cashB"></tbody>
     </table></div>
-    </div>
+  </div>
+
+  <!-- Keep hidden tbody elements for JS compatibility -->
+  <div style="display:none;">
+    <table><tbody id="usB"></tbody></table>
+    <table><tbody id="asxB"></tbody></table>
+    <table><tbody id="cryB"></tbody></table>
+    <table><tbody id="metB"></tbody></table>
+    <span id="usSecTot"></span><span id="asxSecTot"></span>
+    <span id="crypSecTot"></span><span id="metSecTot"></span>
+    <span id="usDot" class="dot dot-stale"></span>
+    <span id="asxDot" class="dot dot-stale"></span>
+    <span id="crypDot" class="dot dot-stale"></span>
+    <span id="metDot" class="dot dot-stale"></span>
+    <span id="usPH"></span><span id="usVH"></span>
+  </div>
 
   </div> <!-- /tab-portfolio -->
 
-  <!-- Fees tab -->
+  <!-- Transactions tab -->
   <div class="tab-panel" id="tab-fees">
 
-  <!-- Fees Ledger -->
+  <!-- Transactions & Fees Ledger -->
   <div class="section">
     <div class="sec-head">
-      <div class="sec-title"><span class="badge b-red">AUD</span>Fees ledger</div>
+      <div class="sec-title"><span class="badge b-red">AUD</span>Transaction &amp; fees ledger</div>
       <div class="sec-right"><span class="sec-tot" id="feesSecTot"></span><button class="csvbtn" data-action="exportCSV">⬇ Export FY CSV</button><button class="addbtn" data-action="showFeesAdd">+ Add fee</button></div>
     </div>
     <div class="fees-summary">
@@ -680,7 +698,7 @@ tr.tint-down td{background:rgba(239,68,68,0.05)!important;}
       <span class="fees-total" id="feesTotal"></span>
     </div>
     <div class="tbl-wrap"><table>
-      <thead><tr><th>Date</th><th>Description</th><th>Category</th><th class="r">Amount (AUD)</th><th style="width:28px"></th></tr></thead>
+      <thead><tr><th>Date</th><th>Description</th><th>Type</th><th class="r">Amount (AUD)</th><th style="width:28px"></th></tr></thead>
       <tbody id="feesB"></tbody>
     </table></div>
     <div class="add-row" id="feesAR" style="display:none;">
@@ -793,6 +811,12 @@ tr.tint-down td{background:rgba(239,68,68,0.05)!important;}
         </div>
       </div>
       <div class="modal-hint" id="modal-hint"></div>
+      <div class="modal-field">
+        <label class="modal-label">Deduct initial cost from cash account (optional)</label>
+        <select class="modal-select" id="modal-new-account">
+          <option value="">— Don't adjust cash —</option>
+        </select>
+      </div>
     </div>
 
     <!-- Transaction fields (existing holding) -->
@@ -823,6 +847,13 @@ tr.tint-down td{background:rgba(239,68,68,0.05)!important;}
       <div class="modal-field">
         <label class="modal-label">Brokerage fee AUD (optional)</label>
         <input class="modal-input" id="modal-txn-fee" type="number" step="any" placeholder="0.00">
+      </div>
+      <div class="modal-field">
+        <label class="modal-label" id="modal-txn-acct-label">Deduct from cash account</label>
+        <select class="modal-select" id="modal-txn-account">
+          <option value="">— Don't adjust cash —</option>
+        </select>
+        <div style="font-size:11px;color:var(--text4);margin-top:4px;" id="modal-txn-acct-hint"></div>
       </div>
     </div>
 
@@ -933,7 +964,10 @@ async function cloudLoad() {
   ['us','asx','cry','met','cash','fees','wl'].forEach(t => rows(t));
   recalcAll();
   ['us','asx','cry','met'].forEach(t => rows(t));
+  renderAllHoldings();
   document.getElementById('rfBtn').disabled = false;
+  // Auto-refresh prices after cloud sync
+  refreshAll();
 }
 
 // ── JSONBin: save (debounced 1.5s) ─────────────────────────────
@@ -1035,12 +1069,12 @@ function buildDrawer(type, i, item, showAud, r){
 function toggleDrawer(type, i){
   const key = type+':'+i;
   openDrawer = (openDrawer===key) ? null : key;
-  rows(type);
+  renderAllHoldings();
   // Pre-fill today's date if form is going to be shown
-  const formId = `txForm_${type}_${i}`;
-  const dateId = `txDate_${type}_${i}`;
-  const dateEl = document.getElementById(dateId);
-  if(dateEl && !dateEl.value) dateEl.value = new Date().toISOString().slice(0,10);
+  setTimeout(() => {
+    const dateEl = document.getElementById(`txDate_${type}_${i}`);
+    if(dateEl && !dateEl.value) dateEl.value = new Date().toISOString().slice(0,10);
+  }, 20);
 }
 function showTxForm(type,i){
   const el=document.getElementById(`txForm_${type}_${i}`);
@@ -1063,17 +1097,18 @@ function saveTxn(type, i){
   S[type][i].txns.push({date, side, qty, price:storePrice, fee});
   recalcFromTxns(type, i);
   if(fee>0){
-    S.fees.push({date, desc:`${side==='buy'?'Buy':'Sell'} ${qty} ${S[type][i].ticker}`, cat:'Transaction Fee', amount:fee});
+    S.fees.push({date, desc:`Brokerage — ${S[type][i].ticker} ${side} ${date}`, cat:'Transaction Fee', amount:fee, txRef:true});
     renderFees();
   }
   save();
-  rows(type);
+  rows(type);renderAllHoldings();
+  renderFees(); // auto-record in ledger
 }
 
 function delTxn(type, i, ti){
   S[type][i].txns.splice(ti,1);
   recalcFromTxns(type,i);
-  save();rows(type);
+  save();rows(type);renderAllHoldings();renderFees();
 }
 
 function recalcFromTxns(type, i){
@@ -1103,12 +1138,11 @@ function recalcAll(){
   });
 }
 
-function upField(t,i,field,v){S[t][i][field]=parseFloat(v)||0;save();rows(t);}
+function upField(t,i,field,v){S[t][i][field]=parseFloat(v)||0;save();rows(t);renderAllHoldings();}
 function delA(t,i){
-  // Remove any auto-generated fee entries tied to this holding's transactions
   S[t].splice(i,1);
   if(openDrawer&&openDrawer.startsWith(t+':')) openDrawer=null;
-  save();rows(t);
+  save();rows(t);renderAllHoldings();
 }
 
 function renderCash(){
@@ -1133,26 +1167,129 @@ function addCash(){
   renderCash();
 }
 
-// ── Fees ledger ─────────────────────────────────────────────────
+// ── Transaction & Fees ledger ────────────────────────────────────
 function fyLabel(){
   const now=new Date();
   const fyStart=now.getMonth()>=6?now.getFullYear():now.getFullYear()-1;
   return{label:`FY${fyStart}/${String(fyStart+1).slice(2)}`,start:new Date(fyStart,6,1),end:new Date(fyStart+1,5,30,23,59,59)};
 }
+
 function renderFees(){
   const body=document.getElementById('feesB');
   const fy=fyLabel();
+  const entries=[];
+
+  // ── Manual fees
+  S.fees.forEach((item,orig)=>{
+    entries.push({
+      date:item.date||'',
+      desc:item.desc||'—',
+      type:'fee',
+      cat:item.cat||'Other',
+      amount:item.amount||0,
+      isDebit:true,
+      orig,
+      deletable:true,
+      reversible:false
+    });
+  });
+
+  // ── All buy/sell transactions from holdings
+  ['us','asx','cry','met'].forEach(assetType=>{
+    S[assetType].forEach((item,assetIdx)=>{
+      (item.txns||[]).forEach((tx,txnIdx)=>{
+        const total = tx.price * tx.qty;
+        entries.push({
+          date:tx.date||'',
+          desc:`${tx.side==='buy'?'Buy':'Sell'} ${f(tx.qty,tx.qty%1===0?0:4)} ${item.ticker}${item.name?' — '+item.name:''}`,
+          type:'trade',
+          cat:tx.side==='buy'?'Purchase':'Sale',
+          amount:total,
+          isDebit:tx.side==='buy',
+          deletable:false,
+          reversible:true,
+          assetType, assetIdx, txnIdx,
+          fee:tx.fee||0,
+          cashAcct:tx.cashAcct!=null?tx.cashAcct:null
+        });
+      });
+    });
+  });
+
   // Sort by date descending
-  const sorted=[...S.fees].sort((a,b)=>new Date(b.date)-new Date(a.date));
-  const fyTotal=S.fees.filter(f=>{const d=new Date(f.date);return d>=fy.start&&d<=fy.end;}).reduce((s,f)=>s+(f.amount||0),0);
+  entries.sort((a,b)=>new Date(b.date)-new Date(a.date));
+
+  // FY totals — fees only
+  const fyFees=entries.filter(e=>e.type==='fee'&&e.isDebit&&(()=>{const d=new Date(e.date);return d>=fy.start&&d<=fy.end;})()).reduce((s,e)=>s+e.amount,0);
   document.getElementById('feesFyLabel').textContent=fy.label+' total fees:';
-  document.getElementById('feesTotal').textContent=fyTotal>0?'-$'+f(fyTotal):'$0.00';
-  document.getElementById('feesSecTot').textContent=fyTotal>0?'-$'+f(fyTotal)+' AUD this FY':'';
-  body.innerHTML=sorted.length?sorted.map((item,i)=>{
-    const orig=S.fees.indexOf(item);
-    const d=item.date?new Date(item.date).toLocaleDateString('en-AU',{day:'2-digit',month:'short',year:'numeric'}):'—';
-    return`<tr><td>${d}</td><td>${item.desc||'—'}</td><td><span class="badge b-gray">${item.cat||'Other'}</span></td><td class="r valbold" style="color:#D85A30;">-$${f(item.amount||0)}</td><td><button class="del" onclick="delFee(${orig})">&#x2715;</button></td></tr>`;
-  }).join(''):'<tr><td colspan="5" style="text-align:center;color:#aaa;padding:16px;">No fees recorded yet</td></tr>';
+  document.getElementById('feesTotal').textContent=fyFees>0?'-$'+f(fyFees):'$0.00';
+  document.getElementById('feesSecTot').textContent=fyFees>0?'-$'+f(fyFees)+' fees this FY':'';
+
+  const TYPE_LABELS={
+    trade:'<span class="badge b-blue" style="font-size:9px;">Trade</span>',
+    fee:  '<span class="badge b-red" style="font-size:9px;">Fee</span>'
+  };
+
+  body.innerHTML=entries.length?entries.map((e,ei)=>{
+    const d=e.date?new Date(e.date).toLocaleDateString('en-AU',{day:'2-digit',month:'short',year:'numeric'}):'—';
+    const amtCol=e.type==='trade'
+      ? `<span style="color:${e.isDebit?'var(--gain-neg)':'var(--gain-pos)'};">${e.isDebit?'-':'+'}\$${f(e.amount)}</span>`
+      : `<span style="color:var(--gain-neg);">-\$${f(e.amount)}</span>`;
+    const actions=e.deletable
+      ? `<button class="del" style="opacity:1;" onclick="delFee(${e.orig})">&#x2715;</button>`
+      : e.reversible
+        ? `<button onclick="reverseTxn('${e.assetType}',${e.assetIdx},${e.txnIdx})" title="Reverse transaction — refunds cash and removes trade" style="font-size:10px;font-weight:600;padding:2px 8px;border:1px solid rgba(248,113,113,0.4);border-radius:99px;background:rgba(248,113,113,0.12);color:#f87171;cursor:pointer;font-family:inherit;white-space:nowrap;">↩ Reverse</button>`
+        : '<span style="color:var(--text4);font-size:10px;">—</span>';
+    return`<tr><td>${d}</td><td>${e.desc}</td><td>${TYPE_LABELS[e.type]||''}</td><td class="r valbold">${amtCol}</td><td style="text-align:right;min-width:90px;">${actions}</td></tr>`;
+  }).join(''):'<tr><td colspan="5" style="text-align:center;color:var(--text4);padding:16px;">No transactions yet</td></tr>';
+}
+
+function reverseTxn(assetType, assetIdx, txnIdx) {
+  const item = S[assetType][assetIdx];
+  if(!item||!item.txns) return;
+  const tx = item.txns[txnIdx];
+  if(!tx) return;
+
+  const label = `${tx.side==='buy'?'Buy':'Sell'} ${f(tx.qty,tx.qty%1===0?0:4)} ${item.ticker}`;
+  if(!confirm(`Reverse "${label}"?\n\nThis will:\n• Remove the transaction from trade history\n• Recalculate avg cost & qty\n${tx.cashAcct!=null?'• Refund $'+f(tx.qty*tx.price+(tx.side==='buy'?tx.fee||0:-(tx.fee||0)))+' to '+S.cash[tx.cashAcct].name:''}${tx.fee>0?'\n• Remove the brokerage fee entry':''}\n\nThis cannot be undone.`)) return;
+
+  // 1. Refund cash account
+  if(tx.cashAcct!=null && S.cash[tx.cashAcct]) {
+    const total = tx.qty * tx.price;
+    const withFee = tx.side==='buy' ? total + (tx.fee||0) : total - (tx.fee||0);
+    // Reverse the original debit/credit
+    S.cash[tx.cashAcct].balance = (S.cash[tx.cashAcct].balance||0) + (tx.side==='buy' ? withFee : -withFee);
+    renderCash();
+  }
+
+  // 2. Remove matching brokerage fee from S.fees if it exists
+  if(tx.fee>0) {
+    // Match on the standardised desc format used when saving
+    const brokerageDesc = `Brokerage — ${item.ticker} ${tx.side} ${tx.date}`;
+    let feeIdx = S.fees.findIndex(fe =>
+      fe.cat==='Transaction Fee' &&
+      fe.desc===brokerageDesc &&
+      Math.abs((fe.amount||0) - tx.fee) < 0.01
+    );
+    // Fallback: match by amount + date + Transaction Fee cat (catches legacy entries)
+    if(feeIdx < 0) {
+      feeIdx = S.fees.findIndex(fe =>
+        fe.cat==='Transaction Fee' &&
+        fe.date===tx.date &&
+        Math.abs((fe.amount||0) - tx.fee) < 0.01
+      );
+    }
+    if(feeIdx >= 0) S.fees.splice(feeIdx, 1);
+  }
+
+  // 3. Remove the transaction and recalc
+  item.txns.splice(txnIdx, 1);
+  recalcFromTxns(assetType, assetIdx);
+  save();
+  rows(assetType);
+  renderAllHoldings();
+  renderFees();
+  summary();
 }
 function delFee(i){S.fees.splice(i,1);save();renderFees();}
 function showFeesAdd(){
@@ -1431,6 +1568,7 @@ async function refreshAll(){
   await Promise.all([fetchUS(),fetchASX(),fetchCry(),fetchMetals(),fetchWl()]);
   document.getElementById('lastUp') && (document.getElementById('lastUp').textContent='Updated '+new Date().toLocaleTimeString('en-AU',{hour:'2-digit',minute:'2-digit'})+' · AUD/USD '+S.audUsd.toFixed(4));
   summary();btn.disabled=false;icon.classList.remove('spin');
+  renderAllHoldings();
   syncWidget();
 }
 
@@ -1452,13 +1590,84 @@ function addA(t){
 
 // ── Dark mode ────────────────────────────────────────────────────
 function toggleDark(){
-  const isDark=document.body.classList.toggle('dark');
-  localStorage.setItem('smsf_dark', isDark?'1':'0');
-  document.getElementById('darkIcon') && (document.getElementById('darkIcon').textContent=isDark?'☀️':'🌙');
-  document.getElementById('darkLabel') && (document.getElementById('darkLabel').textContent=isDark?'Light':'Dark');
-  const pill=document.getElementById('dmPill');
-  if(pill) pill.classList.toggle('on', isDark);
-  if(pieChart){pieChart.update();}
+  const isDark = !document.body.classList.contains('dark');
+  localStorage.setItem('smsf_dark', isDark ? '1' : '0');
+  _applyTheme(isDark);
+  if(pieChart) pieChart.update();
+}
+
+// ── Unified holdings table ───────────────────────────────────────
+const TYPE_BADGE = {
+  us:  '<span class="badge b-blue" style="font-size:9px;">US</span>',
+  asx: '<span class="badge b-green" style="font-size:9px;">ASX</span>',
+  cry: '<span class="badge b-amber" style="font-size:9px;">Crypto</span>',
+  met: '<span class="badge b-gray" style="font-size:9px;">Metal</span>',
+};
+
+function renderAllHoldings() {
+  const body = document.getElementById('allHoldingsB');
+  if(!body) return;
+  const showAud = document.getElementById('audToggle').checked;
+  const r = S.audUsd;
+  const allRows = [];
+
+  ['us','asx','cry','met'].forEach(type => {
+    S[type].forEach((item, i) => {
+      const priceKey = (type==='us'?'us:':type==='asx'?'asx:':type==='cry'?'cry:':'met:')+item.ticker;
+      const p = S.prices[priceKey];
+      const price = p ? p.price : null;
+      const chg   = p ? p.change : null;
+      let dp = price;
+      let val = price !== null ? price * item.qty : null;
+      if(type==='us' && price!==null){ dp = showAud ? price/r : price; val = showAud ? (price*item.qty)/r : price*item.qty; }
+
+      const hasCost = item.cost && item.cost > 0;
+      let gl=null, glPct=null;
+      if(hasCost && val!==null){
+        const tc = item.cost * item.qty;
+        gl = val - tc; glPct = tc>0?(gl/tc)*100:0;
+      }
+
+      const cc  = chg>0?'pos':chg<0?'neg':'';
+      const cs  = chg!==null?(chg>0?'+':'')+f(chg,2)+'%':'—';
+      const isF = type==='cry'||type==='met';
+      const txCount = (item.txns||[]).length;
+      const txBadge = txCount>0?` <span style="font-size:10px;color:var(--text4);font-weight:400;">${txCount} trade${txCount>1?'s':''}</span>`:'';
+      const costDisp = item.cost>0 ? item.cost : '';
+      const isOpen = openDrawer === type+':'+i;
+      const drawerHtml = isOpen ? buildDrawer(type,i,item,showAud,r) : '';
+      const valAUD = type==='us' ? (showAud ? val : (val!==null?val/r:null)) : val;
+
+      allRows.push({
+        valAUD: valAUD||0,
+        html: `<tr class="holding-row${isOpen?' open':''}" onclick="toggleDrawer('${type}',${i})">
+          <td><div class="sym">${item.ticker}${txBadge}</div></td>
+          <td class="mob-hide"><div class="aname">${item.name}</div></td>
+          <td class="mob-hide">${TYPE_BADGE[type]||''}</td>
+          <td class="r"><input class="ni" type="number" step="${isF?'any':'1'}" value="${item.qty}" onclick="event.stopPropagation()" onchange="upField('${type}',${i},'qty',this.value)"></td>
+          <td class="r">${price!==null?'$'+f(dp):'<span class="dim">—</span>'}</td>
+          <td class="r ${cc} mob-hide">${cs}</td>
+          <td class="r mob-hide"><input class="ni" type="number" step="any" value="${costDisp}" placeholder="0.00" onclick="event.stopPropagation()" onchange="upField('${type}',${i},'cost',this.value)"${txCount>0?' title="Auto from transactions" style="color:var(--text3)"':''}></td>
+          <td class="r valbold">${val!==null?'$'+f(val):'<span class="dim">—</span>'}</td>
+          <td class="r mob-hide">${glChip(gl,glPct)}</td>
+          <td><button class="del" onclick="event.stopPropagation();delA('${type}',${i})">&#x2715;</button></td>
+        </tr>${drawerHtml?`<tr class="tx-row"><td colspan="10">${drawerHtml}</td></tr>`:''}`
+      });
+    });
+  });
+
+  allRows.sort((a,b) => b.valAUD - a.valAUD);
+  body.innerHTML = allRows.length
+    ? allRows.map(r=>r.html).join('')
+    : '<tr><td colspan="10" style="text-align:center;color:var(--text4);padding:20px;">No holdings yet — tap + Add to get started</td></tr>';
+
+  const dot = document.getElementById('allDot');
+  const anyLive = Object.keys(S.prices).length > 0;
+  if(dot) dot.className = 'dot ' + (anyLive ? 'dot-live' : 'dot-stale');
+  const allTotal = allRows.reduce((s,row)=>s+row.valAUD,0);
+  const totEl = document.getElementById('allSecTot');
+  if(totEl) totEl.textContent = allTotal>0 ? '$'+f(allTotal)+' AUD' : '';
+  setTimeout(applyRowTints, 50);
 }
 
 // ── Smart Add Modal ──────────────────────────────────────────────
@@ -1482,9 +1691,26 @@ function openAddModal() {
   document.getElementById('modal-txn-date').value  = new Date().toISOString().slice(0,10);
   document.getElementById('modal-ticker-status').textContent = '';
   document.getElementById('modal-ticker-status').style.color = '';
+  // Populate cash account dropdowns
+  _populateAccountSelects();
   _renderSmartModal();
   document.getElementById('addModal').classList.add('open');
   setTimeout(() => document.getElementById('modal-smart-ticker').focus(), 80);
+}
+
+function _populateAccountSelects() {
+  const opts = '<option value="">— Don\'t adjust cash —</option>' +
+    S.cash.map((a,i) => `<option value="${i}">${a.name} ($${f(a.balance||0)} AUD)</option>`).join('');
+  const txnSel = document.getElementById('modal-txn-account');
+  const newSel = document.getElementById('modal-new-account');
+  if(txnSel) txnSel.innerHTML = opts;
+  if(newSel) newSel.innerHTML = opts;
+}
+
+function updateTxnAccountLabel() {
+  const side = document.getElementById('modal-txn-side').value;
+  const lbl  = document.getElementById('modal-txn-acct-label');
+  if(lbl) lbl.textContent = side === 'buy' ? 'Deduct from cash account' : 'Credit to cash account';
 }
 
 function closeAddModal(e) {
@@ -1586,21 +1812,29 @@ function _renderSmartModal() {
 
 function submitAddModal() {
   if(smartMode === 'txn') {
-    const ticker = document.getElementById('modal-smart-ticker').value.trim().toUpperCase();
-    const date   = document.getElementById('modal-txn-date').value;
-    const side   = document.getElementById('modal-txn-side').value;
-    const qty    = parseFloat(document.getElementById('modal-txn-qty').value)||0;
-    const price  = parseFloat(document.getElementById('modal-txn-price').value)||0;
-    const fee    = parseFloat(document.getElementById('modal-txn-fee').value)||0;
+    const ticker  = document.getElementById('modal-smart-ticker').value.trim().toUpperCase();
+    const date    = document.getElementById('modal-txn-date').value;
+    const side    = document.getElementById('modal-txn-side').value;
+    const qty     = parseFloat(document.getElementById('modal-txn-qty').value)||0;
+    const price   = parseFloat(document.getElementById('modal-txn-price').value)||0;
+    const fee     = parseFloat(document.getElementById('modal-txn-fee').value)||0;
+    const acctIdx = document.getElementById('modal-txn-account').value;
     if(!qty || !price) return;
+    // Save transaction
     if(!S[smartFoundType][smartFoundIdx].txns) S[smartFoundType][smartFoundIdx].txns = [];
-    S[smartFoundType][smartFoundIdx].txns.push({date, side, qty, price, fee});
+    const _acct = document.getElementById('modal-txn-account').value;
+S[smartFoundType][smartFoundIdx].txns.push({date, side, qty, price, fee, cashAcct:_acct!==''?parseInt(_acct):null});
     recalcFromTxns(smartFoundType, smartFoundIdx);
-    if(fee > 0) {
-      S.fees.push({date, desc:`${side==='buy'?'Buy':'Sell'} ${qty} ${ticker}`, cat:'Transaction Fee', amount:fee});
-      renderFees();
+    // Adjust cash balance
+    if(acctIdx !== '') {
+      const idx = parseInt(acctIdx);
+      const tradeTotal = qty * price;
+      const totalWithFee = side==='buy' ? tradeTotal + fee : tradeTotal - fee;
+      S.cash[idx].balance = (S.cash[idx].balance||0) + (side==='buy' ? -totalWithFee : totalWithFee);
+      renderCash();
     }
-    save(); rows(smartFoundType);
+    if(fee > 0) S.fees.push({date, desc:`Brokerage — ${ticker} ${side} ${date}`, cat:'Transaction Fee', amount:fee, txRef:true});
+    save(); rows(smartFoundType); renderAllHoldings(); renderFees();
   } else if(smartMode === 'fees') {
     const date   = document.getElementById('modal-fees-date').value;
     const desc   = document.getElementById('modal-fees-desc').value.trim();
@@ -1616,12 +1850,21 @@ function submitAddModal() {
     S.cash.push({name:nm, balance:bal});
     save(); renderCash();
   } else {
-    const tk   = document.getElementById('modal-smart-ticker').value.trim().toUpperCase();
-    const nm   = document.getElementById('modal-name').value.trim() || tk;
-    const qt   = parseFloat(document.getElementById('modal-qty').value)||0;
-    const cost = parseFloat(document.getElementById('modal-cost').value)||0;
+    // New holding
+    const tk      = document.getElementById('modal-smart-ticker').value.trim().toUpperCase();
+    const nm      = document.getElementById('modal-name').value.trim() || tk;
+    const qt      = parseFloat(document.getElementById('modal-qty').value)||0;
+    const cost    = parseFloat(document.getElementById('modal-cost').value)||0;
+    const acctIdx = document.getElementById('modal-new-account').value;
     if(!tk) return;
     S[smartCategory].push({ticker:tk, name:nm, qty:qt, cost, txns:[]});
+    // Deduct initial cost from selected cash account
+    if(acctIdx !== '' && qt > 0 && cost > 0) {
+      const idx = parseInt(acctIdx);
+      const total = qt * cost;
+      S.cash[idx].balance = (S.cash[idx].balance||0) - total;
+      renderCash();
+    }
     save(); rows(smartCategory);
   }
   document.getElementById('addModal').classList.remove('open');
@@ -1898,14 +2141,23 @@ function exportCSV() {
 // ── Boot ─────────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', function() {
 document.getElementById('todayDate').textContent = new Date().toLocaleDateString('en-AU',{weekday:'short',day:'numeric',month:'long',year:'numeric'});
+// Default to dark mode if no preference saved
 const savedTheme = localStorage.getItem('smsf_dark');
-if(savedTheme === '1') {
-  document.body.classList.add('dark');
-  document.getElementById('darkIcon') && (document.getElementById('darkIcon').textContent='☀️');
-  document.getElementById('darkLabel') && (document.getElementById('darkLabel').textContent='Light');
-  const pill=document.getElementById('dmPill');
-  if(pill) pill.classList.add('on');
+const startDark = savedTheme === null ? true : savedTheme === '1';
+function _applyTheme(isDark) {
+  document.body.classList.toggle('dark', isDark);
+  const pill = document.getElementById('dmPill');
+  if(pill) pill.classList.toggle('on', isDark);
+  document.getElementById('darkIcon') && (document.getElementById('darkIcon').textContent = isDark ? '☀️' : '🌙');
+  document.getElementById('darkLabel') && (document.getElementById('darkLabel').textContent = isDark ? 'Light' : 'Dark');
+  const bnIcon = document.getElementById('bn-dark-icon');
+  const bnLabel = document.getElementById('bn-dark-label');
+  if(bnLabel) bnLabel.textContent = isDark ? 'Light' : 'Dark';
+  if(bnIcon) bnIcon.innerHTML = isDark
+    ? '<circle cx="12" cy="12" r="5"/><path d="M12 2v2M12 20v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M2 12h2M20 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/>'
+    : '<path d="M21 12.79A9 9 0 1 1 11.21 3a7 7 0 0 0 9.79 9.79z"/>';
 }
+_applyTheme(startDark);
 function updateSidebarMode() {
   const sb = document.getElementById('sidebar');
   if(window.innerWidth > 800) {
@@ -1959,7 +2211,9 @@ document.addEventListener('click', function(e) {
 document.addEventListener('change', function(e) {
   if(e.target.id === 'audToggle') {
     ['us','asx','cry','met','cash','fees','wl'].forEach(t=>rows(t));
+    renderAllHoldings();
   }
+  if(e.target.id === 'modal-txn-side') updateTxnAccountLabel();
 });
 
 </script>
