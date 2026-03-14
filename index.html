@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<meta name="theme-color" content="#f6f5f4" media="(prefers-color-scheme: light)">
-<meta name="theme-color" content="#0e0e0f" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#eef2f8" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0a1628" media="(prefers-color-scheme: dark)">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
@@ -15,60 +15,59 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
 :root{
-  /* Light: Notion-warm whites + Linear's structured chrome */
-  --bg:#f6f5f4;--surface:#ffffff;--surface2:#faf9f8;--surface3:#f1efed;--surface4:#fbfaf9;
-  --text:#1c1b19;--text2:#6b6860;--text3:#9b9892;--text4:#c4c2bc;
-  --border:rgba(0,0,0,0.07);--border2:rgba(0,0,0,0.05);--border3:rgba(0,0,0,0.04);--border4:rgba(0,0,0,0.12);--border5:rgba(0,0,0,0.22);
-  --alloc-bg:#ebe9e6;
-  --b-blue-bg:#eef2ff;--b-blue-c:#3730a3;
-  --b-green-bg:#f0fdf4;--b-green-c:#166534;
-  --b-amber-bg:#fffbeb;--b-amber-c:#92400e;
-  --b-gray-bg:#f5f4f2;--b-gray-c:#44403c;
-  --b-teal-bg:#f0fdfa;--b-teal-c:#0f766e;
-  --b-red-bg:#fef2f2;--b-red-c:#991b1b;
-  --gl-pos-bg:#f0fdf4;--gl-pos-c:#15803d;
-  --gl-neg-bg:#fef2f2;--gl-neg-c:#b91c1c;
-  --gl-neu-bg:#f5f4f2;--gl-neu-c:#78716c;
-  --err-bg:#fef2f2;
-  --fees-bg:#faf9f8;
-  --okbtn-bg:#1c1b19;--okbtn-c:#faf9f8;
+  --bg:#eef2f8;--surface:#ffffff;--surface2:#f4f7fc;--surface3:#e8eef8;--surface4:#f9fbfe;
+  --text:#0f2044;--text2:#4a6080;--text3:#7a96c2;--text4:#b0c4de;
+  --border:rgba(15,32,68,0.08);--border2:rgba(15,32,68,0.06);--border3:rgba(15,32,68,0.04);--border4:rgba(15,32,68,0.14);--border5:rgba(15,32,68,0.25);
+  --alloc-bg:#dce6f5;
+  --b-blue-bg:#dbeafe;--b-blue-c:#1e3a8a;
+  --b-green-bg:#dcfce7;--b-green-c:#166534;
+  --b-amber-bg:#fef3c7;--b-amber-c:#92400e;
+  --b-gray-bg:#e8eef8;--b-gray-c:#2d4a6e;
+  --b-teal-bg:#ccfbf1;--b-teal-c:#0f766e;
+  --b-red-bg:#fee2e2;--b-red-c:#991b1b;
+  --gl-pos-bg:#dcfce7;--gl-pos-c:#15803d;
+  --gl-neg-bg:#fee2e2;--gl-neg-c:#b91c1c;
+  --gl-neu-bg:#e8eef8;--gl-neu-c:#4a6080;
+  --err-bg:#fee2e2;
+  --fees-bg:#f4f7fc;
+  --okbtn-bg:#1e4fd8;--okbtn-c:#ffffff;
   --gain-pos:#16a34a;--gain-neg:#dc2626;
-  --accent:#5b5bd6;--accent-hover:#4f46e5;
+  --accent:#1e4fd8;--accent-hover:#1a42c0;
+  --sidebar-bg:#0f2044;--sidebar-text:#7a96c2;--sidebar-active:#1e4fd8;
 }
 body.dark{
-  /* Dark: Linear's true dark — near-black with cool-grey surfaces */
-  --bg:#0e0e0f;--surface:#17171a;--surface2:#1e1e22;--surface3:#252529;--surface4:#111113;
-  --text:#e8e7e5;--text2:#8a8885;--text3:#5c5a57;--text4:#3a3836;
-  --border:rgba(255,255,255,0.07);--border2:rgba(255,255,255,0.05);--border3:rgba(255,255,255,0.04);--border4:rgba(255,255,255,0.11);--border5:rgba(255,255,255,0.2);
-  --alloc-bg:#1e1e22;
-  --b-blue-bg:#1e1b4b;--b-blue-c:#a5b4fc;
+  --bg:#0a1628;--surface:#0f2044;--surface2:#162a54;--surface3:#1a3260;--surface4:#0c1c38;
+  --text:#e2eaf8;--text2:#7a96c2;--text3:#4a6080;--text4:#2d4a6e;
+  --border:rgba(255,255,255,0.07);--border2:rgba(255,255,255,0.05);--border3:rgba(255,255,255,0.04);--border4:rgba(255,255,255,0.12);--border5:rgba(255,255,255,0.2);
+  --alloc-bg:#162a54;
+  --b-blue-bg:#1e3a5f;--b-blue-c:#93c5fd;
   --b-green-bg:#052e16;--b-green-c:#86efac;
   --b-amber-bg:#2d1a00;--b-amber-c:#fcd34d;
-  --b-gray-bg:#1e1e22;--b-gray-c:#a8a29e;
+  --b-gray-bg:#162a54;--b-gray-c:#93b4d8;
   --b-teal-bg:#042f2e;--b-teal-c:#5eead4;
   --b-red-bg:#2d0a0a;--b-red-c:#fca5a5;
   --gl-pos-bg:#052e16;--gl-pos-c:#86efac;
   --gl-neg-bg:#2d0a0a;--gl-neg-c:#fca5a5;
-  --gl-neu-bg:#1e1e22;--gl-neu-c:#78716c;
+  --gl-neu-bg:#162a54;--gl-neu-c:#7a96c2;
   --err-bg:#2d0a0a;
-  --fees-bg:#111113;
-  --okbtn-bg:#e8e7e5;--okbtn-c:#0e0e0f;
+  --fees-bg:#0c1c38;
+  --okbtn-bg:#3b6ef5;--okbtn-c:#ffffff;
   --gain-pos:#86efac;--gain-neg:#fca5a5;
-  --accent:#6e6ade;--accent-hover:#7c7aee;
+  --accent:#3b6ef5;--accent-hover:#5082ff;
+  --sidebar-bg:#060e1e;--sidebar-text:#4a6080;--sidebar-active:#1e4fd8;
 }
 *{box-sizing:border-box;margin:0;padding:0;}
-body{font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);color:var(--text);padding:32px;transition:background 0.2s,color 0.2s;font-size:14px;-webkit-font-smoothing:antialiased;}
-.wrap{max-width:1180px;margin:0 auto;padding:1rem 0;}
+body{font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);color:var(--text);transition:background 0.2s,color 0.2s;font-size:14px;-webkit-font-smoothing:antialiased;display:flex;min-height:100vh;}
+.wrap{margin-left:210px;flex:1;padding:28px 32px;min-width:0;}
 .topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:2rem;gap:12px;flex-wrap:wrap;}
 .title-block h1{font-size:20px;font-weight:600;color:var(--text);line-height:1.2;letter-spacing:-0.3px;}
 .top-actions{display:flex;align-items:center;gap:6px;flex-wrap:wrap;}
 .aud-pill{display:flex;align-items:center;gap:6px;font-size:13px;font-weight:500;color:var(--text2);background:var(--surface);border:1px solid var(--border4);border-radius:8px;padding:5px 12px;cursor:pointer;transition:background 0.15s;}
 .aud-pill:hover{background:var(--surface3);}
-.rfbtn{display:flex;align-items:center;gap:6px;font-size:13px;font-weight:500;color:var(--text);background:var(--surface);border:1px solid var(--border4);border-radius:8px;padding:5px 13px;cursor:pointer;transition:background 0.15s,border-color 0.15s;font-family:inherit;}
-.rfbtn:hover{background:var(--surface3);}
-.rfbtn:disabled{opacity:0.4;cursor:not-allowed;}
-.darkbtn{display:flex;align-items:center;gap:6px;font-size:13px;font-weight:500;color:var(--text2);background:var(--surface);border:1px solid var(--border4);border-radius:8px;padding:5px 12px;cursor:pointer;font-family:inherit;transition:background 0.15s;}
-.darkbtn:hover{background:var(--surface3);}
+.rfbtn{display:flex;align-items:center;gap:6px;font-size:13px;font-weight:600;color:#fff;background:var(--accent);border:none;border-radius:8px;padding:6px 14px;cursor:pointer;transition:background 0.15s;font-family:inherit;}
+.rfbtn:hover{background:var(--accent-hover);}
+.rfbtn:disabled{opacity:0.5;cursor:not-allowed;}
+.darkbtn{display:none;}
 .spin{animation:spin 0.9s linear infinite;}
 @keyframes spin{to{transform:rotate(360deg);}}
 .summary{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:10px;margin-bottom:1.25rem;}
@@ -177,7 +176,9 @@ tr.holding-row td:first-child::before{content:'▶';font-size:8px;color:var(--te
 tr.holding-row.open td:first-child::before{transform:rotate(90deg);color:var(--accent);}
 tr.holding-row:hover td{background:var(--surface2);}
 @media(max-width:800px){
-  body{padding:16px;}
+  body{display:block;}
+  .sidebar{display:none;}
+  .wrap{margin-left:0;padding:16px;}
   .summary{grid-template-columns:repeat(2,minmax(0,1fr));}
   .dash{flex-direction:column;align-items:stretch;}
   .dash-divider{width:100%;height:1px;}
@@ -195,7 +196,7 @@ tr.holding-row:hover td{background:var(--surface2);}
   .sval{font-size:17px;}
 }
 /* ── Tabs ── */
-.tab-bar{display:flex;gap:2px;margin-bottom:1.25rem;background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:4px;}
+.tab-bar{display:none;gap:2px;margin-bottom:1.25rem;background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:4px;}
 .tab-btn{flex:1;padding:7px 16px;font-size:13px;font-weight:500;color:var(--text3);background:transparent;border:none;border-radius:9px;cursor:pointer;font-family:inherit;transition:background 0.15s,color 0.15s;}
 .tab-btn:hover{color:var(--text);background:var(--surface3);}
 .tab-btn.active{background:var(--accent);color:#fff;font-weight:600;}
@@ -203,7 +204,7 @@ body.dark .tab-btn.active{box-shadow:0 1px 8px rgba(110,106,222,0.3);}
 .tab-btn.active:hover{background:var(--accent-hover);}
 .tab-panel{display:none;}
 .tab-panel.active{display:block;}
-@media(max-width:800px){.tab-btn{font-size:12px;padding:6px 8px;}}
+@media(max-width:800px){.tab-bar{display:flex;}.tab-btn{font-size:12px;padding:6px 8px;}}
 /* ── Portfolio history chart ── */
 .history-section{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:1.1rem 1.25rem;margin-bottom:1.25rem;transition:background 0.2s;}
 .history-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:8px;}
@@ -237,9 +238,74 @@ tr.tint-down td{background:rgba(239,68,68,0.05)!important;}
 .tab-panel.active{display:block;opacity:1;transform:translateY(0);}
 .tab-panel.entering{display:block;animation:tabIn 0.2s ease forwards;}
 @keyframes tabIn{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
+/* ── Sidebar ── */
+.sidebar{width:210px;flex-shrink:0;background:var(--sidebar-bg);display:flex;flex-direction:column;min-height:100vh;position:fixed;top:0;left:0;z-index:100;}
+.sb-logo{padding:22px 18px 18px;font-size:15px;font-weight:600;color:#fff;display:flex;align-items:center;gap:10px;border-bottom:1px solid rgba(255,255,255,0.07);}
+.sb-logo-dot{width:28px;height:28px;background:var(--sidebar-active);border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.sb-nav{flex:1;padding:10px 8px;display:flex;flex-direction:column;gap:2px;}
+.sb-item{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:8px;color:var(--sidebar-text);cursor:pointer;font-size:13px;font-weight:500;transition:background 0.15s,color 0.15s;border:none;background:transparent;font-family:inherit;width:100%;text-align:left;}
+.sb-item:hover{background:rgba(255,255,255,0.06);color:#cbd5e1;}
+.sb-item.active{background:var(--sidebar-active);color:#fff;}
+.sb-item svg{flex-shrink:0;}
+.sb-section{font-size:10px;font-weight:600;color:#2d4a6e;text-transform:uppercase;letter-spacing:0.08em;padding:12px 12px 4px;}
+.sb-bottom{padding:10px 8px 20px;border-top:1px solid rgba(255,255,255,0.07);}
+.sb-dm{display:flex;align-items:center;justify-content:space-between;padding:8px 12px;color:var(--sidebar-text);font-size:12px;font-weight:500;}
+.dm-pill{width:34px;height:19px;background:rgba(255,255,255,0.15);border-radius:99px;position:relative;cursor:pointer;flex-shrink:0;transition:background 0.2s;}
+.dm-pill.on{background:var(--sidebar-active);}
+.dm-knob{width:15px;height:15px;background:#fff;border-radius:50%;position:absolute;top:2px;left:2px;transition:left 0.2s;}
+.dm-pill.on .dm-knob{left:17px;}
+/* ── Add Holding Modal ── */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.45);z-index:200;align-items:center;justify-content:center;}
+.modal-overlay.open{display:flex;}
+.modal{background:var(--surface);border:1px solid var(--border4);border-radius:14px;padding:24px;width:460px;max-width:calc(100vw - 32px);position:relative;}
+.modal-title{font-size:15px;font-weight:600;color:var(--text);margin-bottom:4px;}
+.modal-sub{font-size:12px;color:var(--text3);margin-bottom:18px;}
+.modal-close{position:absolute;top:14px;right:14px;background:none;border:none;color:var(--text3);font-size:18px;cursor:pointer;line-height:1;padding:2px 7px;border-radius:5px;}
+.modal-close:hover{color:var(--text);background:var(--surface3);}
+.modal-field{display:flex;flex-direction:column;gap:5px;margin-bottom:14px;}
+.modal-label{font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:0.07em;}
+.modal-input{padding:8px 10px;font-size:13px;border:1px solid var(--border4);border-radius:8px;background:var(--surface2);color:var(--text);font-family:'Inter',inherit;transition:border-color 0.15s;width:100%;}
+.modal-input:focus{outline:none;border-color:var(--accent);}
+.modal-select{padding:8px 10px;font-size:13px;border:1px solid var(--border4);border-radius:8px;background:var(--surface2);color:var(--text);font-family:'Inter',inherit;width:100%;}
+.modal-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.modal-footer{display:flex;gap:8px;justify-content:flex-end;margin-top:20px;padding-top:16px;border-top:1px solid var(--border2);}
+.modal-type-tabs{display:flex;gap:3px;margin-bottom:18px;background:var(--surface2);border-radius:9px;padding:3px;}
+.modal-type-btn{flex:1;padding:6px 4px;font-size:12px;font-weight:500;color:var(--text3);background:transparent;border:none;border-radius:7px;cursor:pointer;font-family:inherit;transition:background 0.15s,color 0.15s;text-align:center;}
+.modal-type-btn.active{background:var(--accent);color:#fff;}
+.modal-type-btn:not(.active):hover{background:var(--surface3);color:var(--text);}
+.modal-hint{font-size:11px;color:var(--text4);margin-top:-10px;margin-bottom:14px;}
 </style>
 </head>
 <body>
+<nav class="sidebar" id="sidebar">
+  <div class="sb-logo">
+    <div class="sb-logo-dot">
+      <svg width="15" height="15" viewBox="0 0 16 16" fill="none"><polyline points="2,11 6,7 9,9 14,4" stroke="#fff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </div>
+    SMSF
+  </div>
+  <div class="sb-nav">
+    <div class="sb-section">Views</div>
+    <button class="sb-item active" id="sb-portfolio" onclick="switchTab('portfolio')">
+      <svg width="15" height="15" viewBox="0 0 16 16" fill="none"><rect x="1" y="1" width="6" height="6" rx="1.5" fill="currentColor" opacity="0.9"/><rect x="9" y="1" width="6" height="6" rx="1.5" fill="currentColor" opacity="0.6"/><rect x="1" y="9" width="6" height="6" rx="1.5" fill="currentColor" opacity="0.6"/><rect x="9" y="9" width="6" height="6" rx="1.5" fill="currentColor" opacity="0.6"/></svg>
+      Portfolio
+    </button>
+    <button class="sb-item" id="sb-fees" onclick="switchTab('fees')">
+      <svg width="15" height="15" viewBox="0 0 16 16" fill="none"><path d="M2 4h12M2 8h8M2 12h10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+      Fees
+    </button>
+    <button class="sb-item" id="sb-watchlist" onclick="switchTab('watchlist')">
+      <svg width="15" height="15" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="5" stroke="currentColor" stroke-width="1.5"/><circle cx="8" cy="8" r="2" fill="currentColor"/></svg>
+      Watchlist
+    </button>
+  </div>
+  <div class="sb-bottom">
+    <div class="sb-dm">
+      <span>Dark mode</span>
+      <div class="dm-pill" id="dmPill" onclick="toggleDark()"><div class="dm-knob"></div></div>
+    </div>
+  </div>
+</nav>
 <div class="wrap">
   <div class="topbar">
     <div class="title-block">
@@ -251,6 +317,7 @@ tr.tint-down td{background:rgba(239,68,68,0.05)!important;}
     </div>
     <div class="top-actions">
       <label class="aud-pill"><input type="checkbox" id="audToggle" checked><span>US in AUD</span></label>
+      <button class="addbtn" style="font-size:13px;padding:5px 14px;border-radius:8px;" onclick="openAddModal()">+ Add holding</button>
       <button class="darkbtn" id="darkBtn" onclick="toggleDark()">
         <span id="darkIcon">🌙</span><span id="darkLabel">Dark</span>
       </button>
@@ -320,102 +387,64 @@ tr.tint-down td{background:rgba(239,68,68,0.05)!important;}
   <div class="section">
     <div class="sec-head">
       <div class="sec-title"><span class="dot dot-stale" id="usDot"></span>US stocks<span class="badge b-blue">USD</span></div>
-      <div class="sec-right"><span class="sec-tot" id="usSecTot"></span><button class="addbtn" onclick="showAdd('us')">+ Add</button></div>
+      <div class="sec-right"><span class="sec-tot" id="usSecTot"></span></div>
     </div>
     <div id="usErr"></div>
     <div class="tbl-wrap"><table>
       <thead><tr><th>Ticker</th><th class="mob-hide">Name</th><th class="r">Qty</th><th class="r" id="usPH">Price (USD)</th><th class="r mob-hide">24h</th><th class="r mob-hide">Avg cost (USD)</th><th class="r" id="usVH">Value (USD)</th><th class="r mob-hide">Gain / loss</th><th style="width:28px"></th></tr></thead>
       <tbody id="usB"></tbody>
     </table></div>
-    <div class="add-row" id="usAR" style="display:none;">
-      <input id="usTk" placeholder="Ticker (e.g. TSLA)" style="flex:none;width:110px;">
-      <input id="usNm" placeholder="Name">
-      <input id="usQt" placeholder="Qty" type="number" style="flex:none;width:68px;">
-      <input id="usCost" placeholder="Avg cost USD" type="number" step="any" style="flex:none;width:120px;">
-      <button class="okbtn" onclick="addA('us')">Add</button>
-      <button class="addbtn" onclick="hideAdd('us')">Cancel</button>
     </div>
-  </div>
 
   <!-- ASX Stocks -->
   <div class="section">
     <div class="sec-head">
       <div class="sec-title"><span class="dot dot-stale" id="asxDot"></span>ASX stocks<span class="badge b-green">AUD</span></div>
-      <div class="sec-right"><span class="sec-tot" id="asxSecTot"></span><button class="addbtn" onclick="showAdd('asx')">+ Add</button></div>
+      <div class="sec-right"><span class="sec-tot" id="asxSecTot"></span></div>
     </div>
     <div id="asxErr"></div>
     <div class="tbl-wrap"><table>
       <thead><tr><th>Ticker</th><th class="mob-hide">Name</th><th class="r">Qty</th><th class="r">Price (AUD)</th><th class="r mob-hide">24h</th><th class="r mob-hide">Avg cost (AUD)</th><th class="r">Value (AUD)</th><th class="r mob-hide">Gain / loss</th><th style="width:28px"></th></tr></thead>
       <tbody id="asxB"></tbody>
     </table></div>
-    <div class="add-row" id="asxAR" style="display:none;">
-      <input id="asxTk" placeholder="Ticker (e.g. CBA)" style="flex:none;width:110px;">
-      <input id="asxNm" placeholder="Name">
-      <input id="asxQt" placeholder="Qty" type="number" style="flex:none;width:68px;">
-      <input id="asxCost" placeholder="Avg cost AUD" type="number" step="any" style="flex:none;width:120px;">
-      <button class="okbtn" onclick="addA('asx')">Add</button>
-      <button class="addbtn" onclick="hideAdd('asx')">Cancel</button>
     </div>
-  </div>
 
   <!-- Crypto -->
   <div class="section">
     <div class="sec-head">
       <div class="sec-title"><span class="dot dot-stale" id="crypDot"></span>Crypto<span class="badge b-amber">AUD</span></div>
-      <div class="sec-right"><span class="sec-tot" id="crypSecTot"></span><button class="addbtn" onclick="showAdd('cry')">+ Add</button></div>
+      <div class="sec-right"><span class="sec-tot" id="crypSecTot"></span></div>
     </div>
     <div class="tbl-wrap"><table>
       <thead><tr><th>Coin</th><th class="mob-hide">Name</th><th class="r">Qty</th><th class="r">Price (AUD)</th><th class="r mob-hide">24h</th><th class="r mob-hide">Avg cost (AUD)</th><th class="r">Value (AUD)</th><th class="r mob-hide">Gain / loss</th><th style="width:28px"></th></tr></thead>
       <tbody id="cryB"></tbody>
     </table></div>
-    <div class="add-row" id="cryAR" style="display:none;">
-      <input id="cryTk" placeholder="Symbol (e.g. BTC)" style="flex:none;width:110px;">
-      <input id="cryNm" placeholder="Name">
-      <input id="cryQt" placeholder="Qty" type="number" step="any" style="flex:none;width:68px;">
-      <input id="cryCost" placeholder="Avg cost AUD" type="number" step="any" style="flex:none;width:120px;">
-      <button class="okbtn" onclick="addA('cry')">Add</button>
-      <button class="addbtn" onclick="hideAdd('cry')">Cancel</button>
     </div>
-  </div>
 
   <!-- Precious Metals -->
   <div class="section">
     <div class="sec-head">
       <div class="sec-title"><span class="dot dot-stale" id="metDot"></span>Precious metals<span class="badge b-gray">AUD &middot; troy oz</span></div>
-      <div class="sec-right"><span class="sec-tot" id="metSecTot"></span><button class="addbtn" onclick="showAdd('met')">+ Add</button></div>
+      <div class="sec-right"><span class="sec-tot" id="metSecTot"></span></div>
     </div>
     <div id="metErr"></div>
     <div class="tbl-wrap"><table>
       <thead><tr><th>Symbol</th><th class="mob-hide">Name</th><th class="r mob-hide">Qty (oz)</th><th class="r">Price (AUD/oz)</th><th class="r mob-hide">24h</th><th class="r mob-hide">Avg cost (AUD/oz)</th><th class="r">Value (AUD)</th><th class="r mob-hide">Gain / loss</th><th style="width:28px"></th></tr></thead>
       <tbody id="metB"></tbody>
     </table></div>
-    <div class="add-row" id="metAR" style="display:none;">
-      <input id="metTk" placeholder="XAU / XAG / XPT / XPD" style="flex:none;width:140px;">
-      <input id="metNm" placeholder="Name (e.g. Gold)">
-      <input id="metQt" placeholder="Qty (oz)" type="number" step="any" style="flex:none;width:80px;">
-      <input id="metCost" placeholder="Avg cost AUD/oz" type="number" step="any" style="flex:none;width:130px;">
-      <button class="okbtn" onclick="addA('met')">Add</button>
-      <button class="addbtn" onclick="hideAdd('met')">Cancel</button>
     </div>
-  </div>
 
   <!-- Cash -->
   <div class="section">
     <div class="sec-head">
       <div class="sec-title"><span class="badge b-teal">AUD</span>Cash</div>
-      <div class="sec-right"><span class="sec-tot" id="cashSecTot"></span><button class="addbtn" onclick="showCashAdd()">+ Add</button></div>
+      <div class="sec-right"><span class="sec-tot" id="cashSecTot"></span></div>
     </div>
     <div class="tbl-wrap"><table>
       <thead><tr><th>Account name</th><th class="r">Balance (AUD)</th><th style="width:28px"></th></tr></thead>
       <tbody id="cashB"></tbody>
     </table></div>
-    <div class="add-row" id="cashAR" style="display:none;">
-      <input id="cashNm" placeholder="Account name (e.g. CBA Savings)">
-      <input id="cashBal" placeholder="Balance AUD" type="number" step="any" style="flex:none;width:140px;">
-      <button class="okbtn" onclick="addCash()">Add</button>
-      <button class="addbtn" onclick="hideCashAdd()">Cancel</button>
     </div>
-  </div>
 
   </div> <!-- /tab-portfolio -->
 
@@ -492,6 +521,97 @@ tr.tint-down td{background:rgba(239,68,68,0.05)!important;}
   </div> <!-- /tab-watchlist -->
 
   <div class="footer">Prices: Finnhub (US &amp; ASX) · gold-api.com (metals) · CoinGecko (crypto). Cash and fees entered manually. Portfolio synced to cloud via JSONBin. Verify all figures with your SMSF accountant.</div>
+</div>
+
+<!-- Add Holding Modal -->
+<div class="modal-overlay" id="addModal" onclick="closeAddModal(event)">
+  <div class="modal">
+    <div class="modal-title">Add holding</div>
+    <div class="modal-sub">Select a category and fill in the details</div>
+    <button class="modal-close" onclick="closeAddModal()">✕</button>
+
+    <div class="modal-type-tabs">
+      <button class="modal-type-btn active" onclick="setModalType('us')">US Stock</button>
+      <button class="modal-type-btn" onclick="setModalType('asx')">ASX Stock</button>
+      <button class="modal-type-btn" onclick="setModalType('cry')">Crypto</button>
+      <button class="modal-type-btn" onclick="setModalType('met')">Metal</button>
+      <button class="modal-type-btn" onclick="setModalType('cash')">Cash</button>
+      <button class="modal-type-btn" onclick="setModalType('fees')">Fee</button>
+    </div>
+
+    <!-- US / ASX / Crypto / Metal fields -->
+    <div id="modal-holding-fields">
+      <div class="modal-row">
+        <div class="modal-field">
+          <label class="modal-label" id="modal-ticker-label">Ticker</label>
+          <input class="modal-input" id="modal-ticker" placeholder="e.g. TSLA">
+        </div>
+        <div class="modal-field">
+          <label class="modal-label">Name</label>
+          <input class="modal-input" id="modal-name" placeholder="e.g. Tesla Inc">
+        </div>
+      </div>
+      <div class="modal-row">
+        <div class="modal-field">
+          <label class="modal-label" id="modal-qty-label">Qty</label>
+          <input class="modal-input" id="modal-qty" type="number" step="any" placeholder="0">
+        </div>
+        <div class="modal-field">
+          <label class="modal-label" id="modal-cost-label">Avg cost (AUD)</label>
+          <input class="modal-input" id="modal-cost" type="number" step="any" placeholder="0.00">
+        </div>
+      </div>
+      <div class="modal-hint" id="modal-hint">Prices fetched automatically from Finnhub after adding.</div>
+    </div>
+
+    <!-- Cash fields -->
+    <div id="modal-cash-fields" style="display:none;">
+      <div class="modal-field">
+        <label class="modal-label">Account name</label>
+        <input class="modal-input" id="modal-cash-name" placeholder="e.g. CBA Savings Account">
+      </div>
+      <div class="modal-field">
+        <label class="modal-label">Balance (AUD)</label>
+        <input class="modal-input" id="modal-cash-bal" type="number" step="any" placeholder="0.00">
+      </div>
+    </div>
+
+    <!-- Fees fields -->
+    <div id="modal-fees-fields" style="display:none;">
+      <div class="modal-row">
+        <div class="modal-field">
+          <label class="modal-label">Date</label>
+          <input class="modal-input" id="modal-fees-date" type="date">
+        </div>
+        <div class="modal-field">
+          <label class="modal-label">Amount (AUD)</label>
+          <input class="modal-input" id="modal-fees-amt" type="number" step="any" placeholder="0.00">
+        </div>
+      </div>
+      <div class="modal-field">
+        <label class="modal-label">Description</label>
+        <input class="modal-input" id="modal-fees-desc" placeholder="e.g. Annual audit fee">
+      </div>
+      <div class="modal-field">
+        <label class="modal-label">Category</label>
+        <select class="modal-select" id="modal-fees-cat">
+          <option value="Accounting">Accounting</option>
+          <option value="Audit">Audit</option>
+          <option value="Financial advice">Financial advice</option>
+          <option value="Legal">Legal</option>
+          <option value="Administration">Administration</option>
+          <option value="Investment management">Investment management</option>
+          <option value="Transaction Fee">Transaction Fee</option>
+          <option value="Other">Other</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <button class="addbtn" style="padding:7px 16px;" onclick="closeAddModal()">Cancel</button>
+      <button class="okbtn" style="padding:7px 20px;" onclick="submitAddModal()">Add</button>
+    </div>
+  </div>
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
@@ -1065,10 +1185,98 @@ document.getElementById('audToggle').addEventListener('change',()=>['us','asx','
 function toggleDark(){
   const isDark=document.body.classList.toggle('dark');
   localStorage.setItem('smsf_dark', isDark?'1':'0');
-  document.getElementById('darkIcon').textContent=isDark?'☀️':'🌙';
-  document.getElementById('darkLabel').textContent=isDark?'Light':'Dark';
-  if(pieChart){pieChart.options.plugins.tooltip.bodyColor=isDark?'#e8e8e6':'#1a1a1a';pieChart.update();}
+  document.getElementById('darkIcon') && (document.getElementById('darkIcon').textContent=isDark?'☀️':'🌙');
+  document.getElementById('darkLabel') && (document.getElementById('darkLabel').textContent=isDark?'Light':'Dark');
+  const pill=document.getElementById('dmPill');
+  if(pill) pill.classList.toggle('on', isDark);
+  if(pieChart){pieChart.update();}
 }
+
+// ── Add Holding Modal ────────────────────────────────────────────
+let modalType = 'us';
+const MODAL_HINTS = {
+  us:   'Price fetched automatically from Finnhub. Enter avg cost in AUD.',
+  asx:  'Use ASX ticker without .AX suffix (e.g. CBA). Price fetched automatically.',
+  cry:  'Use CoinGecko symbol (e.g. BTC, ETH, SOL). Price fetched automatically.',
+  met:  'Use XAU (gold), XAG (silver), XPT (platinum) or XPD (palladium).',
+  cash: 'Cash accounts are not price-fetched — balance is entered manually.',
+  fees: 'Fee will appear in the Fees ledger and count toward your FY total.'
+};
+const MODAL_TICKER_LABELS = { us:'Ticker', asx:'Ticker', cry:'Symbol', met:'Symbol', cash:'' };
+const MODAL_QTY_LABELS    = { us:'Qty (shares)', asx:'Qty (shares)', cry:'Qty (coins)', met:'Qty (oz)', cash:'' };
+const MODAL_COST_LABELS   = { us:'Avg cost (AUD)', asx:'Avg cost (AUD)', cry:'Avg cost (AUD)', met:'Avg cost (AUD/oz)', met2:'', cash:'', fees:'' };
+const MODAL_TICKER_PH     = { us:'e.g. TSLA', asx:'e.g. CBA', cry:'e.g. BTC', met:'XAU / XAG / XPT / XPD', cash:'' };
+
+function openAddModal() {
+  setModalType('us');
+  document.getElementById('modal-ticker').value='';
+  document.getElementById('modal-name').value='';
+  document.getElementById('modal-qty').value='';
+  document.getElementById('modal-cost').value='';
+  document.getElementById('modal-cash-name').value='';
+  document.getElementById('modal-cash-bal').value='';
+  document.getElementById('modal-fees-desc').value='';
+  document.getElementById('modal-fees-amt').value='';
+  document.getElementById('modal-fees-date').value=new Date().toISOString().slice(0,10);
+  document.getElementById('addModal').classList.add('open');
+  setTimeout(()=>document.getElementById('modal-ticker').focus(), 50);
+}
+function closeAddModal(e) {
+  if(e && e.target !== document.getElementById('addModal')) return;
+  document.getElementById('addModal').classList.remove('open');
+}
+function setModalType(type) {
+  modalType = type;
+  document.querySelectorAll('.modal-type-btn').forEach((b,i) => {
+    const types = ['us','asx','cry','met','cash'];
+    b.classList.toggle('active', types[i] === type);
+  });
+  const isCash = type === 'cash';
+  const isFees = type === 'fees';
+  document.getElementById('modal-holding-fields').style.display = (!isCash && !isFees) ? 'block' : 'none';
+  document.getElementById('modal-cash-fields').style.display = isCash ? 'block' : 'none';
+  document.getElementById('modal-fees-fields').style.display = isFees ? 'block' : 'none';
+  if(isFees) {
+    // Pre-fill today's date
+    const d = document.getElementById('modal-fees-date');
+    if(d && !d.value) d.value = new Date().toISOString().slice(0,10);
+  }
+  if(!isCash && !isFees) {
+    document.getElementById('modal-ticker-label').textContent = MODAL_TICKER_LABELS[type];
+    document.getElementById('modal-ticker').placeholder = MODAL_TICKER_PH[type];
+    document.getElementById('modal-qty-label').textContent = MODAL_QTY_LABELS[type];
+    document.getElementById('modal-cost-label').textContent = MODAL_COST_LABELS[type];
+    document.getElementById('modal-hint').textContent = MODAL_HINTS[type];
+  }
+}
+function submitAddModal() {
+  if(modalType === 'fees') {
+    const date = document.getElementById('modal-fees-date').value;
+    const desc = document.getElementById('modal-fees-desc').value.trim();
+    const cat  = document.getElementById('modal-fees-cat').value;
+    const amount = parseFloat(document.getElementById('modal-fees-amt').value)||0;
+    if(!desc || !amount) return;
+    S.fees.push({date, desc, cat, amount});
+    save(); renderFees();
+  } else if(modalType === 'cash') {
+    const nm = document.getElementById('modal-cash-name').value.trim();
+    const bal = parseFloat(document.getElementById('modal-cash-bal').value)||0;
+    if(!nm) return;
+    S.cash.push({name:nm, balance:bal});
+    save(); renderCash();
+  } else {
+    const tk = document.getElementById('modal-ticker').value.trim().toUpperCase();
+    const nm = document.getElementById('modal-name').value.trim() || tk;
+    const qt = parseFloat(document.getElementById('modal-qty').value)||0;
+    const cost = parseFloat(document.getElementById('modal-cost').value)||0;
+    if(!tk) return;
+    S[modalType].push({ticker:tk, name:nm, qty:qt, cost, txns:[]});
+    save(); rows(modalType);
+  }
+  document.getElementById('addModal').classList.remove('open');
+}
+// Close on Escape key
+document.addEventListener('keydown', e => { if(e.key==='Escape') document.getElementById('addModal').classList.remove('open'); });
 
 // ── Tabs ─────────────────────────────────────────────────────────
 
@@ -1077,6 +1285,11 @@ function switchTab(name) {
   document.querySelectorAll('.tab-btn').forEach((b,i) => {
     const tabs = ['portfolio','fees','watchlist'];
     b.classList.toggle('active', tabs[i] === name);
+  });
+  // Update sidebar
+  ['portfolio','fees','watchlist'].forEach(t => {
+    const el = document.getElementById('sb-'+t);
+    if(el) el.classList.toggle('active', t === name);
   });
   document.querySelectorAll('.tab-panel').forEach(p => {
     if(p.id === 'tab-'+name) {
@@ -1315,8 +1528,10 @@ document.getElementById('todayDate').textContent = new Date().toLocaleDateString
 const savedTheme = localStorage.getItem('smsf_dark');
 if(savedTheme === '1') {
   document.body.classList.add('dark');
-  document.getElementById('darkIcon').textContent='☀️';
-  document.getElementById('darkLabel').textContent='Light';
+  document.getElementById('darkIcon') && (document.getElementById('darkIcon').textContent='☀️');
+  document.getElementById('darkLabel') && (document.getElementById('darkLabel').textContent='Light');
+  const pill=document.getElementById('dmPill');
+  if(pill) pill.classList.add('on');
 }
 cloudLoad();
 renderHistoryChart();
