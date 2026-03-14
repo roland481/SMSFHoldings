@@ -2119,100 +2119,108 @@ function importSwyftxCSV(input) {
   reader.onload = function(e) {
     try {
       const text = e.target.result;
-      const lines = text.split('\n').map(l => l.trim()).filter(l => l);
-      if(lines.length < 2) { alert('CSV appears empty.'); return; }
+      const rawLines = text.split('\n').map(l => l.trim()).filter(l => l && !l.match(/^[A-Za-z ]+$/));
+      if(rawLines.length < 2) { alert('CSV appears empty.'); return; }
 
-      // Parse header — Swyftx columns:
-      // Amount, Asset, AUD Value, Currency, Date, Address, Type,
-      // Fee (AUD), Fee Amount, Fee Asset, Rate, Reference, Unique ID
-      const headers = lines[0].split(',').map(h => h.trim().replace(/^"|"$/g,'').toLowerCase());
-      const col = name => headers.findIndex(h => h.includes(name));
+      const headerIdx = rawLines.findIndex(l => l.toLowerCase().includes('date') && (l.toLowerCase().includes('event') || l.toLowerCase().includes('type')));
+      if(headerIdx === -1) { alert('Could not find header row in CSV.'); return; }
 
-      const iAmount   = col('amount');
-      const iAsset    = col('asset');
-      const iAudVal   = col('aud value');
-      const iDate     = col('date');
-      const iType     = col('type');
-      const iFeeAud   = col('fee (aud)') >= 0 ? col('fee (aud)') : col('fee');
-      const iUniqueId = col('unique');
+      const headers = rawLines[headerIdx].split(',').map(h => h.trim().replace(/^"|"$/g,'').toLowerCase());
+      const col = name => headers.findIndex(h => h === name);
+      const colInc = name => headers.findIndex(h => h.includes(name));
 
-      let imported = 0, skipped = 0, ignored = 0;
+      const iDate  = col('date');
+      const iEvent = col('event') >= 0 ? col('event') : col('type');
+      const iAsset = col('asset');
+      const iAmt   = col('amount');
+      const iAud   = col('aud value') >= 0 ? col('aud value') : col('value');
+      const iFee   = col('fee amount') >= 0 ? col('fee amount') : colInc('fee');
+      const iUID   = col('uuid') >= 0 ? col('uuid') : col('transaction id');
 
-      for(let i = 1; i < lines.length; i++) {
-        const cols = lines[i].match(/(".*?"|[^,]+)(?=,|$)/g) || lines[i].split(',');
+      // Pre-scan trade count
+      let tradeCount = 0;
+      for(let i = headerIdx+1; i < rawLines.length; i++) {
+        const c = rawLines[i].split(',');
+        const ev = (c[iEvent]||'').toLowerCase().trim();
+        const as = (c[iAsset]||'').trim().toUpperCase();
+        if((ev==='buy'||ev==='sell') && as && as!=='AUD') tradeCount++;
+      }
+      if(tradeCount === 0) { alert('No buy/sell trades found in this CSV.'); return; }
+
+      // Ask which cash account to deduct from
+      let cashAcctIdx = null;
+      if(S.cash.length > 0) {
+        const opts = S.cash.map((a,i) => `${i+1}. ${a.name} ($${f(a.balance||0)} AUD)`).join('\n');
+        const ans = prompt(
+          `Found ${tradeCount} trade${tradeCount!==1?'s':''} to import.\n\nDeduct from which cash account?\n\n${opts}\n\nEnter number, or 0 to skip:`
+        );
+        if(ans === null) return;
+        const n = parseInt(ans);
+        if(n >= 1 && n <= S.cash.length) cashAcctIdx = n - 1;
+      }
+
+      let imported=0, skipped=0, ignored=0;
+
+      for(let i = headerIdx+1; i < rawLines.length; i++) {
+        const cols = rawLines[i].split(',');
         const clean = cols.map(c => (c||'').trim().replace(/^"|"$/g,''));
 
-        const type   = (clean[iType]||'').toLowerCase();
+        const event  = (clean[iEvent]||'').toLowerCase().trim();
         const asset  = (clean[iAsset]||'').trim().toUpperCase();
-        const amount = parseFloat(clean[iAmount]||0);
-        const audVal = parseFloat(clean[iAudVal]||0);
-        const feeAud = parseFloat(iFeeAud >= 0 ? clean[iFeeAud]||0 : 0);
+        const amount = parseFloat(clean[iAmt]||0);
+        const audVal = parseFloat(clean[iAud]||0);
+        const fee    = parseFloat(iFee>=0 ? clean[iFee]||0 : 0);
         const rawDate= clean[iDate]||'';
-        const uid    = iUniqueId >= 0 ? clean[iUniqueId]||'' : '';
+        const uid    = iUID>=0 ? (clean[iUID]||'').trim() : '';
 
-        // Only import buy/sell
-        if(type !== 'buy' && type !== 'sell') { ignored++; continue; }
-        if(!asset || !amount || !audVal) { ignored++; continue; }
-        if(asset === 'AUD') { ignored++; continue; }
+        if(event!=='buy' && event!=='sell') { ignored++; continue; }
+        if(!asset || !amount || !audVal || asset==='AUD') { ignored++; continue; }
 
-        // Parse date — Swyftx: "DD/MM/YYYY HH:MM:SS" or ISO
+        // Parse DD/MM/YYYY
         let date = '';
         if(rawDate.includes('/')) {
-          const parts = rawDate.split(' ')[0].split('/');
-          date = `${parts[2]}-${parts[1].padStart(2,'0')}-${parts[0].padStart(2,'0')}`;
-        } else {
-          date = rawDate.slice(0,10);
-        }
-        if(!date || date.startsWith('NaN')) { ignored++; continue; }
+          const p = rawDate.split('/');
+          date = `${p[2]}-${p[1].padStart(2,'0')}-${p[0].padStart(2,'0')}`;
+        } else { date = rawDate.slice(0,10); }
+        if(!date || date.startsWith('NaN') || date.length<10) { ignored++; continue; }
 
-        const price = amount > 0 ? audVal / amount : 0;
+        const price = amount>0 ? audVal/amount : 0;
         if(!price) { ignored++; continue; }
 
-        // Skip duplicates by unique ID
+        // Skip dupes by UUID
         if(uid) {
-          const isDupe = S.cry.concat(S.us, S.asx, S.met).some(h =>
-            (h.txns||[]).some(t => t.swyftxId === uid)
-          );
+          const isDupe = S.cry.concat(S.us,S.asx,S.met).some(h=>(h.txns||[]).some(t=>t.swyftxId===uid));
           if(isDupe) { skipped++; continue; }
         }
 
-        // Find or create crypto holding
-        let idx = S.cry.findIndex(h => h.ticker === asset);
-        if(idx === -1) {
-          S.cry.push({ ticker:asset, name:asset, qty:0, cost:0, txns:[] });
-          idx = S.cry.length - 1;
-        }
-        if(!S.cry[idx].txns) S.cry[idx].txns = [];
+        // Find or create holding
+        let idx = S.cry.findIndex(h => h.ticker===asset);
+        if(idx===-1) { S.cry.push({ticker:asset,name:asset,qty:0,cost:0,txns:[]}); idx=S.cry.length-1; }
+        if(!S.cry[idx].txns) S.cry[idx].txns=[];
 
-        S.cry[idx].txns.push({
-          date, side:type, qty:amount, price, fee:feeAud,
-          txnId: generateTxnId(date),
-          swyftxId: uid,
-          cashAcct: null
-        });
+        S.cry[idx].txns.push({date,side:event,qty:amount,price,fee,txnId:generateTxnId(date),swyftxId:uid,cashAcct:cashAcctIdx});
+
+        // Adjust cash balance
+        if(cashAcctIdx!==null && S.cash[cashAcctIdx]) {
+          const total = event==='buy' ? audVal+fee : -(audVal-fee);
+          S.cash[cashAcctIdx].balance = (S.cash[cashAcctIdx].balance||0) - total;
+        }
 
         recalcFromTxns('cry', idx);
         imported++;
       }
 
-      if(imported > 0) {
-        save();
-        rows('cry');
-        renderAllHoldings();
-        renderFees();
-        summary();
-      }
+      if(imported>0) { save(); rows('cry'); renderAllHoldings(); renderCash(); renderFees(); summary(); }
 
-      alert(
-        `✓ Swyftx import complete!\n\n` +
-        `${imported} trade${imported!==1?'s':''} imported\n` +
-        `${skipped} already in tracker (skipped)\n` +
-        `${ignored} non-trade rows ignored`
-      );
+      const cashMsg = cashAcctIdx!==null
+        ? `\nDeducted from: ${S.cash[cashAcctIdx].name} (balance now $${f(S.cash[cashAcctIdx].balance||0)})`
+        : '';
+
+      alert(`✓ Swyftx import complete!\n\n${imported} trade${imported!==1?'s':''} imported\n${skipped} already in tracker (skipped)\n${ignored} non-trade rows ignored${cashMsg}`);
 
     } catch(err) {
       console.error('CSV import error:', err);
-      alert(`Import failed: ${err.message}\n\nMake sure you're using the Swyftx CSV export.`);
+      alert(`Import failed: ${err.message}`);
     }
   };
   reader.readAsText(file);
