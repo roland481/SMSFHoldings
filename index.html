@@ -391,7 +391,7 @@ tr.tint-down td{background:rgba(239,68,68,0.05)!important;}
   </button>
   <button class="bn-item" id="bn-fees" data-action="switchTab" data-tab="fees">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4 6h16M4 12h10M4 18h13"/></svg>
-    Fees
+    Transactions
     <div class="bn-dot"></div>
   </button>
   <button class="bn-item" id="bn-watchlist" data-action="switchTab" data-tab="watchlist">
@@ -644,12 +644,22 @@ tr.tint-down td{background:rgba(239,68,68,0.05)!important;}
       <div class="sec-title"><span class="badge b-red">AUD</span>Transaction &amp; fees ledger</div>
       <div class="sec-right"><span class="sec-tot" id="feesSecTot"></span><button class="addbtn" data-action="openAddModal" style="background:#397968;color:#fff;border-color:#397968;font-weight:600;">+ Add</button><button class="csvbtn" data-action="exportCSV">⬇ Export FY CSV</button><button class="addbtn" data-action="showFeesAdd">+ Add fee</button></div>
     </div>
+    <!-- Account filter -->
+    <div style="padding:10px 14px 0;display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+      <label style="font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:0.06em;">Filter by account:</label>
+      <select id="ledgerAccountFilter" onchange="renderFees()" style="font-size:12px;padding:4px 10px;border:1px solid var(--border4);border-radius:99px;background:var(--surface2);color:var(--text);font-family:inherit;cursor:pointer;">
+        <option value="">All accounts</option>
+      </select>
+      <span id="ledgerBalanceDisplay" style="font-size:12px;font-weight:600;color:var(--text);margin-left:auto;display:none;">
+        Current balance: <span id="ledgerBalanceAmt" style="color:#59d0a3;"></span>
+      </span>
+    </div>
     <div class="fees-summary">
       <span class="fees-fy" id="feesFyLabel"></span>
       <span class="fees-total" id="feesTotal"></span>
     </div>
     <div class="tbl-wrap"><table>
-      <thead><tr><th style="width:130px">ID</th><th>Date</th><th>Description</th><th>Type</th><th class="r">Amount (AUD)</th><th style="width:100px"></th></tr></thead>
+      <thead><tr><th style="width:130px">ID</th><th>Date</th><th>Description</th><th>Type</th><th class="r">Amount (AUD)</th><th class="r" id="balanceColHeader" style="display:none;width:120px;">Balance</th><th style="width:100px"></th></tr></thead>
       <tbody id="feesB"></tbody>
     </table></div>
     <div class="add-row" id="feesAR" style="display:none;">
@@ -998,13 +1008,13 @@ async function cloudLoad() {
     S.cash= rec.cash|| DEF.cash;
     S.fees= rec.fees|| DEF.fees;
     S.wl  = rec.wl  || DEF.wl;
-    S.income = rec.income || DEF.income;
-    S.contributions = rec.contributions || DEF.contributions;
+    S.income = rec.income || [];
+    S.contributions = rec.contributions || [];
     syncUI('synced', 'Synced · ' + new Date().toLocaleTimeString('en-AU',{hour:'2-digit',minute:'2-digit'}));
   } catch(e) {
     S.us = DEF.us; S.asx = DEF.asx; S.cry = DEF.cry; S.met = DEF.met;
     S.cash = DEF.cash; S.fees = DEF.fees; S.wl = DEF.wl;
-    S.income = DEF.income; S.contributions = DEF.contributions;
+    S.income = []; S.contributions = [];
     syncUI('err', 'Cloud unavailable — using local data');
   }
   try {
@@ -1325,7 +1335,8 @@ function renderFees(){
             deletable:false,
             reversible:false,
             txnId:txId,
-            isBrokerageFee:false
+            isBrokerageFee:false,
+            cashAcct:tx.cashAcct
           });
         }
         if(tx.fee>0){
@@ -1346,8 +1357,51 @@ function renderFees(){
     });
   });
 
-  // Sort by date descending
-  entries.sort((a,b)=>new Date(b.date)-new Date(a.date));
+  // ── Add cashAcct to trade/fee/cash-movement entries (already done above)
+  // Also tag brokerage fees with their parent trade's cashAcct
+  let lastCashAcct = null;
+  entries.forEach(e => {
+    if(e.type==='trade') lastCashAcct = e.cashAcct;
+    if(e.isBrokerageFee && lastCashAcct!=null) e.cashAcct = lastCashAcct;
+  });
+
+  // ── Filter by selected account
+  let filtered = entries;
+  if(showBalance && acctIndex!=null) {
+    filtered = entries.filter(e => {
+      if(e.type==='cash-movement') return e.cashAcct === acctIndex;
+      if(e.type==='trade') return e.cashAcct === acctIndex;
+      if(e.isBrokerageFee) return e.cashAcct === acctIndex;
+      if(e.type==='income') return e.cashAcct === acctIndex;
+      if(e.type==='contribution') return e.cashAcct === acctIndex;
+      return false; // manual fees without cashAcct hidden in account view
+    });
+  }
+
+  // Sort by date ascending for balance calc, then reverse for display
+  filtered.sort((a,b)=>new Date(a.date)-new Date(b.date));
+
+  // ── Compute running balance (oldest first, then reverse for display)
+  if(showBalance && acctIndex!=null) {
+    // Start from current account balance and work backwards
+    // Actually compute forward from 0 and offset
+    let running = 0;
+    filtered.forEach(e => {
+      const isCredit = !e.isDebit || e.type==='income' || e.type==='contribution';
+      running += isCredit ? e.amount : -e.amount;
+      e._runningBalance = running;
+    });
+    // Show current balance
+    const currentBal = S.cash[acctIndex]?.balance || 0;
+    const balAmtEl = document.getElementById('ledgerBalanceAmt');
+    if(balAmtEl) balAmtEl.textContent = '$' + f(currentBal) + ' AUD';
+  }
+
+  // Reverse for display (newest first)
+  filtered.reverse();
+
+  // Sort by date descending for all-accounts view
+  if(!showBalance) filtered.sort((a,b)=>new Date(b.date)-new Date(a.date));
 
   // FY totals — fees only
   const fyFees=entries.filter(e=>e.type==='fee'&&e.isDebit&&(()=>{const d=new Date(e.date);return d>=fy.start&&d<=fy.end;})()).reduce((s,e)=>s+e.amount,0);
@@ -1363,23 +1417,26 @@ function renderFees(){
     'cash-movement':'<span class="badge b-gray"  style="font-size:9px;">Cash</span>'
   };
 
-  body.innerHTML=entries.length?entries.map((e,ei)=>{
+  body.innerHTML=filtered.length?filtered.map((e,ei)=>{
     const d=e.date?new Date(e.date).toLocaleDateString('en-AU',{day:'2-digit',month:'short',year:'numeric'}):'—';
     const isCredit = !e.isDebit || e.type==='income' || e.type==='contribution';
     const amtColour = isCredit ? 'var(--gain-pos)' : 'var(--gain-neg)';
     const amtSign = isCredit ? '+' : '-';
     const amtCol = `<span style="color:${amtColour};">${amtSign}$${f(e.amount)}</span>`;
+    const balCol = showBalance && e._runningBalance!=null
+      ? `<td class="r" style="font-weight:600;color:${e._runningBalance>=0?'var(--gain-pos)':'var(--gain-neg)'};">$${f(Math.abs(e._runningBalance))}</td>`
+      : (showBalance ? '<td class="r" style="color:var(--text4);">—</td>' : '');
     const idStr = e.txnId || '—';
     const idDisplay = e.isBrokerageFee ? `${idStr} (FEE)` : idStr;
     const idBadge = `<span title="${idDisplay}" style="font-size:9px;font-family:monospace;color:var(--text3);cursor:default;border-bottom:1px dashed var(--text4);white-space:nowrap;">${idDisplay.length>16?idDisplay.slice(0,16)+'…':idDisplay}</span>`;
     let actions;
-    if(e.deletable && e.type==='income')        actions=`<button class="del" style="opacity:1;" onclick="delIncome(${e.orig})">&#x2715;</button>`;
-    else if(e.deletable && e.type==='contribution') actions=`<button class="del" style="opacity:1;" onclick="delContribution(${e.orig})">&#x2715;</button>`;
-    else if(e.deletable)                         actions=`<button class="del" style="opacity:1;" onclick="delFee(${e.orig})">&#x2715;</button>`;
-    else if(e.reversible)                        actions=`<button onclick="reverseTxn('${e.assetType}',${e.assetIdx},${e.txnIdx})" title="Reverse transaction" style="font-size:10px;font-weight:600;padding:2px 8px;border:1px solid rgba(248,113,113,0.4);border-radius:99px;background:rgba(248,113,113,0.12);color:#f87171;cursor:pointer;font-family:inherit;white-space:nowrap;">↩ Reverse</button>`;
-    else                                         actions='<span style="color:var(--text4);font-size:10px;">—</span>';
-    return`<tr title="ID: ${idDisplay}"><td>${idBadge}</td><td>${d}</td><td>${e.desc}</td><td>${TYPE_LABELS[e.type]||''}</td><td class="r valbold">${amtCol}</td><td style="text-align:right;min-width:90px;">${actions}</td></tr>`;
-  }).join(''):'<tr><td colspan="6" style="text-align:center;color:var(--text4);padding:16px;">No transactions yet</td></tr>';
+    if(e.deletable && e.type==='income')             actions=`<button class="del" style="opacity:1;" onclick="delIncome(${e.orig})">&#x2715;</button>`;
+    else if(e.deletable && e.type==='contribution')  actions=`<button class="del" style="opacity:1;" onclick="delContribution(${e.orig})">&#x2715;</button>`;
+    else if(e.deletable)                             actions=`<button class="del" style="opacity:1;" onclick="delFee(${e.orig})">&#x2715;</button>`;
+    else if(e.reversible)                            actions=`<button onclick="reverseTxn('${e.assetType}',${e.assetIdx},${e.txnIdx})" title="Reverse transaction" style="font-size:10px;font-weight:600;padding:2px 8px;border:1px solid rgba(248,113,113,0.4);border-radius:99px;background:rgba(248,113,113,0.12);color:#f87171;cursor:pointer;font-family:inherit;white-space:nowrap;">↩ Reverse</button>`;
+    else                                             actions='<span style="color:var(--text4);font-size:10px;">—</span>';
+    return`<tr title="ID: ${idDisplay}"><td>${idBadge}</td><td>${d}</td><td>${e.desc}</td><td>${TYPE_LABELS[e.type]||''}</td><td class="r valbold">${amtCol}</td>${balCol}<td style="text-align:right;min-width:90px;">${actions}</td></tr>`;
+  }).join(''):`<tr><td colspan="${showBalance?7:6}" style="text-align:center;color:var(--text4);padding:16px;">${showBalance?'No entries linked to this account':'No transactions yet'}</td></tr>`;
   } catch(err) { console.error('renderFees error:', err); }
 }
 
@@ -1833,8 +1890,10 @@ function openAddModal() {
    'modal-contrib-amt','modal-contrib-member'].forEach(id => {
     const el = document.getElementById(id); if(el) el.value = '';
   });
-  document.getElementById('modal-fees-date').value = new Date().toISOString().slice(0,10);
-  document.getElementById('modal-txn-date').value  = new Date().toISOString().slice(0,10);
+  const today = new Date().toISOString().slice(0,10);
+  ['modal-fees-date','modal-txn-date','modal-income-date','modal-contrib-date'].forEach(id => {
+    const el = document.getElementById(id); if(el) el.value = today;
+  });
   document.getElementById('modal-ticker-status').textContent = '';
   document.getElementById('modal-ticker-status').style.color = '';
   // Populate cash account dropdowns
@@ -2072,7 +2131,11 @@ function submitAddModal() {
     }
     save(); rows(smartCategory);
   }
-  document.getElementById('addModal').classList.remove('open');
+  // Close modal and reset inline styles
+  const _m = document.getElementById('addModal');
+  _m.classList.remove('open');
+  _m.style.display = 'none';
+  _m.style.visibility = 'hidden';
 }
 document.addEventListener('keydown', e => { if(e.key==='Escape') { const m=document.getElementById('addModal'); m.classList.remove('open'); m.style.display='none'; m.style.visibility='hidden'; }});
 
