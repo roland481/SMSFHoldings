@@ -16,36 +16,6 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <style>
 :root{
-  /* Light mode — opaque white cards on space background */
-  --bg:transparent;
-  --surface:rgba(255,255,255,0.92);
-  --surface2:rgba(245,247,252,0.95);
-  --surface3:rgba(235,240,250,0.95);
-  --surface4:rgba(250,252,255,0.92);
-  --text:#0f1a2e;--text2:#3a4a6a;--text3:#6a7a9a;--text4:#aab8d0;
-  --border:rgba(15,26,46,0.1);--border2:rgba(15,26,46,0.07);
-  --border3:rgba(15,26,46,0.05);--border4:rgba(15,26,46,0.13);
-  --border5:rgba(15,26,46,0.22);
-  --alloc-bg:rgba(15,26,46,0.1);
-  --b-blue-bg:#dbeafe;--b-blue-c:#1e4a9a;
-  --b-green-bg:#d1fae5;--b-green-c:#065f46;
-  --b-amber-bg:#fef3c7;--b-amber-c:#92400e;
-  --b-gray-bg:#f1f5f9;--b-gray-c:#334155;
-  --b-teal-bg:#ccfbf1;--b-teal-c:#0f766e;
-  --b-red-bg:#fee2e2;--b-red-c:#991b1b;
-  --gl-pos-bg:#d1fae5;--gl-pos-c:#065f46;
-  --gl-neg-bg:#fee2e2;--gl-neg-c:#b91c1c;
-  --gl-neu-bg:#f1f5f9;--gl-neu-c:#334155;
-  --err-bg:#fee2e2;
-  --fees-bg:rgba(245,247,252,0.95);
-  --okbtn-bg:#397968;--okbtn-c:#ffffff;
-  --gain-pos:#059669;--gain-neg:#dc2626;
-  --accent:#397968;--accent-hover:#2d6a57;
-  --accent-light:#aedf33;
-  --sidebar-bg:rgba(255,255,255,0.88);--sidebar-text:#6a7a9a;--sidebar-active:#397968;
-  --card-shadow:0 4px 24px rgba(0,0,0,0.18),inset 0 1px 0 rgba(255,255,255,0.8);
-}
-body.dark{
   /* Same vars — theme is always dark */
   --bg:transparent;
   --surface:rgba(255,255,255,0.07);
@@ -91,7 +61,7 @@ body::after{content:'';position:fixed;inset:0;z-index:-1;
 .rfbtn{display:flex;align-items:center;gap:6px;font-size:13px;font-weight:600;color:#fff;background:linear-gradient(135deg,#397968,#59d0a3);border:none;border-radius:99px;padding:7px 18px;cursor:pointer;transition:all 0.2s;font-family:inherit;box-shadow:0 4px 15px rgba(89,208,163,0.3);}
 .rfbtn:hover{background:linear-gradient(135deg,#2d6a57,#40b08a);box-shadow:0 4px 20px rgba(89,208,163,0.45);}
 .rfbtn:disabled{opacity:0.5;cursor:not-allowed;}
-.darkbtn{display:none;}
+
 .spin{animation:spin 0.9s linear infinite;}
 @keyframes spin{to{transform:rotate(360deg);}}
 .summary{display:grid;grid-template-columns:1.3fr 1fr 1fr;gap:12px;margin-bottom:12px;}
@@ -300,7 +270,7 @@ tr.tint-down td{background:rgba(239,68,68,0.05)!important;}
 .sidebar.collapsed .sb-item{padding:10px 0;justify-content:center;}
 .sidebar.collapsed .sb-item svg{margin:0;}
 .sidebar.collapsed .sb-dm span{display:none;}
-.sidebar.collapsed .sb-dm{justify-content:center;}
+.sidebar.collapsed 
 .sidebar.collapsed #sb-search{display:none;}
 .sb-toggle{position:absolute;top:18px;right:-12px;width:24px;height:24px;background:rgba(10,20,50,0.9);border:1px solid rgba(255,255,255,0.15);border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:10;transition:transform 0.25s ease;box-shadow:0 4px 12px rgba(0,0,0,0.4);backdrop-filter:blur(8px);}
 .sb-toggle svg{transition:transform 0.25s ease;}
@@ -313,12 +283,12 @@ tr.tint-down td{background:rgba(239,68,68,0.05)!important;}
 .sb-item.active{background:#f0f7f4;color:#397968;font-weight:600;}
 .sb-item svg{flex-shrink:0;}
 .sb-section{font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:0.08em;padding:12px 12px 4px;}
-.sb-bottom{padding:10px 8px 20px;border-top:1px solid var(--border);}
-.sb-dm{display:flex;align-items:center;justify-content:space-between;padding:8px 12px;color:var(--text3);font-size:12px;font-weight:500;}
-.dm-pill{width:34px;height:19px;background:rgba(0,0,0,0.15);border-radius:99px;position:relative;cursor:pointer;flex-shrink:0;transition:background 0.2s;}
-.dm-pill.on{background:#397968;}
-.dm-knob{width:15px;height:15px;background:#fff;border-radius:50%;position:absolute;top:2px;left:2px;transition:left 0.2s;}
-.dm-pill.on .dm-knob{left:17px;}
+
+
+
+
+
+.dm-pill.on 
 /* ── Add Holding Modal ── */
 .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,5,20,0.7);z-index:200;align-items:center;justify-content:center;backdrop-filter:blur(4px);}
 .modal-overlay.open{display:flex;}
@@ -412,12 +382,7 @@ tr.tint-down td{background:rgba(239,68,68,0.05)!important;}
       <span class="sb-label">Export CSV</span>
     </button>
   </div>
-  <div class="sb-bottom">
-    <div class="sb-dm">
-      <span class="sb-label">Dark mode</span>
-      <div class="dm-pill" id="dmPill" data-action="toggleDark"><div class="dm-knob"></div></div>
-    </div>
-  </div>
+
 </nav>
 
 <!-- Mobile bottom nav -->
@@ -442,11 +407,7 @@ tr.tint-down td{background:rgba(239,68,68,0.05)!important;}
     Add
     <div class="bn-dot" style="opacity:0!important;"></div>
   </button>
-  <button class="bn-item" id="bn-darkmode" data-action="toggleDark">
-    <svg id="bn-dark-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M21 12.79A9 9 0 1 1 11.21 3a7 7 0 0 0 9.79 9.79z"/></svg>
-    <span id="bn-dark-label">Dark</span>
-    <div class="bn-dot" style="opacity:0!important;"></div>
-  </button>
+
 </nav>
 
 <!-- Sidebar overlay (mobile) -->
@@ -469,9 +430,6 @@ tr.tint-down td{background:rgba(239,68,68,0.05)!important;}
     <div class="top-actions">
       <label class="aud-pill"><input type="checkbox" id="audToggle" checked><span>US in AUD</span></label>
       <button class="addbtn" data-action="openAddModal" style="background:#397968;color:#fff;border-color:#397968;font-weight:600;">+ Add</button>
-      <button class="darkbtn" id="darkBtn" data-action="toggleDark">
-        <span id="darkIcon">🌙</span><span id="darkLabel">Dark</span>
-      </button>
       <button class="rfbtn" id="rfBtn" data-action="refreshAll" disabled>
         <svg id="rfIcon" width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" style="flex-shrink:0;"><path d="M2 8a6 6 0 1 0 1.5-3.9M2 4v4h4"/></svg>
         Refresh prices
@@ -698,7 +656,7 @@ tr.tint-down td{background:rgba(239,68,68,0.05)!important;}
       <span class="fees-total" id="feesTotal"></span>
     </div>
     <div class="tbl-wrap"><table>
-      <thead><tr><th>Date</th><th>Description</th><th>Type</th><th class="r">Amount (AUD)</th><th style="width:28px"></th></tr></thead>
+      <thead><tr><th style="width:130px">ID</th><th>Date</th><th>Description</th><th>Type</th><th class="r">Amount (AUD)</th><th style="width:100px"></th></tr></thead>
       <tbody id="feesB"></tbody>
     </table></div>
     <div class="add-row" id="feesAR" style="display:none;">
@@ -961,10 +919,12 @@ async function cloudLoad() {
     S.us = DEF.us; S.asx = DEF.asx; S.cry = DEF.cry; S.met = DEF.met; S.cash = DEF.cash; S.fees = DEF.fees; S.wl = DEF.wl;
     syncUI('err', 'Cloud unavailable — using local data');
   }
-  ['us','asx','cry','met','cash','fees','wl'].forEach(t => rows(t));
   recalcAll();
-  ['us','asx','cry','met'].forEach(t => rows(t));
+  migrateIds();
+  save();
+  ['us','asx','cry','met','cash','fees','wl'].forEach(t => rows(t));
   renderAllHoldings();
+  renderFees();
   document.getElementById('rfBtn').disabled = false;
   // Auto-refresh prices after cloud sync
   refreshAll();
@@ -1094,15 +1054,12 @@ function saveTxn(type, i){
   const showAud=document.getElementById('audToggle').checked;
   const storePrice = (type==='us' && !showAud) ? price / S.audUsd : price;
   if(!S[type][i].txns) S[type][i].txns=[];
-  S[type][i].txns.push({date, side, qty, price:storePrice, fee});
+  const newTxnId = generateTxnId(date);
+  S[type][i].txns.push({date, side, qty, price:storePrice, fee, txnId:newTxnId});
   recalcFromTxns(type, i);
-  if(fee>0){
-    S.fees.push({date, desc:`Brokerage — ${S[type][i].ticker} ${side} ${date}`, cat:'Transaction Fee', amount:fee, txRef:true});
-    renderFees();
-  }
   save();
   rows(type);renderAllHoldings();
-  renderFees(); // auto-record in ledger
+  renderFees();
 }
 
 function delTxn(type, i, ti){
@@ -1190,7 +1147,9 @@ function renderFees(){
       isDebit:true,
       orig,
       deletable:true,
-      reversible:false
+      reversible:false,
+      txnId:item.txnId||'—',
+      isBrokerageFee:false
     });
   });
 
@@ -1199,6 +1158,7 @@ function renderFees(){
     S[assetType].forEach((item,assetIdx)=>{
       (item.txns||[]).forEach((tx,txnIdx)=>{
         const total = tx.price * tx.qty;
+        const txId = tx.txnId || '—';
         entries.push({
           date:tx.date||'',
           desc:`${tx.side==='buy'?'Buy':'Sell'} ${f(tx.qty,tx.qty%1===0?0:4)} ${item.ticker}${item.name?' — '+item.name:''}`,
@@ -1210,8 +1170,25 @@ function renderFees(){
           reversible:true,
           assetType, assetIdx, txnIdx,
           fee:tx.fee||0,
-          cashAcct:tx.cashAcct!=null?tx.cashAcct:null
+          cashAcct:tx.cashAcct!=null?tx.cashAcct:null,
+          txnId:txId,
+          isBrokerageFee:false
         });
+        // Brokerage fee — same ID as trade with (FEE) suffix
+        if(tx.fee>0){
+          entries.push({
+            date:tx.date||'',
+            desc:`Brokerage — ${item.ticker} ${tx.side}`,
+            type:'fee',
+            cat:'Transaction Fee',
+            amount:tx.fee,
+            isDebit:true,
+            deletable:false,
+            reversible:false,
+            txnId:txId,
+            isBrokerageFee:true
+          });
+        }
       });
     });
   });
@@ -1233,15 +1210,19 @@ function renderFees(){
   body.innerHTML=entries.length?entries.map((e,ei)=>{
     const d=e.date?new Date(e.date).toLocaleDateString('en-AU',{day:'2-digit',month:'short',year:'numeric'}):'—';
     const amtCol=e.type==='trade'
-      ? `<span style="color:${e.isDebit?'var(--gain-neg)':'var(--gain-pos)'};">${e.isDebit?'-':'+'}\$${f(e.amount)}</span>`
-      : `<span style="color:var(--gain-neg);">-\$${f(e.amount)}</span>`;
+      ? `<span style="color:${e.isDebit?'var(--gain-neg)':'var(--gain-pos)'};">${e.isDebit?'-':'+'}$${f(e.amount)}</span>`
+      : `<span style="color:var(--gain-neg);">-$${f(e.amount)}</span>`;
+    // ID tooltip — trade shows its own ID, brokerage fee shows "TXN-XXX (FEE)"
+    const idStr = e.txnId || '—';
+    const idDisplay = e.isBrokerageFee ? `${idStr} (FEE)` : idStr;
+    const idBadge = `<span title="${idDisplay}" style="font-size:9px;font-family:monospace;color:var(--text3);cursor:default;border-bottom:1px dashed var(--text4);white-space:nowrap;">${idDisplay.length>16?idDisplay.slice(0,16)+'…':idDisplay}</span>`;
     const actions=e.deletable
       ? `<button class="del" style="opacity:1;" onclick="delFee(${e.orig})">&#x2715;</button>`
       : e.reversible
-        ? `<button onclick="reverseTxn('${e.assetType}',${e.assetIdx},${e.txnIdx})" title="Reverse transaction — refunds cash and removes trade" style="font-size:10px;font-weight:600;padding:2px 8px;border:1px solid rgba(248,113,113,0.4);border-radius:99px;background:rgba(248,113,113,0.12);color:#f87171;cursor:pointer;font-family:inherit;white-space:nowrap;">↩ Reverse</button>`
+        ? `<button onclick="reverseTxn('${e.assetType}',${e.assetIdx},${e.txnIdx})" title="Reverse transaction" style="font-size:10px;font-weight:600;padding:2px 8px;border:1px solid rgba(248,113,113,0.4);border-radius:99px;background:rgba(248,113,113,0.12);color:#f87171;cursor:pointer;font-family:inherit;white-space:nowrap;">↩ Reverse</button>`
         : '<span style="color:var(--text4);font-size:10px;">—</span>';
-    return`<tr><td>${d}</td><td>${e.desc}</td><td>${TYPE_LABELS[e.type]||''}</td><td class="r valbold">${amtCol}</td><td style="text-align:right;min-width:90px;">${actions}</td></tr>`;
-  }).join(''):'<tr><td colspan="5" style="text-align:center;color:var(--text4);padding:16px;">No transactions yet</td></tr>';
+    return`<tr title="ID: ${idDisplay}"><td>${idBadge}</td><td>${d}</td><td>${e.desc}</td><td>${TYPE_LABELS[e.type]||''}</td><td class="r valbold">${amtCol}</td><td style="text-align:right;min-width:90px;">${actions}</td></tr>`;
+  }).join(''):'<tr><td colspan="6" style="text-align:center;color:var(--text4);padding:16px;">No transactions yet</td></tr>';
 }
 
 function reverseTxn(assetType, assetIdx, txnIdx) {
@@ -1303,7 +1284,7 @@ function addFee(){
   const cat=document.getElementById('feesCat').value;
   const amount=parseFloat(document.getElementById('feesAmt').value)||0;
   if(!desc||!amount)return;
-  S.fees.push({date,desc,cat,amount});
+  S.fees.push({date, desc, cat, amount, txnId:generateTxnId(date)});
   save();hideFeesAdd();
   document.getElementById('feesDesc').value='';document.getElementById('feesAmt').value='';
   renderFees();
@@ -1589,12 +1570,6 @@ function addA(t){
 // audToggle handled by delegated listener below
 
 // ── Dark mode ────────────────────────────────────────────────────
-function toggleDark(){
-  const isDark = !document.body.classList.contains('dark');
-  localStorage.setItem('smsf_dark', isDark ? '1' : '0');
-  _applyTheme(isDark);
-  if(pieChart) pieChart.update();
-}
 
 // ── Unified holdings table ───────────────────────────────────────
 const TYPE_BADGE = {
@@ -1823,7 +1798,8 @@ function submitAddModal() {
     // Save transaction
     if(!S[smartFoundType][smartFoundIdx].txns) S[smartFoundType][smartFoundIdx].txns = [];
     const _acct = document.getElementById('modal-txn-account').value;
-S[smartFoundType][smartFoundIdx].txns.push({date, side, qty, price, fee, cashAcct:_acct!==''?parseInt(_acct):null});
+    const _txnId = generateTxnId(date);
+    S[smartFoundType][smartFoundIdx].txns.push({date, side, qty, price, fee, cashAcct:_acct!==''?parseInt(_acct):null, txnId:_txnId});
     recalcFromTxns(smartFoundType, smartFoundIdx);
     // Adjust cash balance
     if(acctIdx !== '') {
@@ -1833,7 +1809,6 @@ S[smartFoundType][smartFoundIdx].txns.push({date, side, qty, price, fee, cashAcc
       S.cash[idx].balance = (S.cash[idx].balance||0) + (side==='buy' ? -totalWithFee : totalWithFee);
       renderCash();
     }
-    if(fee > 0) S.fees.push({date, desc:`Brokerage — ${ticker} ${side} ${date}`, cat:'Transaction Fee', amount:fee, txRef:true});
     save(); rows(smartFoundType); renderAllHoldings(); renderFees();
   } else if(smartMode === 'fees') {
     const date   = document.getElementById('modal-fees-date').value;
@@ -1841,7 +1816,7 @@ S[smartFoundType][smartFoundIdx].txns.push({date, side, qty, price, fee, cashAcc
     const cat    = document.getElementById('modal-fees-cat').value;
     const amount = parseFloat(document.getElementById('modal-fees-amt').value)||0;
     if(!desc || !amount) return;
-    S.fees.push({date, desc, cat, amount});
+    S.fees.push({date, desc, cat, amount, txnId:generateTxnId(date)});
     save(); renderFees();
   } else if(smartMode === 'cash') {
     const nm  = document.getElementById('modal-cash-name').value.trim();
@@ -2141,23 +2116,6 @@ function exportCSV() {
 // ── Boot ─────────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', function() {
 document.getElementById('todayDate').textContent = new Date().toLocaleDateString('en-AU',{weekday:'short',day:'numeric',month:'long',year:'numeric'});
-// Default to dark mode if no preference saved
-const savedTheme = localStorage.getItem('smsf_dark');
-const startDark = savedTheme === null ? true : savedTheme === '1';
-function _applyTheme(isDark) {
-  document.body.classList.toggle('dark', isDark);
-  const pill = document.getElementById('dmPill');
-  if(pill) pill.classList.toggle('on', isDark);
-  document.getElementById('darkIcon') && (document.getElementById('darkIcon').textContent = isDark ? '☀️' : '🌙');
-  document.getElementById('darkLabel') && (document.getElementById('darkLabel').textContent = isDark ? 'Light' : 'Dark');
-  const bnIcon = document.getElementById('bn-dark-icon');
-  const bnLabel = document.getElementById('bn-dark-label');
-  if(bnLabel) bnLabel.textContent = isDark ? 'Light' : 'Dark';
-  if(bnIcon) bnIcon.innerHTML = isDark
-    ? '<circle cx="12" cy="12" r="5"/><path d="M12 2v2M12 20v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M2 12h2M20 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/>'
-    : '<path d="M21 12.79A9 9 0 1 1 11.21 3a7 7 0 0 0 9.79 9.79z"/>';
-}
-_applyTheme(startDark);
 function updateSidebarMode() {
   const sb = document.getElementById('sidebar');
   if(window.innerWidth > 800) {
@@ -2174,6 +2132,65 @@ window.addEventListener('resize', updateSidebarMode);
 if(localStorage.getItem('smsf_sb_collapsed') === '1') {
   document.getElementById('sidebar').classList.add('collapsed');
 }
+
+// ── Transaction ID utilities ────────────────────────────────────
+function _txnDateStr(date) {
+  // Format date as YYYYMMDD
+  const d = date ? new Date(date) : new Date();
+  const y = d.getFullYear();
+  const m = String(d.getMonth()+1).padStart(2,'0');
+  const day = String(d.getDate()).padStart(2,'0');
+  return `${y}${m}${day}`;
+}
+
+function _nextSeqForDate(dateStr) {
+  // Find all existing IDs for this date across all txns and fees
+  let max = 0;
+  ['us','asx','cry','met'].forEach(t => {
+    (S[t]||[]).forEach(item => {
+      (item.txns||[]).forEach(tx => {
+        if(tx.txnId && tx.txnId.startsWith('TXN-'+dateStr+'-')) {
+          const n = parseInt(tx.txnId.split('-')[2])||0;
+          if(n > max) max = n;
+        }
+      });
+    });
+  });
+  (S.fees||[]).forEach(fe => {
+    if(fe.txnId && fe.txnId.startsWith('TXN-'+dateStr+'-')) {
+      const n = parseInt(fe.txnId.split('-')[2])||0;
+      if(n > max) max = n;
+    }
+  });
+  return String(max + 1).padStart(3, '0');
+}
+
+function generateTxnId(date) {
+  const ds = _txnDateStr(date);
+  const seq = _nextSeqForDate(ds);
+  return `TXN-${ds}-${seq}`;
+}
+
+function migrateIds() {
+  // 1. Strip all auto-generated brokerage fees from S.fees
+  //    (they were duplicates — now rendered live from txns)
+  S.fees = (S.fees||[]).filter(fe => !fe.txRef);
+
+  // 2. Assign IDs to all txns that don't have one
+  ['us','asx','cry','met'].forEach(t => {
+    (S[t]||[]).forEach(item => {
+      (item.txns||[]).forEach(tx => {
+        if(!tx.txnId) tx.txnId = generateTxnId(tx.date);
+      });
+    });
+  });
+
+  // 3. Assign IDs to all manual fees that don't have one
+  (S.fees||[]).forEach(fe => {
+    if(!fe.txnId) fe.txnId = generateTxnId(fe.date);
+  });
+}
+
 cloudLoad();
 renderHistoryChart();
 updateSessions();
@@ -2187,7 +2204,6 @@ document.addEventListener('click', function(e) {
   const action = el.getAttribute('data-action');
   switch(action) {
     case 'toggleSidebar':     toggleSidebar(); break;
-    case 'toggleDark':        toggleDark(); break;
     case 'openAddModal':      openAddModal(); break;
     case 'closeAddModal':     closeAddModal(); break;
     case 'closeModalOverlay': if(e.target === el) closeAddModal(); break;
