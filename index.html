@@ -423,6 +423,10 @@ tr.tint-down td{background:rgba(239,68,68,0.05)!important;}
     <div class="top-actions">
       <label class="aud-pill"><input type="checkbox" id="audToggle" checked><span>US in AUD</span></label>
       <button class="addbtn" id="topbarAddBtn" data-action="openAddModal" style="background:#397968;color:#fff;border-color:#397968;font-weight:600;">+ Add</button>
+      <button class="addbtn" id="swyftxBtn" data-action="syncSwyftx" style="background:rgba(174,223,51,0.15);color:#aedf33;border-color:rgba(174,223,51,0.4);font-weight:600;display:flex;align-items:center;gap:5px;">
+        <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M2 8a6 6 0 1 0 1.5-3.9M2 4v4h4"/></svg>
+        Sync Swyftx
+      </button>
       <button class="rfbtn" id="rfBtn" data-action="refreshAll" disabled>
         <svg id="rfIcon" width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" style="flex-shrink:0;"><path d="M2 8a6 6 0 1 0 1.5-3.9M2 4v4h4"/></svg>
         Refresh prices
@@ -1024,7 +1028,10 @@ async function cloudLoad() {
     ['us','asx','cry','met','cash','fees','wl'].forEach(t => rows(t));
     renderAllHoldings();
     renderFees();
+    renderCash();
     summary();
+    // Small delay to ensure tab panel is visible before final render
+    setTimeout(() => { renderCash(); renderAllHoldings(); summary(); }, 150);
   } catch(e) {
     console.error('Render error after cloudLoad:', e);
   } finally {
@@ -2101,6 +2108,114 @@ function submitAddModal() {
 }
 document.addEventListener('keydown', e => { if(e.key==='Escape') { const m=document.getElementById('addModal'); m.classList.remove('open'); m.style.display='none'; m.style.visibility='hidden'; }});
 
+// ── Swyftx API Sync ──────────────────────────────────────────────
+const SWYFTX_PROXY = 'https://swyftx-proxy.roland-docker.workers.dev';
+
+async function syncSwyftx() {
+  const btn = document.getElementById('swyftxBtn');
+  const origText = btn.innerHTML;
+  btn.disabled = true;
+  btn.innerHTML = '<svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" style="animation:spin 0.9s linear infinite"><path d="M2 8a6 6 0 1 0 1.5-3.9M2 4v4h4"/></svg> Syncing...';
+
+  try {
+    // 1. Fetch completed orders from Swyftx
+    const ordersResp = await fetch(`${SWYFTX_PROXY}/orders/list/`, {
+      method: 'GET',
+      headers: { 'Content-Type': 'application/json' }
+    });
+
+    if(!ordersResp.ok) throw new Error(`Swyftx API error: ${ordersResp.status}`);
+    const ordersData = await ordersResp.json();
+    const orders = ordersData.orders || ordersData.data || ordersData || [];
+
+    if(!Array.isArray(orders) || orders.length === 0) {
+      alert('No orders found in Swyftx account.');
+      return;
+    }
+
+    // 2. Fetch asset list to map asset IDs to tickers
+    const assetResp = await fetch(`${SWYFTX_PROXY}/markets/assets/`, {
+      headers: { 'Content-Type': 'application/json' }
+    });
+    const assetData = await assetResp.json();
+    const assetMap = {}; // id -> { code, name }
+    (assetData.assets || assetData || []).forEach(a => {
+      assetMap[a.id] = { code: a.code, name: a.name };
+    });
+
+    // 3. Process each completed order
+    let imported = 0, skipped = 0;
+    const today = new Date().toISOString().slice(0,10);
+
+    orders.forEach(order => {
+      // Only process completed buy/sell orders
+      if(order.status !== 'FILLED' && order.status !== 'completed' && order.orderStatus !== 2) return;
+
+      const assetInfo = assetMap[order.secondary_asset || order.asset_id] || {};
+      const ticker = (order.secondaryAsset || order.assetCode || assetInfo.code || '').toUpperCase();
+      const name   = assetInfo.name || ticker;
+      const isBuy  = (order.orderType === 'BUY'  || order.side === 'buy'  || order.type === 1);
+      const qty    = parseFloat(order.quantity    || order.amount   || 0);
+      const price  = parseFloat(order.trigger     || order.price    || order.rate || 0); // AUD price
+      const fee    = parseFloat(order.fee         || order.feeTotal || 0);
+      const rawDate= order.updated_time || order.created_time || order.completedAt || order.date;
+      const date   = rawDate ? new Date(rawDate*1000 > 1e12 ? rawDate : rawDate*1000).toISOString().slice(0,10) : today;
+
+      if(!ticker || !qty || !price) { skipped++; return; }
+
+      // Check if we already have this order (by order ID to avoid duplicates)
+      const orderId = String(order.orderId || order.id || order.order_id || '');
+      const alreadyImported = S.cry.concat(S.us, S.asx, S.met).some(h =>
+        (h.txns||[]).some(t => t.swyftxOrderId === orderId)
+      );
+      if(orderId && alreadyImported) { skipped++; return; }
+
+      // Find or create the holding in cry (most Swyftx assets are crypto)
+      let holdingType = 'cry';
+      let holdingIdx  = S.cry.findIndex(h => h.ticker === ticker);
+
+      if(holdingIdx === -1) {
+        // Create new holding
+        S.cry.push({ ticker, name, qty:0, cost:0, txns:[] });
+        holdingIdx = S.cry.length - 1;
+      }
+
+      // Add the transaction
+      const txnId = generateTxnId(date);
+      if(!S.cry[holdingIdx].txns) S.cry[holdingIdx].txns = [];
+      S.cry[holdingIdx].txns.push({
+        date, side: isBuy ? 'buy' : 'sell',
+        qty, price, fee,
+        txnId,
+        swyftxOrderId: orderId, // store to prevent re-importing
+        cashAcct: null
+      });
+
+      recalcFromTxns('cry', holdingIdx);
+      imported++;
+    });
+
+    // 4. Save and re-render
+    if(imported > 0) {
+      save();
+      rows('cry');
+      renderAllHoldings();
+      renderFees();
+      summary();
+      alert(`✓ Swyftx sync complete!\n${imported} order${imported>1?'s':''} imported, ${skipped} already up to date.`);
+    } else {
+      alert(`Swyftx sync complete — all ${skipped} orders already imported, nothing new.`);
+    }
+
+  } catch(err) {
+    console.error('Swyftx sync error:', err);
+    alert(`Swyftx sync failed: ${err.message}\n\nCheck that your Worker is deployed and the SWYFTX_TOKEN secret is set correctly.`);
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = origText;
+  }
+}
+
 // ── Mobile sidebar ───────────────────────────────────────────────
 function openMobileSidebar() {
   document.getElementById('sidebar').classList.add('mobile-open');
@@ -2494,6 +2609,7 @@ document.addEventListener('click', function(e) {
     case 'closeModalOverlay': if(e.target === el) closeAddModal(); break;
     case 'submitAddModal':    submitAddModal(); break;
     case 'refreshAll':        refreshAll(); break;
+    case 'syncSwyftx':        syncSwyftx(); break;
     case 'exportCSV':         exportCSV(); break;
     case 'openMobileSidebar': openMobileSidebar(); break;
     case 'closeMobileSidebar':closeMobileSidebar(); break;
