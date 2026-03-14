@@ -1806,7 +1806,7 @@ function importCommsecIntlCSV(input) {
         return result;
       }
 
-      const rows = text.split('\n').map(parseCSVLine);
+      const csvRows = text.split('\n').map(parseCSVLine);
 
       // ── Extract trades (stock rows only, Order discriminator) ──
       // Format: Trades,Data,Order,Stocks,USD,SYMBOL,DATE,TIME,QTY,T.PRICE,C.PRICE,PROCEEDS,COMM,BASIS,...
@@ -1816,7 +1816,7 @@ function importCommsecIntlCSV(input) {
 
       // Get AUD totals for the whole statement (used to apportion per-trade AUD values)
       // For single-trade statements this equals the trade's AUD values directly
-      for(const r of rows) {
+      for(const r of csvRows) {
         if(r[0]==='Trades' && r[1]==='Total' && r[3]==='Stocks' && r[4]==='AUD') {
           // Proceeds col = 10 (index), Comm col = 11
           audTotalProceeds = Math.abs(parseFloat(r[10])||0); // purchase = negative proceeds
@@ -1824,14 +1824,14 @@ function importCommsecIntlCSV(input) {
         }
       }
 
-      for(const r of rows) {
+      for(const r of csvRows) {
         if(r[0]==='Trades' && r[1]==='Data' && r[2]==='Order' && r[3]==='Stocks') {
           // r: [Trades,Data,Order,Stocks,USD,SYMBOL,DATE,TIME,QTY,T.PRICE,C.PRICE,PROCEEDS,COMM,BASIS,RPL,MTM,CODE]
           const symbol   = (r[5]||'').trim().toUpperCase();
-          const dateStr  = (r[6]||'').trim(); // YYYY-MM-DD
-          const qtyRaw   = parseFloat(r[8])  || 0;
-          const usdPrice = parseFloat(r[9])  || 0;
-          const usdProc  = parseFloat(r[11]) || 0; // negative for buys
+          const dateStr  = (r[6]||'').split(',')[0].trim(); // "2026-03-13, 09:30:00" → "2026-03-13"
+          const qtyRaw   = parseFloat(r[7])  || 0;  // qty at index 7
+          const usdPrice = parseFloat(r[8])  || 0;  // T.Price at index 8
+          const usdProc  = parseFloat(r[10]) || 0;  // Proceeds at index 10
           if(!symbol || !qtyRaw || !usdPrice) continue;
 
           const side = qtyRaw > 0 ? 'buy' : 'sell';
@@ -1862,7 +1862,7 @@ function importCommsecIntlCSV(input) {
 
       // ── Extract deposits ──
       const deposits = [];
-      for(const r of rows) {
+      for(const r of csvRows) {
         if(r[0]==='Deposits & Withdrawals' && r[1]==='Data' && r[2]!=='Total') {
           const currency = (r[2]||'').trim();
           const date     = (r[3]||'').trim();
@@ -1876,7 +1876,7 @@ function importCommsecIntlCSV(input) {
 
       // ── Summary for user prompt ──
       const tradeLines = stockTrades.map(t =>
-        `${t.side.toUpperCase()} ${t.qty} ${t.symbol} @ $${t.audPrice.toFixed(2)} AUD (fee $${t.audComm.toFixed(2)})`
+        `${t.side.toUpperCase()} ${t.qty} x ${t.symbol} @ $${t.audPrice.toFixed(2)} AUD/share (fee $${t.audComm.toFixed(2)} AUD)`
       ).join('\n');
       const depositLines = deposits.length
         ? '\n\nDeposits found:\n' + deposits.map(d => `$${d.amount.toLocaleString()} AUD — ${d.desc}`).join('\n')
