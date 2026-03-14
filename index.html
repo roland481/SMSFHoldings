@@ -928,8 +928,10 @@ function importSwyftxCSV(input) {
         });
 
         // Adjust cash balance
+        // Note: Swyftx fees are NOT deducted from the AUD wallet — they are charged
+        // separately by Swyftx. Only deduct/credit the trade value (audVal).
         if(cashAcctIdx !== null && S.cash[cashAcctIdx]) {
-          const move = row.event === 'buy' ? -(row.audVal + row.fee) : (row.audVal - row.fee);
+          const move = row.event === 'buy' ? -row.audVal : row.audVal;
           S.cash[cashAcctIdx].balance = (S.cash[cashAcctIdx].balance||0) + move;
         }
 
@@ -1159,7 +1161,7 @@ function renderFees(){
     S.fees.forEach((item,orig)=>{entries.push({date:item.date||'',desc:item.desc||'—',type:'fee',amount:item.amount||0,isDebit:true,orig,deletable:true,reversible:false,txnId:item.txnId||'—',isBrokerageFee:false,cashAcct:item.cashAcct??null});});
     (S.income||[]).forEach((item,orig)=>{entries.push({date:item.date||'',desc:`${item.type} — ${item.source}${item.franking>0?' (Franking: $'+f(item.franking)+')':''}`,type:'income',amount:item.amount||0,isDebit:false,orig,deletable:true,reversible:false,txnId:item.txnId||'—',isBrokerageFee:false,cashAcct:item.cashAcct??null});});
     (S.contributions||[]).forEach((item,orig)=>{entries.push({date:item.date||'',desc:`${item.type} contribution — ${item.member}`,type:'contribution',amount:item.amount||0,isDebit:false,orig,deletable:true,reversible:false,txnId:item.txnId||'—',isBrokerageFee:false,cashAcct:item.cashAcct??null});});
-    ['us','asx','cry','met'].forEach(assetType=>{S[assetType].forEach((item,assetIdx)=>{(item.txns||[]).forEach((tx,txnIdx)=>{const total=tx.price*tx.qty;const txId=tx.txnId||'—';const ca=tx.cashAcct!=null?tx.cashAcct:null;entries.push({date:tx.date||'',desc:`${tx.side==='buy'?'Buy':'Sell'} ${f(tx.qty,tx.qty%1===0?0:4)} ${item.ticker}${item.name?' — '+item.name:''}`,type:'trade',amount:total,isDebit:tx.side==='buy',deletable:false,reversible:true,assetType,assetIdx,txnIdx,txnId:txId,isBrokerageFee:false,cashAcct:ca});if(ca!=null&&S.cash[ca]){const cashTotal=tx.qty*tx.price+(tx.side==='buy'?tx.fee||0:-(tx.fee||0));entries.push({date:tx.date||'',desc:`Cash ${tx.side==='buy'?'debit':'credit'} — ${item.ticker} via ${S.cash[ca].name}`,type:'cash-movement',amount:Math.abs(cashTotal),isDebit:tx.side==='buy',deletable:false,reversible:false,txnId:txId,isBrokerageFee:false,cashAcct:ca});}if(tx.fee>0){entries.push({date:tx.date||'',desc:`Brokerage — ${item.ticker} ${tx.side}`,type:'fee',amount:tx.fee,isDebit:true,deletable:false,reversible:false,txnId:txId,isBrokerageFee:true,cashAcct:ca});}});});});
+    ['us','asx','cry','met'].forEach(assetType=>{S[assetType].forEach((item,assetIdx)=>{(item.txns||[]).forEach((tx,txnIdx)=>{const total=tx.price*tx.qty;const txId=tx.txnId||'—';const ca=tx.cashAcct!=null?tx.cashAcct:null;entries.push({date:tx.date||'',desc:`${tx.side==='buy'?'Buy':'Sell'} ${f(tx.qty,tx.qty%1===0?0:4)} ${item.ticker}${item.name?' — '+item.name:''}`,type:'trade',amount:total,isDebit:tx.side==='buy',deletable:false,reversible:true,assetType,assetIdx,txnIdx,txnId:txId,isBrokerageFee:false,cashAcct:ca});if(tx.fee>0){entries.push({date:tx.date||'',desc:`Brokerage — ${item.ticker} ${tx.side}`,type:'fee',amount:tx.fee,isDebit:true,deletable:false,reversible:false,txnId:txId,isBrokerageFee:true,cashAcct:ca});}});});});
     let filtered=showBalance?entries.filter(e=>e.cashAcct===acctIndex):entries;
     filtered.sort((a,b)=>new Date(a.date)-new Date(b.date));
     if(showBalance){let running=0;filtered.forEach(e=>{const credit=!e.isDebit||e.type==='income'||e.type==='contribution';running+=credit?e.amount:-e.amount;e._runningBalance=running;});}
@@ -1168,7 +1170,7 @@ function renderFees(){
     document.getElementById('feesFyLabel').textContent=fy.label+' total fees:';
     document.getElementById('feesTotal').textContent=fyFees>0?'-$'+f(fyFees):'$0.00';
     document.getElementById('feesSecTot').textContent=fyFees>0?'-$'+f(fyFees)+' fees this FY':'';
-    const TYPE_LABELS={trade:'<span class="badge b-blue" style="font-size:9px;">Trade</span>',fee:'<span class="badge b-red" style="font-size:9px;">Fee</span>',income:'<span class="badge b-green" style="font-size:9px;">Income</span>',contribution:'<span class="badge b-teal" style="font-size:9px;">Contribution</span>','cash-movement':'<span class="badge b-gray" style="font-size:9px;">Cash</span>'};
+    const TYPE_LABELS={trade:'<span class="badge b-blue" style="font-size:9px;">Trade</span>',fee:'<span class="badge b-red" style="font-size:9px;">Fee</span>',income:'<span class="badge b-green" style="font-size:9px;">Income</span>',contribution:'<span class="badge b-teal" style="font-size:9px;">Contribution</span>'};
     const cols=showBalance?7:6;
     body.innerHTML=filtered.length?filtered.map(e=>{
       const d=e.date?new Date(e.date).toLocaleDateString('en-AU',{day:'2-digit',month:'short',year:'numeric'}):'—';
