@@ -324,6 +324,12 @@ tr.hrow-met:hover td{background:rgba(148,163,184,0.04)!important;}
 .tkr-info{display:flex;flex-direction:column;gap:1px;}
 .tkr-sym{font-family:var(--mono);font-size:13px;font-weight:500;}
 .tkr-name{font-size:11px;color:var(--text3);}
+.tkr-mobile-sub{display:none;}
+@media(max-width:800px){
+  .tkr-mobile-sub{display:flex;align-items:center;gap:6px;margin-top:3px;flex-wrap:wrap;}
+  .mob-avg{font-size:10px;color:var(--text3);font-family:var(--mono);}
+  .mob-sep{font-size:10px;color:var(--text4);}
+}
 /* ── Alloc bar thicker ── */
 .alloc-bar{height:8px!important;}
 /* ── Dot live glow ── */
@@ -1595,7 +1601,14 @@ function renderAllHoldings(){
       const tileClass={us:'tkr-us',asx:'tkr-asx',cry:'tkr-cry',met:'tkr-met'}[type]||'';
       const rowClass={us:'hrow-us',asx:'hrow-asx',cry:'hrow-cry',met:'hrow-met'}[type]||'';
       const glChipStr=glChip(gl,glPct);
-      allRows.push({valAUD:valAUD||0,html:`<tr class="holding-row ${rowClass}${isOpen?' open':''}" onclick="toggleDrawer('${type}',${i})"><td><div class="tkr-cell"><div class="tkr-tile ${tileClass}">${tileLetter}</div><div class="tkr-info"><div class="tkr-sym">${item.ticker}${txBadge}</div><div class="tkr-name mob-hide">${item.name}</div></div></div></td><td class="mob-hide">${TYPE_BADGE[type]||''}</td><td class="r"><input class="ni" type="number" step="${isF?'any':'1'}" value="${item.qty}" onclick="event.stopPropagation()" onchange="upField('${type}',${i},'qty',this.value)"></td><td class="r">${price!==null?'<span class="valbold">$'+f(dp)+'</span>':'<span class="dim">—</span>'}</td><td class="r ${cc} mob-hide">${cs}</td><td class="r mob-hide"><input class="ni" type="number" step="any" value="${costDisp}" placeholder="0.00" onclick="event.stopPropagation()" onchange="upField('${type}',${i},'cost',this.value)"${txCount>0?' title="Auto from transactions" style="color:var(--text3)"':''}></td><td class="r valbold">${val!==null?'$'+f(val):'<span class="dim">—</span>'}</td><td class="r mob-hide">${glChipStr}</td><td><button class="del" onclick="event.stopPropagation();delA('${type}',${i})">&#x2715;</button></td></tr>${drawerHtml?`<tr class="tx-row"><td colspan="10">${drawerHtml}</td></tr>`:''}`});
+      // Mobile P&L sub-row
+      const mobAvg = item.cost>0 ? `<span class="mob-avg">avg $${f(item.cost)}</span><span class="mob-sep">·</span>` : '';
+      const mobGL = gl!==null && !isNaN(gl) ? (() => {
+        const sign=gl>=0?'+':''; const cls=gl>0?'gl-pos':gl<0?'gl-neg':'gl-neu';
+        return `<span class="gl-chip ${cls}" style="font-size:10px;padding:1px 6px;">${sign}$${f(Math.abs(gl))} (${sign}${f(glPct,1)}%)</span>`;
+      })() : '';
+      const mobSub = (mobAvg||mobGL) ? `<div class="tkr-mobile-sub">${mobAvg}${mobGL}</div>` : '';
+      allRows.push({valAUD:valAUD||0,html:`<tr class="holding-row ${rowClass}${isOpen?' open':''}" onclick="toggleDrawer('${type}',${i})"><td><div class="tkr-cell"><div class="tkr-tile ${tileClass}">${tileLetter}</div><div class="tkr-info"><div class="tkr-sym">${item.ticker}${txBadge}</div><div class="tkr-name mob-hide">${item.name}</div>${mobSub}</div></div></td><td class="mob-hide">${TYPE_BADGE[type]||''}</td><td class="r"><input class="ni" type="number" step="${isF?'any':'1'}" value="${item.qty}" onclick="event.stopPropagation()" onchange="upField('${type}',${i},'qty',this.value)"></td><td class="r">${price!==null?'<span class="valbold">$'+f(dp)+'</span>':'<span class="dim">—</span>'}</td><td class="r ${cc} mob-hide">${cs}</td><td class="r mob-hide"><input class="ni" type="number" step="any" value="${costDisp}" placeholder="0.00" onclick="event.stopPropagation()" onchange="upField('${type}',${i},'cost',this.value)"${txCount>0?' title="Auto from transactions" style="color:var(--text3)"':''}></td><td class="r valbold">${val!==null?'$'+f(val):'<span class="dim">—</span>'}</td><td class="r mob-hide">${glChipStr}</td><td><button class="del" onclick="event.stopPropagation();delA('${type}',${i})">&#x2715;</button></td></tr>${drawerHtml?`<tr class="tx-row"><td colspan="10">${drawerHtml}</td></tr>`:''}`});
     });
   });
   allRows.sort((a,b)=>b.valAUD-a.valAUD);
@@ -2159,6 +2172,48 @@ function importCommsecIntlCSV(input) {
   };
   reader.readAsText(file);
 }
+
+// ── Swipe to switch tabs (mobile) ──────────────────────────────
+(function(){
+  const TABS = ['portfolio','fees','watchlist','import'];
+  let touchStartX = 0, touchStartY = 0, touchStartTime = 0;
+  const MIN_SWIPE_X = 60;   // min horizontal distance px
+  const MAX_SWIPE_Y = 80;   // max vertical drift px
+  const MAX_TIME    = 400;  // max gesture duration ms
+
+  function currentTab(){
+    return TABS.find(t => {
+      const el = document.getElementById('tab-'+t);
+      return el && el.classList.contains('active');
+    }) || 'portfolio';
+  }
+
+  document.addEventListener('touchstart', e => {
+    // Ignore if inside a scrollable element (table, tbl-wrap)
+    if(e.target.closest('.tbl-wrap,.modal,.sidebar')) return;
+    touchStartX    = e.touches[0].clientX;
+    touchStartY    = e.touches[0].clientY;
+    touchStartTime = Date.now();
+  }, { passive: true });
+
+  document.addEventListener('touchend', e => {
+    if(!touchStartX) return;
+    const dx   = e.changedTouches[0].clientX - touchStartX;
+    const dy   = e.changedTouches[0].clientY - touchStartY;
+    const dt   = Date.now() - touchStartTime;
+    touchStartX = 0;
+
+    if(Math.abs(dx) < MIN_SWIPE_X) return;   // too short
+    if(Math.abs(dy) > MAX_SWIPE_Y) return;   // too vertical
+    if(dt > MAX_TIME) return;                 // too slow
+    if(Math.abs(dy) > Math.abs(dx)) return;  // more vertical than horizontal
+
+    const cur = currentTab();
+    const idx = TABS.indexOf(cur);
+    if(dx < 0 && idx < TABS.length - 1) switchTab(TABS[idx + 1]); // swipe left → next
+    if(dx > 0 && idx > 0)               switchTab(TABS[idx - 1]); // swipe right → prev
+  }, { passive: true });
+})();
 </script>
 </body>
 </html>
