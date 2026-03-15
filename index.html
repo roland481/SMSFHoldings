@@ -1983,7 +1983,16 @@ function clearErr(type){const el=document.getElementById(type+'Err');if(el)el.in
 
 async function fetchRate(){const sources=[async()=>{const r=await fetch('https://api.frankfurter.app/latest?from=USD&to=AUD');const d=await r.json();if(d.rates&&d.rates.AUD)return 1/d.rates.AUD;return null;},async()=>{const r=await fetch('https://api.coingecko.com/api/v3/simple/price?ids=usd&vs_currencies=aud');const d=await r.json();if(d.usd&&d.usd.aud)return 1/d.usd.aud;return null;}];for(const source of sources){try{const rate=await source();if(rate&&rate>0.5&&rate<1.2){S.audUsd=rate;return;}}catch(e){}}}
 async function fetchUS(){setDot('usDot','loading');clearErr('us');const tickers=S.us.map(a=>a.ticker);if(!tickers.length){setDot('usDot','stale');return;}let ok=false;await Promise.all(tickers.map(async tk=>{try{const r=await fetch(`https://finnhub.io/api/v1/quote?symbol=${tk}&token=${FINHUB_KEY}`);const d=await r.json();if(d&&d.c&&d.c>0){S.prices['us:'+tk]={price:d.c,change:d.pc>0?((d.c-d.pc)/d.pc*100):0};ok=true;}}catch(e){}}));setDot('usDot',ok?'live':'err');if(!ok)showErr('us','Could not load US prices.');rows('us');}
-async function fetchASX(){setDot('asxDot','loading');clearErr('asx');const tickers=S.asx.map(a=>a.ticker);if(!tickers.length){setDot('asxDot','stale');return;}let ok=false;await Promise.all(tickers.map(async tk=>{try{const r=await fetch(`https://finnhub.io/api/v1/quote?symbol=${tk}.AX&token=${FINHUB_KEY}`);const d=await r.json();if(d&&d.c&&d.c>0){S.prices['asx:'+tk]={price:d.c,change:d.pc>0?((d.c-d.pc)/d.pc*100):0};ok=true;}}catch(e){}}));setDot('asxDot',ok?'live':'err');if(!ok)showErr('asx','Could not load ASX prices.');rows('asx');}
+async function fetchASX(){setDot('asxDot','loading');clearErr('asx');const tickers=S.asx.map(a=>a.ticker);if(!tickers.length){setDot('asxDot','stale');return;}let ok=false;await Promise.all(tickers.map(async tk=>{try{
+    // Try ASX:TICKER format first (more reliable for Australian stocks)
+    let r=await fetch(`https://finnhub.io/api/v1/quote?symbol=ASX:${tk}&token=${FINHUB_KEY}`);
+    let d=await r.json();
+    if(d&&d.c&&d.c>0){S.prices['asx:'+tk]={price:d.c,change:d.pc>0?((d.c-d.pc)/d.pc*100):0};ok=true;return;}
+    // Fallback: try with .AX suffix
+    r=await fetch(`https://finnhub.io/api/v1/quote?symbol=${tk}.AX&token=${FINHUB_KEY}`);
+    d=await r.json();
+    if(d&&d.c&&d.c>0){S.prices['asx:'+tk]={price:d.c,change:d.pc>0?((d.c-d.pc)/d.pc*100):0};ok=true;}
+  }catch(e){}}));setDot('asxDot',ok?'live':'err');if(!ok)showErr('asx','Could not load ASX prices — check ticker format.');rows('asx');}
 async function fetchCry(){setDot('crypDot','loading');const coins=S.cry.map(a=>CID[a.ticker.toUpperCase()]||a.ticker.toLowerCase());if(!coins.length){setDot('crypDot','stale');return;}try{const r=await fetch(`https://api.coingecko.com/api/v3/simple/price?ids=${coins.join(',')}&vs_currencies=aud&include_24hr_change=true`);const d=await r.json();S.cry.forEach(item=>{const id=CID[item.ticker.toUpperCase()]||item.ticker.toLowerCase();if(d[id])S.prices['cry:'+item.ticker]={price:d[id].aud,change:d[id].aud_24h_change};});setDot('crypDot','live');}catch(e){setDot('crypDot','err');}rows('cry');}
 async function fetchMetals(){setDot('metDot','loading');clearErr('met');if(!S.met.length){setDot('metDot','stale');return;}let ok=false;await Promise.all(S.met.map(async item=>{try{const r=await fetch(`https://api.gold-api.com/price/${item.ticker.toUpperCase()}`);const d=await r.json();if(d&&d.price&&d.price>0){const pa=d.price/S.audUsd;const pv=d.prev_close_price>0?d.prev_close_price/S.audUsd:null;S.prices['met:'+item.ticker]={price:pa,change:pv?((pa-pv)/pv*100):null};ok=true;}}catch(e){}}));setDot('metDot',ok?'live':'err');if(!ok)showErr('met','Could not load metal prices.');rows('met');}
 
@@ -2005,7 +2014,7 @@ function renderAllHoldings(){
 let smartMode='new',smartCategory='us',smartFoundType=null,smartFoundIdx=null;
 const MODAL_QTY_LABELS={us:'Qty (shares)',asx:'Qty (shares)',cry:'Qty (coins)',met:'Qty (oz)'};
 const MODAL_COST_LABELS={us:'Avg cost (AUD)',asx:'Avg cost (AUD)',cry:'Avg cost (AUD)',met:'Avg cost (AUD/oz)'};
-const MODAL_HINTS={us:'Price fetched from Finnhub automatically.',asx:'Use ASX ticker without .AX (e.g. CBA).',cry:'Use CoinGecko symbol (e.g. BTC, ETH).',met:'Use XAU, XAG, XPT or XPD.'};
+const MODAL_HINTS={us:'Price fetched from Finnhub automatically.',asx:'Enter ASX ticker without .AX suffix, e.g. CBA, BHP, ANZ. Make sure ASX Stock category is selected.',cry:'Use CoinGecko symbol (e.g. BTC, ETH).',met:'Use XAU, XAG, XPT or XPD.'};
 
 function openAddModal(){
   if(isReadOnly()) return;
@@ -2024,7 +2033,12 @@ function openAddModal(){
 }
 function _populateAccountSelects(){const opts='<option value="">— Don\'t adjust cash —</option>'+S.cash.map((a,i)=>`<option value="${i}">${a.name} ($${f(a.balance||0)} AUD)</option>`).join('');['modal-txn-account','modal-new-account'].forEach(id=>{const el=document.getElementById(id);if(el)el.innerHTML=opts;});}
 function closeAddModal(){const _modal=document.getElementById('addModal');_modal.classList.remove('open');_modal.style.display='none';_modal.style.visibility='hidden';}
-function onSmartTickerInput(raw){const tk=raw.trim().toUpperCase();if(smartMode==='cash'||smartMode==='fees')setSmartMode('new');smartFoundType=null;smartFoundIdx=null;for(const type of['us','asx','cry','met']){const idx=S[type].findIndex(h=>h.ticker===tk);if(idx>=0){smartFoundType=type;smartFoundIdx=idx;break;}}const status=document.getElementById('modal-ticker-status');if(!tk){status.textContent='';smartMode='new';}else if(smartFoundType){status.textContent='✓ Found: '+S[smartFoundType][smartFoundIdx].name+' — adding transaction';status.style.color='#42ac5c';smartMode='txn';}else{status.textContent='New holding — select category below';status.style.color='var(--text3)';smartMode='new';}_renderSmartModal();}
+function onSmartTickerInput(raw){const tk=raw.trim().toUpperCase();if(smartMode==='cash'||smartMode==='fees')setSmartMode('new');smartFoundType=null;smartFoundIdx=null;for(const type of['us','asx','cry','met']){const idx=S[type].findIndex(h=>h.ticker===tk);if(idx>=0){smartFoundType=type;smartFoundIdx=idx;break;}}const status=document.getElementById('modal-ticker-status');if(!tk){status.textContent='';smartMode='new';}else if(smartFoundType){status.textContent='✓ Found: '+S[smartFoundType][smartFoundIdx].name+' — adding transaction';status.style.color='#42ac5c';smartMode='txn';}else{// Auto-suggest category based on ticker pattern
+  const isCrypto=Object.keys(CID).includes(tk)||['BTC','ETH','SOL','XRP','ADA','BNB','DOGE','AVAX','MATIC','LINK'].includes(tk);
+  const isASX=/^[A-Z]{2,4}[0-9]?$/.test(tk)&&!isCrypto&&tk.length<=4&&!['AAPL','MSFT','TSLA','AMZN','GOOGL','META','NVDA','AMD','INTC','NFLX'].includes(tk);
+  if(isASX&&smartCategory==='us')setSmartCategory('asx');
+  status.textContent='New holding — select category below';status.style.color='var(--text3)';smartMode='new';}
+_renderSmartModal();}
 function setSmartMode(mode){
   smartMode=mode;const noTicker=['cash','fees','income','contribution','transfer'];
   if(noTicker.includes(mode)){document.getElementById('modal-smart-ticker').value='';document.getElementById('modal-ticker-status').textContent='';}
