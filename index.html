@@ -1610,7 +1610,7 @@ async function saveTxn(type,i){
     await xanoUpdateHolding(type, i);
     await xanoAddTransaction(type, i);
     syncUI('synced','Saved · '+new Date().toLocaleTimeString('en-AU',{hour:'2-digit',minute:'2-digit'}));
-  } catch(e) { syncUI('err','Save failed: '+e.message); alert('DEBUG - Save error: ' + e.message + ' | holding._id: ' + S[type][i]?._id + ' | portfolioId: ' + AUTH.currentPortfolioId); }
+  } catch(e) { syncUI('err','Save failed: '+e.message); }
   rows(type);renderAllHoldings();renderFees();
 }
 
@@ -1990,7 +1990,18 @@ async function submitAddModal(){
   }else{
     const tk=document.getElementById('modal-smart-ticker').value.trim().toUpperCase();const nm=document.getElementById('modal-name').value.trim()||tk;const qt=parseFloat(document.getElementById('modal-qty').value)||0;const cost=parseFloat(document.getElementById('modal-cost').value)||0;const acctIdx=document.getElementById('modal-new-account').value;
     if(!tk)return;S[smartCategory].push({ticker:tk,name:nm,qty:qt,cost,txns:[]});
-    try{await xanoAddHolding(smartCategory);if(acctIdx!==''&&qt>0&&cost>0){const idx=parseInt(acctIdx);S.cash[idx].balance=(S.cash[idx].balance||0)-(qt*cost);await xanoUpdateCash(idx);renderCash();}rows(smartCategory);syncUI('synced','Saved');}catch(e){syncUI('err','Save failed');S[smartCategory].pop();}
+    try{
+      await xanoAddHolding(smartCategory);
+      // If qty and cost provided, also create an opening buy transaction
+      if(qt>0&&cost>0){
+        const lastIdx=S[smartCategory].length-1;
+        const txnId=generateTxnId(new Date().toISOString().slice(0,10));
+        S[smartCategory][lastIdx].txns=[{date:new Date().toISOString().slice(0,10),side:'buy',qty:qt,price:cost,fee:0,txnId,cashAcct:null}];
+        await xanoAddTransaction(smartCategory,lastIdx);
+      }
+      if(acctIdx!==''&&qt>0&&cost>0){const idx=parseInt(acctIdx);S.cash[idx].balance=(S.cash[idx].balance||0)-(qt*cost);await xanoUpdateCash(idx);renderCash();}
+      rows(smartCategory);syncUI('synced','Saved');
+    }catch(e){syncUI('err','Save failed: '+e.message);S[smartCategory].pop();}
   }
   closeAddModal();
 }
