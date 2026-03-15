@@ -1610,7 +1610,7 @@ async function saveTxn(type,i){
     await xanoUpdateHolding(type, i);
     await xanoAddTransaction(type, i);
     syncUI('synced','Saved · '+new Date().toLocaleTimeString('en-AU',{hour:'2-digit',minute:'2-digit'}));
-  } catch(e) { syncUI('err','Save failed: '+e.message); }
+  } catch(e) { syncUI('err','Save failed: '+e.message); alert('DEBUG - Save error: ' + e.message + ' | holding._id: ' + S[type][i]?._id + ' | portfolioId: ' + AUTH.currentPortfolioId); }
   rows(type);renderAllHoldings();renderFees();
 }
 
