@@ -366,9 +366,9 @@ tr.holding-row.open td:first-child::before{transform:rotate(90deg);color:var(--a
 .sb-item.active::before{content:'';position:absolute;left:0;top:20%;bottom:20%;width:3px;border-radius:0 3px 3px 0;background:linear-gradient(180deg,var(--accent),var(--accent2));}
 .sb-item svg{flex-shrink:0;}
 .sb-section{font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:0.08em;padding:12px 12px 4px;}
-.modal-overlay{display:none;visibility:hidden;position:fixed;inset:0;background:rgba(0,5,20,0.7);z-index:200;align-items:center;justify-content:center;}
+.modal-overlay{display:none;visibility:hidden;position:fixed;inset:0;background:rgba(0,5,20,0.7);z-index:200;align-items:flex-start;justify-content:center;overflow-y:auto;padding:20px 0;}
 .modal-overlay.open{display:flex;visibility:visible;backdrop-filter:blur(4px);}
-.modal{background:var(--card-glass);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border:1px solid var(--border4);border-radius:20px;padding:24px;width:460px;max-width:calc(100vw - 32px);position:relative;box-shadow:0 24px 64px rgba(0,0,0,0.4);}
+.modal{background:var(--card-glass);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border:1px solid var(--border4);border-radius:20px;padding:24px;width:460px;max-width:calc(100vw - 32px);position:relative;box-shadow:0 24px 64px rgba(0,0,0,0.4);margin:auto;}
 .modal-title{font-size:16px;font-weight:700;color:var(--text);margin-bottom:4px;font-family:Arial,Helvetica,sans-serif;letter-spacing:-0.03em;}
 .modal-sub{font-size:12px;color:var(--text3);margin-bottom:18px;}
 .modal-close{position:absolute;top:14px;right:14px;background:none;border:none;color:var(--text3);font-size:18px;cursor:pointer;line-height:1;padding:2px 7px;border-radius:5px;}
@@ -1020,7 +1020,10 @@ tr.hrow-met td{border-left:2px solid rgba(154,162,200,0.45);}
       </div>
       <div style="height:1px;background:var(--border2);margin-bottom:16px;" id="modal-divider"></div>
       <div id="modal-new-holding" style="display:none;">
-        <div class="modal-field"><label class="modal-label">Name</label><input class="modal-input" id="modal-name" placeholder="e.g. Tesla Inc"></div>
+        <div class="modal-row">
+          <div class="modal-field"><label class="modal-label">Transaction date</label><input class="modal-input" id="modal-new-date" type="date"></div>
+          <div class="modal-field"><label class="modal-label">Name</label><input class="modal-input" id="modal-name" placeholder="e.g. Tesla Inc"></div>
+        </div>
         <div class="modal-row">
           <div class="modal-field"><label class="modal-label" id="modal-qty-label">Qty</label><input class="modal-input" id="modal-qty" type="number" step="any" placeholder="0" oninput="updateNewHoldingTotal()"></div>
           <div class="modal-field"><label class="modal-label" id="modal-cost-label">Avg cost (AUD)</label><input class="modal-input" id="modal-cost" type="number" step="any" placeholder="0.00" oninput="updateNewHoldingTotal()"></div>
@@ -2007,10 +2010,11 @@ const MODAL_HINTS={us:'Price fetched from Finnhub automatically.',asx:'Use ASX t
 function openAddModal(){
   if(isReadOnly()) return;
   smartMode='new';smartCategory='us';smartFoundType=null;smartFoundIdx=null;
+  setTimeout(()=>{const nd=document.getElementById('modal-new-date');if(nd&&!nd.value)nd.value=new Date().toISOString().slice(0,10);},50);
   const _ntt=document.getElementById('modal-new-total');if(_ntt)_ntt.style.display='none';
   const _st=document.getElementById('modal-sale-total');if(_st)_st.style.display='none';
   const _swt=document.getElementById('modal-swap-total');if(_swt)_swt.style.display='none';
-  ['modal-smart-ticker','modal-name','modal-qty','modal-cost','modal-new-fee','modal-sale-qty','modal-sale-price','modal-sale-fee','modal-swap-from-qty','modal-swap-from-aud','modal-swap-to-qty','modal-swap-to-aud','modal-swap-fee','modal-cash-name','modal-cash-bal','modal-fees-desc','modal-fees-amt','modal-txn-qty','modal-txn-price','modal-txn-fee','modal-income-amt','modal-income-source','modal-income-franking','modal-contrib-amt','modal-contrib-member'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  ['modal-smart-ticker','modal-name','modal-new-date','modal-qty','modal-cost','modal-new-fee','modal-sale-qty','modal-sale-price','modal-sale-fee','modal-swap-from-qty','modal-swap-from-aud','modal-swap-to-qty','modal-swap-to-aud','modal-swap-fee','modal-cash-name','modal-cash-bal','modal-fees-desc','modal-fees-amt','modal-txn-qty','modal-txn-price','modal-txn-fee','modal-income-amt','modal-income-source','modal-income-franking','modal-contrib-amt','modal-contrib-member'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
   const today=new Date().toISOString().slice(0,10);
   ['modal-fees-date','modal-txn-date','modal-income-date','modal-contrib-date'].forEach(id=>{const el=document.getElementById(id);if(el)el.value=today;});
   document.getElementById('modal-ticker-status').textContent='';
@@ -2168,8 +2172,10 @@ async function submitAddModal(){
       // If qty and cost provided, also create an opening buy transaction
       if(qt>0&&cost>0){
         const lastIdx=S[smartCategory].length-1;
-        const txnId=generateTxnId(new Date().toISOString().slice(0,10));
-        S[smartCategory][lastIdx].txns=[{date:new Date().toISOString().slice(0,10),side:'buy',qty:qt,price:cost,fee:newFee,txnId,cashAcct:null}];
+        const newHoldingDate=document.getElementById('modal-new-date')?.value||new Date().toISOString().slice(0,10);
+        const txnId=generateTxnId(newHoldingDate);
+        const openingCashAcct=acctIdx!==''&&acctIdx!=null?parseInt(acctIdx):null;
+        S[smartCategory][lastIdx].txns=[{date:newHoldingDate,side:'buy',qty:qt,price:cost,fee:newFee,txnId,cashAcct:openingCashAcct}];
         await xanoAddTransaction(smartCategory,lastIdx);
       }
       if(acctIdx!==''&&qt>0&&cost>0){const idx=parseInt(acctIdx);S.cash[idx].balance=(S.cash[idx].balance||0)-((qt*cost)+newFee);await xanoUpdateCash(idx);renderCash();}
