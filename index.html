@@ -1419,6 +1419,26 @@ async function loadPortfolio(portfolioId) {
     syncUI('synced', 'Loaded · ' + new Date().toLocaleTimeString('en-AU',{hour:'2-digit',minute:'2-digit'}));
     ['us','asx','cry','met','cash','fees','wl'].forEach(t => rows(t));
     renderAllHoldings(); renderFees(); renderCash(); summary(); renderAllocTable();
+    // Load snapshots from Xano for history chart
+    xanoLoadSnapshots(portfolioId).then(snapshots => {
+      if(snapshots && snapshots.length) {
+        // Convert Xano format to local format {d, v, invested, cash}
+        const history = snapshots
+          .sort((a,b) => a.date > b.date ? 1 : -1)
+          .map(s => ({d: s.date, v: parseFloat(s.value)||0, invested: parseFloat(s.invested)||0, cash: parseFloat(s.cash)||0}));
+        // Store in localStorage as cache
+        try { localStorage.setItem(HISTORY_KEY + '_' + portfolioId, JSON.stringify(history)); } catch(e) {}
+        S.snapshots = history;
+        renderHistoryChart(history);
+      } else {
+        // Fall back to localStorage cache
+        try {
+          const cached = JSON.parse(localStorage.getItem(HISTORY_KEY + '_' + portfolioId) || localStorage.getItem(HISTORY_KEY) || '[]');
+          S.snapshots = cached;
+          renderHistoryChart(cached);
+        } catch(e) { S.snapshots = []; }
+      }
+    });
     setTimeout(() => { renderCash(); renderAllHoldings(); renderFees(); summary(); renderAllocTable(); }, 150);
   } catch(e) {
     syncUI('err', 'Failed to load portfolio — ' + e.message);
@@ -2080,7 +2100,26 @@ async function fetchASX(){setDot('asxDot','loading');clearErr('asx');const ticke
 async function fetchCry(){setDot('crypDot','loading');const coins=S.cry.map(a=>CID[a.ticker.toUpperCase()]||a.ticker.toLowerCase());if(!coins.length){setDot('crypDot','stale');return;}try{const r=await fetch(`https://api.coingecko.com/api/v3/simple/price?ids=${coins.join(',')}&vs_currencies=aud&include_24hr_change=true`);const d=await r.json();S.cry.forEach(item=>{const id=CID[item.ticker.toUpperCase()]||item.ticker.toLowerCase();if(d[id])S.prices['cry:'+item.ticker]={price:d[id].aud,change:d[id].aud_24h_change};});setDot('crypDot','live');}catch(e){setDot('crypDot','err');}rows('cry');}
 async function fetchMetals(){setDot('metDot','loading');clearErr('met');if(!S.met.length){setDot('metDot','stale');return;}let ok=false;await Promise.all(S.met.map(async item=>{try{const r=await fetch(`https://api.gold-api.com/price/${item.ticker.toUpperCase()}`);const d=await r.json();if(d&&d.price&&d.price>0){const pa=d.price/S.audUsd;const pv=d.prev_close_price>0?d.prev_close_price/S.audUsd:null;S.prices['met:'+item.ticker]={price:pa,change:pv?((pa-pv)/pv*100):null};ok=true;}}catch(e){}}));setDot('metDot',ok?'live':'err');if(!ok)showErr('met','Could not load metal prices.');rows('met');}
 
-async function refreshAll(){const btn=document.getElementById('rfBtn'),icon=document.getElementById('rfIcon');btn.disabled=true;icon.classList.add('spin');try{await fetchRate();await Promise.allSettled([fetchUS(),fetchASX(),fetchCry(),fetchMetals(),fetchWl()]);summary();renderAllHoldings();renderAllocTable();const lrb=document.getElementById('lastRefreshedBar');const lrt=document.getElementById('lastRefreshedTime');if(lrb&&lrt){lrt.textContent=new Date().toLocaleTimeString('en-AU',{hour:'2-digit',minute:'2-digit'});lrb.style.display='block';}}catch(e){console.warn('refreshAll error:',e);}finally{btn.disabled=false;icon.classList.remove('spin');}}
+async function refreshAll(){const btn=document.getElementById('rfBtn'),icon=document.getElementById('rfIcon');btn.disabled=true;icon.classList.add('spin');try{await fetchRate();await Promise.allSettled([fetchUS(),fetchASX(),fetchCry(),fetchMetals(),fetchWl()]);summary();renderAllHoldings();renderAllocTable();
+      // Save snapshot to Xano after price refresh
+      setTimeout(async () => {
+        try {
+          const val = parseFloat(document.getElementById('tot')?.textContent?.replace(/[^0-9.]/g,''))||0;
+          const inv = parseFloat(document.getElementById('tot-invested')?.textContent?.replace(/[^0-9.]/g,''))||0;
+          const csh = parseFloat(document.getElementById('tot-cash')?.textContent?.replace(/[^0-9.]/g,''))||0;
+          if(val > 0 && AUTH.currentPortfolioId) {
+            await xanoSaveSnapshot(AUTH.currentPortfolioId, val, inv, csh);
+            // Reload snapshots and re-render history
+            const snapshots = await xanoLoadSnapshots(AUTH.currentPortfolioId);
+            if(snapshots && snapshots.length) {
+              const history = snapshots.sort((a,b)=>a.date>b.date?1:-1).map(s=>({d:s.date,v:parseFloat(s.value)||0,invested:parseFloat(s.invested)||0,cash:parseFloat(s.cash)||0}));
+              S.snapshots = history;
+              try{localStorage.setItem(HISTORY_KEY+'_'+AUTH.currentPortfolioId, JSON.stringify(history));}catch(e){}
+              renderHistoryChart(history);
+            }
+          }
+        } catch(e) { console.warn('Post-refresh snapshot error:', e); }
+      }, 500);const lrb=document.getElementById('lastRefreshedBar');const lrt=document.getElementById('lastRefreshedTime');if(lrb&&lrt){lrt.textContent=new Date().toLocaleTimeString('en-AU',{hour:'2-digit',minute:'2-digit'});lrb.style.display='block';}}catch(e){console.warn('refreshAll error:',e);}finally{btn.disabled=false;icon.classList.remove('spin');}}
 
 function renderAllHoldings(){
   const body=document.getElementById('allHoldingsB');if(!body)return;
@@ -2410,7 +2449,17 @@ function updateSessions(){
 function applyRowTints(){document.querySelectorAll('tr.holding-row').forEach(tr=>{const changeCell=[...tr.querySelectorAll('td')].find(td=>td.classList.contains('pos')||td.classList.contains('neg'));if(!changeCell)return;tr.classList.remove('tint-up','tint-down');if(changeCell.classList.contains('pos'))tr.classList.add('tint-up');else if(changeCell.classList.contains('neg'))tr.classList.add('tint-down');});}
 
 let historyChart=null;const HISTORY_KEY='smsf_history';const MAX_SNAPSHOTS=90;
-function saveSnapshot(totalValue){if(!totalValue||totalValue<=0)return;const today=new Date().toISOString().slice(0,10);let history=[];try{history=JSON.parse(localStorage.getItem(HISTORY_KEY)||'[]');}catch(e){}const last=history[history.length-1];if(last&&last.d===today){last.v=totalValue;}else{history.push({d:today,v:totalValue});}if(history.length>MAX_SNAPSHOTS)history=history.slice(-MAX_SNAPSHOTS);localStorage.setItem(HISTORY_KEY,JSON.stringify(history));renderHistoryChart(history);}
+function saveSnapshot(totalValue){
+  // Snapshots now saved to Xano on price refresh — localStorage kept as cache only
+  if(!totalValue||totalValue<=0)return;
+  const today=new Date().toISOString().slice(0,10);
+  let history=[];
+  try{history=JSON.parse(localStorage.getItem(HISTORY_KEY)||'[]');}catch(e){}
+  // Only update localStorage cache, Xano save happens in refreshAll
+  if(history.length&&history[history.length-1].d===today){history[history.length-1].v=totalValue;}
+  else{history.push({d:today,v:totalValue});}
+  try{localStorage.setItem(HISTORY_KEY,JSON.stringify(history));}catch(e){}
+}
 function renderHistoryChart(history){if(!history){try{history=JSON.parse(localStorage.getItem(HISTORY_KEY)||'[]');}catch(e){history=[];}}const el=document.getElementById('historyChart');const meta=document.getElementById('historyMeta');if(!history.length){if(meta)meta.textContent='No history yet — refresh prices to record first snapshot';return;}const labels=history.map(h=>{const d=new Date(h.d);return d.toLocaleDateString('en-AU',{day:'numeric',month:'short'});});const data=history.map(h=>h.v);const first=data[0],last=data[data.length-1];const change=last-first;const changePct=first>0?(change/first*100):0;const sign=change>=0?'+':'';if(meta)meta.innerHTML=`${history.length} snapshot${history.length>1?'s':''} &nbsp;·&nbsp; <span style="color:${change>=0?'var(--gain-pos)':'var(--gain-neg)'};font-weight:700;">${sign}$${f(Math.abs(change))} (${sign}${changePct.toFixed(1)}%)</span> since first recorded`;const isDarkMode=document.documentElement.getAttribute('data-theme')!=='light';const lineColor=isDarkMode?'#4f8ef5':'#3a7ae0';const fillColor=isDarkMode?'rgba(79,142,245,0.1)':'rgba(79,142,245,0.08)';const gridColor=isDarkMode?'rgba(255,255,255,0.06)':'rgba(0,0,0,0.06)';const textColor=isDarkMode?'#444':'#999';if(historyChart){historyChart.destroy();historyChart=null;}if(!el)return;(function(){const gradH=el.getContext('2d').createLinearGradient(0,0,0,180);gradH.addColorStop(0,'rgba(93,227,108,0.35)');gradH.addColorStop(1,'rgba(93,227,108,0)');historyChart=new Chart(el,{type:'line',data:{labels,datasets:[{data,borderColor:document.documentElement.getAttribute('data-theme')==='light'?'#42ac5c':'#5de36c',backgroundColor:gradH,borderWidth:2,pointRadius:0,pointHoverRadius:5,pointHoverBackgroundColor:'#5de36c',fill:true,tension:0.4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{backgroundColor:'rgba(6,10,20,0.85)',borderColor:'rgba(93,227,108,0.3)',borderWidth:1,bodyColor:'#5de36c',padding:10,callbacks:{label:ctx=>' $'+f(ctx.parsed.y)}}},scales:{x:{grid:{color:gridColor},ticks:{color:textColor,maxTicksLimit:8,font:{size:11}}},y:{grid:{color:gridColor},ticks:{color:textColor,font:{size:11},callback:v=>'$'+f(v)}}}}});})();}
 function openMobileSidebar(){document.getElementById('sidebar').classList.add('mobile-open');document.getElementById('sidebarOverlay').classList.add('visible');document.body.style.overflow='hidden';}
 function closeMobileSidebar(){document.getElementById('sidebar').classList.remove('mobile-open');document.getElementById('sidebarOverlay').classList.remove('visible');document.body.style.overflow='';}
@@ -2580,6 +2629,32 @@ function updateNewHoldingTotal(){
     totalValEl.textContent='-$'+f(total)+(fee>0?' (incl. $'+f(fee)+' fee)':'');
   } else {
     totalEl.style.display='none';
+  }
+}
+
+
+async function xanoSaveSnapshot(portfolioId, value, invested, cash) {
+  const date = new Date().toISOString().slice(0, 10);
+  try {
+    await xano('POST', '/snapshot', {
+      portfolio: portfolioId,
+      date,
+      value,
+      invested,
+      cash
+    });
+  } catch(e) {
+    console.warn('Snapshot save failed:', e);
+  }
+}
+
+async function xanoLoadSnapshots(portfolioId) {
+  try {
+    const data = await xano('GET', `/snapshot?portfolio_id=${portfolioId}`);
+    return Array.isArray(data) ? data : (data.items || []);
+  } catch(e) {
+    console.warn('Snapshot load failed:', e);
+    return [];
   }
 }
 
