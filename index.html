@@ -1815,6 +1815,71 @@ function summary(){
 }
 
 
+function updatePie(){
+  const labels=[],data=[],colors=[];let ci=0;
+  S.us.forEach(item=>{const p=S.prices['us:'+item.ticker];if(p&&item.qty){const v=(p.price*item.qty)/S.audUsd;if(v>0){labels.push(item.ticker);data.push(parseFloat(v.toFixed(2)));colors.push(PIE_COLORS[ci%PIE_COLORS.length]);ci++;}}});
+  S.asx.forEach(item=>{const p=S.prices['asx:'+item.ticker];if(p&&item.qty){const v=p.price*item.qty;if(v>0){labels.push(item.ticker);data.push(parseFloat(v.toFixed(2)));colors.push(PIE_COLORS[ci%PIE_COLORS.length]);ci++;}}});
+  S.cry.forEach(item=>{const p=S.prices['cry:'+item.ticker];if(p&&item.qty){const v=p.price*item.qty;if(v>0){labels.push(item.ticker);data.push(parseFloat(v.toFixed(2)));colors.push(PIE_COLORS[ci%PIE_COLORS.length]);ci++;}}});
+  S.met.forEach(item=>{const p=S.prices['met:'+item.ticker];if(p&&item.qty){const v=p.price*item.qty;if(v>0){labels.push(item.name);data.push(parseFloat(v.toFixed(2)));colors.push(PIE_COLORS[ci%PIE_COLORS.length]);ci++;}}});
+  S.cash.forEach(item=>{if(item.balance>0){labels.push(item.name);data.push(parseFloat(item.balance.toFixed(2)));colors.push('#397968');ci++;}});
+  if(!data.length)return;
+  const gt=data.reduce((a,b)=>a+b,0);
+  document.getElementById('pieLegend').innerHTML=labels.map((l,i)=>{const pct=gt>0?((data[i]/gt)*100).toFixed(1):0;return`<div class="pie-leg-row"><div class="pie-leg-left"><div class="pie-leg-sw" style="background:${colors[i]}"></div><span>${l}</span></div><span style="font-weight:500;">${pct}%</span></div>`;}).join('');
+  if(pieChart){pieChart.data.labels=labels;pieChart.data.datasets[0].data=data;pieChart.data.datasets[0].backgroundColor=colors;pieChart.update();}
+  else{pieChart=new Chart(document.getElementById('pieChart'),{type:'doughnut',data:{labels,datasets:[{data,backgroundColor:colors,borderWidth:2,borderColor:'rgba(12,14,20,0.8)',hoverOffset:4}]},options:{responsive:true,maintainAspectRatio:false,cutout:'65%',plugins:{legend:{display:false},tooltip:{callbacks:{label:(ctx)=>{const pct=gt>0?((ctx.parsed/gt)*100).toFixed(1):0;return ctx.label+': $'+f(ctx.parsed)+' ('+pct+'%)';}}}}}});}
+}
+function clearErr(type){const el=document.getElementById(type+'Err');if(el)el.innerHTML='';}
+function showErr(type,msg){const el=document.getElementById(type+'Err');if(el)el.innerHTML=`<div class="err-note">${msg}</div>`;}
+function setDot(id,s){document.getElementById(id).className='dot dot-'+s;}
+function renderSparklines(){
+  // Draw real sparklines on all summary cards using portfolio history
+  const history=[];
+  try{const h=JSON.parse(localStorage.getItem('smsf_history')||'[]');history.push(...h);}catch(e){}
+  const pts=history.slice(-14); // last 2 weeks
+  // Draw sparkline into any .sparkline element \u2014 use overall portfolio trajectory
+  document.querySelectorAll('.sparkline').forEach((el,idx)=>{
+    if(pts.length<2){el.innerHTML='<svg viewBox="0 0 100 36" style="width:100%;height:100%;"><line x1="0" y1="18" x2="100" y2="18" stroke="rgba(201,149,42,0.2)" stroke-width="1" stroke-dasharray="3,3"/></svg>';return;}
+    const vals=pts.map(p=>p.v);
+    const min=Math.min(...vals),max=Math.max(...vals),range=max-min||1;
+    const H=34;
+    const coords=pts.map((p,i)=>{
+      const x=(i/(pts.length-1))*100;
+      const y=H-((p.v-min)/range)*(H-4)-2;
+      return x+','+y;
+    });
+    const pathD='M'+coords.join(' L');
+    const last=vals[vals.length-1],first=vals[0];
+    const up=last>=first;
+    const stroke=up?'#4ade80':'#f87171';
+    const fillId='spkfill'+idx;
+    el.innerHTML=`<svg viewBox="0 0 100 36" preserveAspectRatio="none" style="width:100%;height:100%;overflow:visible">
+      <defs><linearGradient id="${fillId}" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="${stroke}" stop-opacity="0.22"/>
+        <stop offset="100%" stop-color="${stroke}" stop-opacity="0"/>
+      </linearGradient></defs>
+      <path d="${pathD}" fill="none" stroke="${stroke}" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="${pathD} L100,36 L0,36 Z" fill="url(#${fillId})"/>
+    </svg>`;
+  });
+}
+function delFee(i){
+  const fee=S.fees[i];
+  if(fee&&fee.cashAcct!=null&&S.cash[fee.cashAcct]){
+    S.cash[fee.cashAcct].balance=(S.cash[fee.cashAcct].balance||0)+fee.amount;
+    renderCash();
+  }
+  S.fees.splice(i,1);save();renderFees();
+}
+function delIncome(i){S.income.splice(i,1);save();renderFees();}
+function delContribution(i){S.contributions.splice(i,1);save();renderFees();}
+function delTransfer(i){
+  const t=S.transfers[i];if(!t)return;
+  // Reverse the balance adjustments
+  if(S.cash[t.from]!=null)S.cash[t.from].balance=(S.cash[t.from].balance||0)+t.amount;
+  if(S.cash[t.to]!=null)S.cash[t.to].balance=(S.cash[t.to].balance||0)-t.amount;
+  S.transfers.splice(i,1);save();renderCash();renderFees();
+}
+
 function recalcFromTxns(type,i){const txns=S[type][i].txns||[];if(!txns.length)return;let totalQty=0,totalCost=0;[...txns].sort((a,b)=>new Date(a.date)-new Date(b.date)).forEach(tx=>{if(tx.side==='buy'){totalCost+=tx.qty*tx.price+(tx.fee||0);totalQty+=tx.qty;}else{const sf=Math.min(tx.qty/(totalQty||1),1);totalCost-=totalCost*sf;totalQty-=tx.qty;if(totalQty<0)totalQty=0;if(totalCost<0)totalCost=0;}});S[type][i].qty=parseFloat(totalQty.toFixed(8));S[type][i].cost=totalQty>0?parseFloat((totalCost/totalQty).toFixed(6)):0;}
 function recalcAll(){['us','asx','cry','met'].forEach(type=>{S[type].forEach((item,i)=>{if((item.txns||[]).length)recalcFromTxns(type,i);});});}
 
