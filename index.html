@@ -350,15 +350,8 @@ tr.hrow-met:hover td{background:rgba(148,163,184,0.04)!important;}
   #modal-ticker-row{padding:0 24px;}
   #modal-ticker-row .modal-field{margin-bottom:4px;}
 }
-/* ── Mobile holdings list ── */
+/* ── Mobile holdings — keep table layout, just hide non-essential cols ── */
 @media(max-width:800px){
-  #allHoldingsB tr.holding-row td:not(:first-child):not(:last-child){display:none;}
-  #allHoldingsB tr.holding-row td:first-child{padding:12px 14px;width:100%;}
-  #allHoldingsB tr.holding-row td:last-child{padding:12px 8px 12px 0;width:auto;}
-  #allHoldingsB tr.holding-row{display:flex;align-items:center;}
-  .mob-row-expand{display:flex;align-items:center;justify-content:space-between;gap:12px;width:100%;}
-  .mob-row-left{display:flex;align-items:center;gap:10px;}
-  .mob-row-right{text-align:right;flex-shrink:0;}
   .mob-val{font-family:var(--mono);font-size:14px;font-weight:600;color:var(--text);}
   .mob-gl{font-size:11px;margin-top:2px;}
 }
@@ -1294,7 +1287,7 @@ function renderFees(){
       // Credit leg (destination account)
       entries.push({date:item.date||'',desc:`Transfer from ${fromName}${item.desc?' — '+item.desc:''}`,type:'transfer',amount:item.amount||0,isDebit:false,orig,deletable:false,reversible:false,txnId:item.txnId||'—',isBrokerageFee:false,cashAcct:item.to});
     });
-    ['us','asx','cry','met'].forEach(assetType=>{S[assetType].forEach((item,assetIdx)=>{(item.txns||[]).forEach((tx,txnIdx)=>{const total=tx.price*tx.qty;const txId=tx.txnId||'—';const ca=tx.cashAcct!=null?tx.cashAcct:null;entries.push({date:tx.date||'',desc:`${tx.side==='buy'?'Buy':'Sell'} ${f(tx.qty,tx.qty%1===0?0:4)} ${item.ticker}${item.name?' — '+item.name:''}`,type:'trade',amount:total,isDebit:tx.side==='buy',deletable:false,reversible:true,assetType,assetIdx,txnIdx,txnId:txId,isBrokerageFee:false,cashAcct:ca});if(tx.fee>0){entries.push({date:tx.date||'',desc:`Brokerage — ${item.ticker} ${tx.side}`,type:'fee',amount:tx.fee,isDebit:true,deletable:false,reversible:false,txnId:txId,isBrokerageFee:true,cashAcct:null});}});});});
+    ['us','asx','cry','met'].forEach(assetType=>{S[assetType].forEach((item,assetIdx)=>{(item.txns||[]).forEach((tx,txnIdx)=>{const total=tx.price*tx.qty;const txId=tx.txnId||'—';const ca=tx.cashAcct!=null?tx.cashAcct:null;entries.push({date:tx.date||'',desc:`${tx.side==='buy'?'Buy':'Sell'} ${f(tx.qty,tx.qty%1===0?0:4)} ${item.ticker}${item.name?' — '+item.name:''}`,type:'trade',amount:total,isDebit:tx.side==='buy',deletable:false,reversible:true,assetType,assetIdx,txnIdx,txnId:txId,isBrokerageFee:false,cashAcct:ca});if(tx.fee>0){entries.push({date:tx.date||'',desc:`Brokerage — ${item.ticker} ${tx.side}`,type:'fee',amount:tx.fee,isDebit:true,deletable:false,reversible:false,txnId:txId,isBrokerageFee:true,cashAcct:ca});}});});});
     let filtered=showBalance?entries.filter(e=>e.cashAcct===acctIndex):entries;
     filtered.sort((a,b)=>new Date(a.date)-new Date(b.date));
     if(showBalance){let running=S.cash[acctIndex]?.balance||0;for(let i=filtered.length-1;i>=0;i--){const e=filtered[i];const credit=!e.isDebit||e.type==='income'||e.type==='contribution';e._runningBalance=running;running+=credit?-e.amount:e.amount;}}
@@ -1602,7 +1595,7 @@ function renderAllHoldings(){
       const tileClass={us:'tkr-us',asx:'tkr-asx',cry:'tkr-cry',met:'tkr-met'}[type]||'';
       const rowClass={us:'hrow-us',asx:'hrow-asx',cry:'hrow-cry',met:'hrow-met'}[type]||'';
       const glChipStr=glChip(gl,glPct);
-      allRows.push({valAUD:valAUD||0,html:`<tr class="holding-row ${rowClass}${isOpen?' open':''}" onclick="toggleDrawer('${type}',${i})"><td><div class="tkr-cell"><div class="tkr-tile ${tileClass}">${tileLetter}</div><div class="tkr-info"><div class="tkr-sym">${item.ticker}${txBadge}</div><div class="tkr-name mob-hide">${item.name}</div></div></div></td><td class="mob-hide">${TYPE_BADGE[type]||''}</td><td class="r mob-hide"><input class="ni" type="number" step="${isF?'any':'1'}" value="${item.qty}" onclick="event.stopPropagation()" onchange="upField('${type}',${i},'qty',this.value)"></td><td class="r">${price!==null?'<span class="valbold">$'+f(dp)+'</span>':'<span class="dim">—</span>'}</td><td class="r ${cc} mob-hide">${cs}</td><td class="r mob-hide"><input class="ni" type="number" step="any" value="${costDisp}" placeholder="0.00" onclick="event.stopPropagation()" onchange="upField('${type}',${i},'cost',this.value)"${txCount>0?' title="Auto from transactions" style="color:var(--text3)"':''}></td><td class="r valbold">${val!==null?'$'+f(val):'<span class="dim">—</span>'}</td><td class="r mob-hide">${glChipStr}</td><td><button class="del" onclick="event.stopPropagation();delA('${type}',${i})">&#x2715;</button></td></tr>${drawerHtml?`<tr class="tx-row"><td colspan="10">${drawerHtml}</td></tr>`:''}`});
+      allRows.push({valAUD:valAUD||0,html:`<tr class="holding-row ${rowClass}${isOpen?' open':''}" onclick="toggleDrawer('${type}',${i})"><td><div class="tkr-cell"><div class="tkr-tile ${tileClass}">${tileLetter}</div><div class="tkr-info"><div class="tkr-sym">${item.ticker}${txBadge}</div><div class="tkr-name mob-hide">${item.name}</div></div></div></td><td class="mob-hide">${TYPE_BADGE[type]||''}</td><td class="r"><input class="ni" type="number" step="${isF?'any':'1'}" value="${item.qty}" onclick="event.stopPropagation()" onchange="upField('${type}',${i},'qty',this.value)"></td><td class="r">${price!==null?'<span class="valbold">$'+f(dp)+'</span>':'<span class="dim">—</span>'}</td><td class="r ${cc} mob-hide">${cs}</td><td class="r mob-hide"><input class="ni" type="number" step="any" value="${costDisp}" placeholder="0.00" onclick="event.stopPropagation()" onchange="upField('${type}',${i},'cost',this.value)"${txCount>0?' title="Auto from transactions" style="color:var(--text3)"':''}></td><td class="r valbold">${val!==null?'$'+f(val):'<span class="dim">—</span>'}</td><td class="r mob-hide">${glChipStr}</td><td><button class="del" onclick="event.stopPropagation();delA('${type}',${i})">&#x2715;</button></td></tr>${drawerHtml?`<tr class="tx-row"><td colspan="10">${drawerHtml}</td></tr>`:''}`});
     });
   });
   allRows.sort((a,b)=>b.valAUD-a.valAUD);
