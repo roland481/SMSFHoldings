@@ -1816,11 +1816,20 @@ function summary(){
 
 
 function updatePie(){
-  const labels=[],data=[],colors=[];let ci=0;
-  S.us.forEach(item=>{const p=S.prices['us:'+item.ticker];if(p&&item.qty){const v=(p.price*item.qty)/S.audUsd;if(v>0){labels.push(item.ticker);data.push(parseFloat(v.toFixed(2)));colors.push(PIE_COLORS[ci%PIE_COLORS.length]);ci++;}}});
-  S.asx.forEach(item=>{const p=S.prices['asx:'+item.ticker];if(p&&item.qty){const v=p.price*item.qty;if(v>0){labels.push(item.ticker);data.push(parseFloat(v.toFixed(2)));colors.push(PIE_COLORS[ci%PIE_COLORS.length]);ci++;}}});
-  S.cry.forEach(item=>{const p=S.prices['cry:'+item.ticker];if(p&&item.qty){const v=p.price*item.qty;if(v>0){labels.push(item.ticker);data.push(parseFloat(v.toFixed(2)));colors.push(PIE_COLORS[ci%PIE_COLORS.length]);ci++;}}});
-  S.met.forEach(item=>{const p=S.prices['met:'+item.ticker];if(p&&item.qty){const v=p.price*item.qty;if(v>0){labels.push(item.name);data.push(parseFloat(v.toFixed(2)));colors.push(PIE_COLORS[ci%PIE_COLORS.length]);ci++;}}});
+  const labels=[],data=[],colors=[];
+  const isDark=document.documentElement.getAttribute('data-theme')!=='light';
+  // Per-type color palettes
+  const US_COLORS=['#5754fd','#7b6ff5','#9b8fef','#b8aaff','#4040cc'];
+  const ASX_COLORS=['#3a7bd5','#5599ee','#2255aa','#4477cc','#6699ff'];
+  const CRY_COLORS=['#cea350','#e0b86a','#b8903f','#d4a240','#f0c060'];
+  const MET_COLORS=['#9b9fc8','#b0b4d8','#7070a8','#8888bb','#aaaacc'];
+  const CASH_GREEN=isDark?'#5de36c':'#42ac5c';
+  const CASH_COLORS=[CASH_GREEN,'#4ab85c','#3a9e4f','#5de36c','#42ac5c'];
+  let ui=0,ai=0,ci2=0,mi=0,cai=0;
+  S.us.forEach(item=>{const p=S.prices['us:'+item.ticker];if(p&&item.qty){const v=(p.price*item.qty)/S.audUsd;if(v>0){labels.push(item.ticker);data.push(parseFloat(v.toFixed(2)));colors.push(US_COLORS[ui%US_COLORS.length]);ui++;}}});
+  S.asx.forEach(item=>{const p=S.prices['asx:'+item.ticker];if(p&&item.qty){const v=p.price*item.qty;if(v>0){labels.push(item.ticker);data.push(parseFloat(v.toFixed(2)));colors.push(ASX_COLORS[ai%ASX_COLORS.length]);ai++;}}});
+  S.cry.forEach(item=>{const p=S.prices['cry:'+item.ticker];if(p&&item.qty){const v=p.price*item.qty;if(v>0){labels.push(item.ticker);data.push(parseFloat(v.toFixed(2)));colors.push(CRY_COLORS[ci2%CRY_COLORS.length]);ci2++;}}});
+  S.met.forEach(item=>{const p=S.prices['met:'+item.ticker];if(p&&item.qty){const v=p.price*item.qty;if(v>0){labels.push(item.name);data.push(parseFloat(v.toFixed(2)));colors.push(MET_COLORS[mi%MET_COLORS.length]);mi++;}}});
   S.cash.forEach(item=>{if(item.balance>0){labels.push(item.name);data.push(parseFloat(item.balance.toFixed(2)));colors.push('#397968');ci++;}});
   if(!data.length)return;
   const gt=data.reduce((a,b)=>a+b,0);
