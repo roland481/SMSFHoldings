@@ -1833,7 +1833,7 @@ async function fetchWl(){
   const usItems=S.wl.filter(w=>w.type==='us');const asxItems=S.wl.filter(w=>w.type==='asx');const cryptoItems=S.wl.filter(w=>w.type==='crypto');const metalItems=S.wl.filter(w=>w.type==='metal');const r=S.audUsd;
   await Promise.all([
     ...usItems.map(async w=>{try{const res=await fetch(`https://finnhub.io/api/v1/quote?symbol=${w.ticker}&token=${FINHUB_KEY}`);const d=await res.json();if(d&&d.c&&d.c>0){S.prices['wl:us:'+w.ticker]={price:d.c/r,change:d.pc>0?((d.c-d.pc)/d.pc*100):0};ok=true;}}catch(e){}}),
-    ...asxItems.map(async w=>{try{const res=await fetch(`https://finnhub.io/api/v1/quote?symbol=${w.ticker}.AX&token=${FINHUB_KEY}`);const d=await res.json();if(d&&d.c&&d.c>0){S.prices['wl:asx:'+w.ticker]={price:d.c,change:d.pc>0?((d.c-d.pc)/d.pc*100):0};ok=true;}}catch(e){}}),
+    ...asxItems.map(async w=>{try{const res=await fetch(`https://query1.finance.yahoo.com/v8/finance/chart/${w.ticker}.AX?interval=1d&range=2d`);const d=await res.json();const meta=d?.chart?.result?.[0]?.meta;if(meta&&meta.regularMarketPrice>0){const prev=meta.chartPreviousClose||meta.previousClose||meta.regularMarketPrice;S.prices['wl:asx:'+w.ticker]={price:meta.regularMarketPrice,change:prev>0?((meta.regularMarketPrice-prev)/prev*100):0};ok=true;}}catch(e){}}),
     cryptoItems.length?fetch(`https://api.coingecko.com/api/v3/simple/price?ids=${cryptoItems.map(w=>CID[w.ticker]||w.ticker.toLowerCase()).join(',')}&vs_currencies=aud&include_24hr_change=true`).then(r=>r.json()).then(d=>{cryptoItems.forEach(w=>{const id=CID[w.ticker]||w.ticker.toLowerCase();if(d[id]){S.prices['wl:crypto:'+w.ticker]={price:d[id].aud,change:d[id].aud_24h_change};ok=true;}});}).catch(()=>{}):Promise.resolve(),
     ...metalItems.map(async w=>{try{const res=await fetch(`https://api.gold-api.com/price/${w.ticker}`);const d=await res.json();if(d&&d.price>0){const pa=d.price/r;const pv=d.prev_close_price>0?d.prev_close_price/r:null;S.prices['wl:metal:'+w.ticker]={price:pa,change:pv?((pa-pv)/pv*100):null};ok=true;}}catch(e){}}),
   ]);
@@ -1984,15 +1984,17 @@ function clearErr(type){const el=document.getElementById(type+'Err');if(el)el.in
 async function fetchRate(){const sources=[async()=>{const r=await fetch('https://api.frankfurter.app/latest?from=USD&to=AUD');const d=await r.json();if(d.rates&&d.rates.AUD)return 1/d.rates.AUD;return null;},async()=>{const r=await fetch('https://api.coingecko.com/api/v3/simple/price?ids=usd&vs_currencies=aud');const d=await r.json();if(d.usd&&d.usd.aud)return 1/d.usd.aud;return null;}];for(const source of sources){try{const rate=await source();if(rate&&rate>0.5&&rate<1.2){S.audUsd=rate;return;}}catch(e){}}}
 async function fetchUS(){setDot('usDot','loading');clearErr('us');const tickers=S.us.map(a=>a.ticker);if(!tickers.length){setDot('usDot','stale');return;}let ok=false;await Promise.all(tickers.map(async tk=>{try{const r=await fetch(`https://finnhub.io/api/v1/quote?symbol=${tk}&token=${FINHUB_KEY}`);const d=await r.json();if(d&&d.c&&d.c>0){S.prices['us:'+tk]={price:d.c,change:d.pc>0?((d.c-d.pc)/d.pc*100):0};ok=true;}}catch(e){}}));setDot('usDot',ok?'live':'err');if(!ok)showErr('us','Could not load US prices.');rows('us');}
 async function fetchASX(){setDot('asxDot','loading');clearErr('asx');const tickers=S.asx.map(a=>a.ticker);if(!tickers.length){setDot('asxDot','stale');return;}let ok=false;await Promise.all(tickers.map(async tk=>{try{
-    // Try ASX:TICKER format first (more reliable for Australian stocks)
-    let r=await fetch(`https://finnhub.io/api/v1/quote?symbol=ASX:${tk}&token=${FINHUB_KEY}`);
-    let d=await r.json();
-    if(d&&d.c&&d.c>0){S.prices['asx:'+tk]={price:d.c,change:d.pc>0?((d.c-d.pc)/d.pc*100):0};ok=true;return;}
-    // Fallback: try with .AX suffix
-    r=await fetch(`https://finnhub.io/api/v1/quote?symbol=${tk}.AX&token=${FINHUB_KEY}`);
-    d=await r.json();
-    if(d&&d.c&&d.c>0){S.prices['asx:'+tk]={price:d.c,change:d.pc>0?((d.c-d.pc)/d.pc*100):0};ok=true;}
-  }catch(e){}}));setDot('asxDot',ok?'live':'err');if(!ok)showErr('asx','Could not load ASX prices — check ticker format.');rows('asx');}
+    // Yahoo Finance — free, no key required, covers ASX with .AX suffix
+    const r=await fetch(`https://query1.finance.yahoo.com/v8/finance/chart/${tk}.AX?interval=1d&range=2d`);
+    const d=await r.json();
+    const meta=d?.chart?.result?.[0]?.meta;
+    if(meta&&meta.regularMarketPrice>0){
+      const prev=meta.chartPreviousClose||meta.previousClose||meta.regularMarketPrice;
+      const change=prev>0?((meta.regularMarketPrice-prev)/prev*100):0;
+      S.prices['asx:'+tk]={price:meta.regularMarketPrice,change};
+      ok=true;
+    }
+  }catch(e){}}));setDot('asxDot',ok?'live':'err');if(!ok)showErr('asx','Could not load ASX prices — check ticker is correct (e.g. CBA, BHP, SVL).');rows('asx');}
 async function fetchCry(){setDot('crypDot','loading');const coins=S.cry.map(a=>CID[a.ticker.toUpperCase()]||a.ticker.toLowerCase());if(!coins.length){setDot('crypDot','stale');return;}try{const r=await fetch(`https://api.coingecko.com/api/v3/simple/price?ids=${coins.join(',')}&vs_currencies=aud&include_24hr_change=true`);const d=await r.json();S.cry.forEach(item=>{const id=CID[item.ticker.toUpperCase()]||item.ticker.toLowerCase();if(d[id])S.prices['cry:'+item.ticker]={price:d[id].aud,change:d[id].aud_24h_change};});setDot('crypDot','live');}catch(e){setDot('crypDot','err');}rows('cry');}
 async function fetchMetals(){setDot('metDot','loading');clearErr('met');if(!S.met.length){setDot('metDot','stale');return;}let ok=false;await Promise.all(S.met.map(async item=>{try{const r=await fetch(`https://api.gold-api.com/price/${item.ticker.toUpperCase()}`);const d=await r.json();if(d&&d.price&&d.price>0){const pa=d.price/S.audUsd;const pv=d.prev_close_price>0?d.prev_close_price/S.audUsd:null;S.prices['met:'+item.ticker]={price:pa,change:pv?((pa-pv)/pv*100):null};ok=true;}}catch(e){}}));setDot('metDot',ok?'live':'err');if(!ok)showErr('met','Could not load metal prices.');rows('met');}
 
