@@ -1013,7 +1013,10 @@ tr.hrow-met td{border-left:2px solid rgba(154,162,200,0.45);}
         <div class="modal-field"><label class="modal-label">Name</label><input class="modal-input" id="modal-name" placeholder="e.g. Tesla Inc"></div>
         <div class="modal-row">
           <div class="modal-field"><label class="modal-label" id="modal-qty-label">Qty</label><input class="modal-input" id="modal-qty" type="number" step="any" placeholder="0"></div>
-          <div class="modal-field"><label class="modal-label" id="modal-cost-label">Avg cost (AUD)</label><input class="modal-input" id="modal-cost" type="number" step="any" placeholder="0.00"></div>
+          <div class="modal-row">
+            <div class="modal-field"><label class="modal-label" id="modal-cost-label">Avg cost (AUD)</label><input class="modal-input" id="modal-cost" type="number" step="any" placeholder="0.00"></div>
+            <div class="modal-field"><label class="modal-label">Brokerage fee (AUD)</label><input class="modal-input" id="modal-new-fee" type="number" step="any" placeholder="0.00 (optional)"></div>
+          </div>
         </div>
         <div class="modal-hint" id="modal-hint"></div>
         <div class="modal-field"><label class="modal-label">Deduct from cash account (optional)</label><select class="modal-select" id="modal-new-account"><option value="">— Don't adjust cash —</option></select></div>
@@ -1932,7 +1935,7 @@ const MODAL_HINTS={us:'Price fetched from Finnhub automatically.',asx:'Use ASX t
 function openAddModal(){
   if(isReadOnly()) return;
   smartMode='new';smartCategory='us';smartFoundType=null;smartFoundIdx=null;
-  ['modal-smart-ticker','modal-name','modal-qty','modal-cost','modal-cash-name','modal-cash-bal','modal-fees-desc','modal-fees-amt','modal-txn-qty','modal-txn-price','modal-txn-fee','modal-income-amt','modal-income-source','modal-income-franking','modal-contrib-amt','modal-contrib-member'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  ['modal-smart-ticker','modal-name','modal-qty','modal-cost','modal-new-fee','modal-cash-name','modal-cash-bal','modal-fees-desc','modal-fees-amt','modal-txn-qty','modal-txn-price','modal-txn-fee','modal-income-amt','modal-income-source','modal-income-franking','modal-contrib-amt','modal-contrib-member'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
   const today=new Date().toISOString().slice(0,10);
   ['modal-fees-date','modal-txn-date','modal-income-date','modal-contrib-date'].forEach(id=>{const el=document.getElementById(id);if(el)el.value=today;});
   document.getElementById('modal-ticker-status').textContent='';
@@ -1988,7 +1991,7 @@ async function submitAddModal(){
     if(!amt||from===''||to===''||from===to)return;const fromIdx=parseInt(from),toIdx=parseInt(to);const txnId=generateTxnId(date);const fromId=S.cash[fromIdx]?._id,toId=S.cash[toIdx]?._id;
     try{const recId=await xanoAddLedger({portfolio:AUTH.currentPortfolioId,date,type:'transfer',category:'Internal Transfer',description:`Transfer${desc?' — '+desc:''}`,amount:amt,txn_id:txnId,cash_acct_id:fromId,to_cash_acct_id:toId,meta:{desc}});S.transfers.push({_id:recId,date,from:fromIdx,to:toIdx,amount:amt,desc,txnId});S.cash[fromIdx].balance=(S.cash[fromIdx].balance||0)-amt;S.cash[toIdx].balance=(S.cash[toIdx].balance||0)+amt;await Promise.all([xanoUpdateCash(fromIdx),xanoUpdateCash(toIdx)]);renderCash();renderFees();syncUI('synced','Saved');}catch(e){syncUI('err','Save failed');}
   }else{
-    const tk=document.getElementById('modal-smart-ticker').value.trim().toUpperCase();const nm=document.getElementById('modal-name').value.trim()||tk;const qt=parseFloat(document.getElementById('modal-qty').value)||0;const cost=parseFloat(document.getElementById('modal-cost').value)||0;const acctIdx=document.getElementById('modal-new-account').value;
+    const tk=document.getElementById('modal-smart-ticker').value.trim().toUpperCase();const nm=document.getElementById('modal-name').value.trim()||tk;const qt=parseFloat(document.getElementById('modal-qty').value)||0;const cost=parseFloat(document.getElementById('modal-cost').value)||0;const newFee=parseFloat(document.getElementById('modal-new-fee')?.value)||0;const acctIdx=document.getElementById('modal-new-account').value;
     if(!tk)return;S[smartCategory].push({ticker:tk,name:nm,qty:qt,cost,txns:[]});
     try{
       await xanoAddHolding(smartCategory);
@@ -1996,10 +1999,10 @@ async function submitAddModal(){
       if(qt>0&&cost>0){
         const lastIdx=S[smartCategory].length-1;
         const txnId=generateTxnId(new Date().toISOString().slice(0,10));
-        S[smartCategory][lastIdx].txns=[{date:new Date().toISOString().slice(0,10),side:'buy',qty:qt,price:cost,fee:0,txnId,cashAcct:null}];
+        S[smartCategory][lastIdx].txns=[{date:new Date().toISOString().slice(0,10),side:'buy',qty:qt,price:cost,fee:newFee,txnId,cashAcct:null}];
         await xanoAddTransaction(smartCategory,lastIdx);
       }
-      if(acctIdx!==''&&qt>0&&cost>0){const idx=parseInt(acctIdx);S.cash[idx].balance=(S.cash[idx].balance||0)-(qt*cost);await xanoUpdateCash(idx);renderCash();}
+      if(acctIdx!==''&&qt>0&&cost>0){const idx=parseInt(acctIdx);S.cash[idx].balance=(S.cash[idx].balance||0)-((qt*cost)+newFee);await xanoUpdateCash(idx);renderCash();}
       rows(smartCategory);syncUI('synced','Saved');
     }catch(e){syncUI('err','Save failed: '+e.message);S[smartCategory].pop();}
   }
@@ -2395,7 +2398,7 @@ function renderFees(){
       const y=parseInt(dateStr.slice(0,4));const m=parseInt(dateStr.slice(5,7));
       const fy=m>=7?y+1:y;return fy===parseInt(fyVal);
     }
-    function matchAcct(e){if(!selectedAcct)return true;return String(e.cashAcct)===selectedAcct||String(e.from)===selectedAcct||String(e.to)===selectedAcct;}
+    function matchAcct(e){if(!selectedAcct)return true;const s=selectedAcct;return String(e.cashAcct)===s||e.cashAcct===parseInt(s)||String(e.from)===s||String(e.to)===s;}
     // Build entries
     const entries=[];
     S.fees.forEach((item,orig)=>{if(!inFY(item.date)||!matchAcct(item))return;entries.push({date:item.date||'',desc:item.desc||'—',type:'fee',amount:item.amount||0,isDebit:true,orig,deletable:true,txnId:item.txnId||'—',cashAcct:item.cashAcct??null,_id:item._id});});
@@ -2412,7 +2415,7 @@ function renderFees(){
     entries.sort((a,b)=>new Date(b.date)-new Date(a.date));
     // Running balance
     let running=showBalance?S.cash[acctIndex]?.balance||0:null;
-    const filtered=showBalance?entries.filter(e=>e.cashAcct===acctIndex||e.cashAcct==acctIndex):entries;
+    const filtered=showBalance?entries.filter(e=>matchAcct(e)):entries;
     if(showBalance&&running!==null){let bal=running;filtered.forEach(e=>{e._runningBalance=bal;bal-=(e.isDebit?-1:1)*e.amount;});}
     const TYPE_LABELS={trade:'<span class="badge b-blue" style="font-size:9px;">Trade</span>',fee:'<span class="badge b-red" style="font-size:9px;">Fee</span>',income:'<span class="badge b-green" style="font-size:9px;">Income</span>',contribution:'<span class="badge b-teal" style="font-size:9px;">Contribution</span>',transfer:'<span class="badge b-gray" style="font-size:9px;">Transfer</span>'};
     const ro=isReadOnly();
