@@ -1141,14 +1141,19 @@ async function loadPortfolio(portfolioId) {
           (h.txns||[]).forEach((tx,i) => info.push(`  tx${i}: ${tx.side} ${tx.qty} @ ${tx.price} fee=${tx.fee} _id=${tx._id}`));
         });
         dp.textContent = info.join('\n');
-        dp.style.display = 'block';
+        // Also check what renderFees would produce
+      const tradeCount = ['us','asx','cry','met'].reduce((s,t) => s + S[t].reduce((s2,h) => s2 + (h.txns||[]).length, 0), 0);
+      info.push('');
+      info.push(`Total txns for ledger: ${tradeCount}`);
+      info.push(`Fees: ${S.fees.length} Income: ${S.income.length}`);
+      dp.style.display = 'block';
       }
     } catch(e) {}
 
     syncUI('synced', 'Loaded · ' + new Date().toLocaleTimeString('en-AU',{hour:'2-digit',minute:'2-digit'}));
     ['us','asx','cry','met','cash','fees','wl'].forEach(t => rows(t));
     renderAllHoldings(); renderFees(); renderCash(); summary();
-    setTimeout(() => { renderCash(); renderAllHoldings(); summary(); }, 150);
+    setTimeout(() => { renderCash(); renderAllHoldings(); renderFees(); summary(); }, 150);
   } catch(e) {
     syncUI('err', 'Failed to load portfolio — ' + e.message);
     console.error('loadPortfolio error:', e);
@@ -1492,7 +1497,7 @@ function renderFees(){
     (S.income||[]).forEach((item,orig)=>{entries.push({date:item.date||'',desc:`${item.type} — ${item.source}${item.franking>0?' (Franking: $'+f(item.franking)+')':''}`,type:'income',amount:item.amount||0,isDebit:false,orig,deletable:true,txnId:item.txnId||'—',cashAcct:item.cashAcct??null,_id:item._id});});
     (S.contributions||[]).forEach((item,orig)=>{entries.push({date:item.date||'',desc:`${item.type} contribution — ${item.member}`,type:'contribution',amount:item.amount||0,isDebit:false,orig,deletable:true,txnId:item.txnId||'—',cashAcct:item.cashAcct??null,_id:item._id});});
     (S.transfers||[]).forEach((item,orig)=>{const fromName=S.cash[item.from]?.name||'Unknown';const toName=S.cash[item.to]?.name||'Unknown';entries.push({date:item.date||'',desc:`Transfer to ${toName}${item.desc?' — '+item.desc:''}`,type:'transfer',amount:item.amount||0,isDebit:true,orig,deletable:true,txnId:item.txnId||'—',cashAcct:item.from,_id:item._id});entries.push({date:item.date||'',desc:`Transfer from ${fromName}${item.desc?' — '+item.desc:''}`,type:'transfer',amount:item.amount||0,isDebit:false,orig,deletable:false,txnId:item.txnId||'—',cashAcct:item.to,_id:item._id});});
-    ['us','asx','cry','met'].forEach(assetType=>{S[assetType].forEach((item)=>{(item.txns||[]).forEach((tx)=>{const total=tx.price*tx.qty;const audTotal=tx.fee>0&&!tx.priceExFee?parseFloat((total-tx.fee).toFixed(2)):total;entries.push({date:tx.date||'',desc:`${tx.side==='buy'?'Buy':'Sell'} ${f(tx.qty,tx.qty%1===0?0:4)} ${item.ticker}`,type:'trade',amount:audTotal,isDebit:tx.side==='buy',deletable:false,reversible:true,assetType,assetIdx,txnIdx:txns_idx,txnId:tx.txnId||'—',cashAcct:tx.cashAcct??null,_txId:tx._id});if(tx.fee>0)entries.push({date:tx.date||'',desc:`Brokerage — ${item.ticker} ${tx.side}`,type:'fee',amount:tx.fee,isDebit:true,deletable:false,txnId:(tx.txnId||'—')+'-FEE',cashAcct:tx.cashAcct??null});});});});
+    ['us','asx','cry','met'].forEach(assetType=>{S[assetType].forEach((item)=>{(item.txns||[]).forEach((tx)=>{const total=tx.price*tx.qty;const audTotal=tx.fee>0&&!tx.priceExFee?parseFloat((total-tx.fee).toFixed(2)):total;entries.push({date:tx.date||'',desc:`${tx.side==='buy'?'Buy':'Sell'} ${f(tx.qty,tx.qty%1===0?0:4)} ${item.ticker}`,type:'trade',amount:audTotal,isDebit:tx.side==='buy',deletable:false,reversible:true,assetType,assetIdx,txnIdx:txIdx,txnId:tx.txnId||'—',cashAcct:tx.cashAcct??null,_txId:tx._id});if(tx.fee>0)entries.push({date:tx.date||'',desc:`Brokerage — ${item.ticker} ${tx.side}`,type:'fee',amount:tx.fee,isDebit:true,deletable:false,txnId:(tx.txnId||'—')+'-FEE',cashAcct:tx.cashAcct??null});});});});
     let filtered=showBalance?entries.filter(e=>e.cashAcct!=null&&parseInt(e.cashAcct)===acctIndex):entries;
     filtered.sort((a,b)=>new Date(a.date)-new Date(b.date));
     if(showBalance){let running=S.cash[acctIndex]?.balance||0;for(let i=filtered.length-1;i>=0;i--){const e=filtered[i];const credit=!e.isDebit||e.type==='income'||e.type==='contribution';e._runningBalance=parseFloat(running.toFixed(2));running+=credit?-e.amount:e.amount;}}
