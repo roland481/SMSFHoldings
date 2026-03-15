@@ -186,11 +186,12 @@ tr.holding-row:hover td{background:var(--surface2);}
   .dash{flex-direction:column;align-items:stretch;border-radius:12px;}
   .dash-divider{width:100%;height:1px;}
   .pie-section{width:100%;}
-  .topbar{gap:6px;margin-bottom:0.875rem;}
-  .title-block h1{font-size:16px;}
-  .top-actions{gap:5px;}
+  .topbar{gap:8px;margin-bottom:0.875rem;padding:10px 14px;}
+  .title-block h1{font-size:15px;}
+  .top-actions{gap:6px;}
   .aud-pill{font-size:12px;padding:5px 10px;}
-  .rfbtn{font-size:12px;padding:5px 12px;}
+  .rfbtn{font-size:12px;padding:8px 12px;min-width:40px;justify-content:center;}
+  .rfbtn-label{display:none;}
   .mob-hide{display:none;}
   .tbl-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;}
   table{font-size:12px;}
@@ -463,7 +464,7 @@ tr.hrow-met:hover td{background:rgba(148,163,184,0.04)!important;}
       <input type="file" id="commsecIntlCSVInput" accept=".csv" style="display:none;" onchange="importCommsecIntlCSV(this)">
       <button class="rfbtn" id="rfBtn" data-action="refreshAll" disabled>
         <svg id="rfIcon" width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" style="flex-shrink:0;"><path d="M2 8a6 6 0 1 0 1.5-3.9M2 4v4h4"/></svg>
-        Refresh prices
+        <span class="rfbtn-label">Refresh prices</span>
       </button>
     </div>
   </div>
@@ -1042,7 +1043,7 @@ function importSwyftxCSV(input) {
           date:     row.date,
           side:     row.event,
           qty:      row.amount,
-          price:    parseFloat((row.audVal / row.amount).toFixed(6)),
+          price:    parseFloat(((row.audVal - row.fee) / row.amount).toFixed(6)),
           fee:      row.fee,
           txnId:    generateTxnId(row.date),
           swyftxId: row.uuid,
@@ -1293,10 +1294,12 @@ function renderFees(){
       // Credit leg (destination account)
       entries.push({date:item.date||'',desc:`Transfer from ${fromName}${item.desc?' — '+item.desc:''}`,type:'transfer',amount:item.amount||0,isDebit:false,orig,deletable:false,reversible:false,txnId:item.txnId||'—',isBrokerageFee:false,cashAcct:item.to});
     });
-    ['us','asx','cry','met'].forEach(assetType=>{S[assetType].forEach((item,assetIdx)=>{(item.txns||[]).forEach((tx,txnIdx)=>{const total=tx.price*tx.qty;const txId=tx.txnId||'—';const ca=tx.cashAcct!=null?tx.cashAcct:null;entries.push({date:tx.date||'',desc:`${tx.side==='buy'?'Buy':'Sell'} ${f(tx.qty,tx.qty%1===0?0:4)} ${item.ticker}${item.name?' — '+item.name:''}`,type:'trade',amount:total,isDebit:tx.side==='buy',deletable:false,reversible:true,assetType,assetIdx,txnIdx,txnId:txId,isBrokerageFee:false,cashAcct:ca});if(tx.fee>0){entries.push({date:tx.date||'',desc:`Brokerage — ${item.ticker} ${tx.side}`,type:'fee',amount:tx.fee,isDebit:true,deletable:false,reversible:false,txnId:txId,isBrokerageFee:true,cashAcct:ca});}});});});
-    let filtered=showBalance?entries.filter(e=>e.cashAcct===acctIndex):entries;
+    ['us','asx','cry','met'].forEach(assetType=>{S[assetType].forEach((item,assetIdx)=>{(item.txns||[]).forEach((tx,txnIdx)=>{const total=tx.price*tx.qty;const txId=tx.txnId||'—';const ca=tx.cashAcct!=null?tx.cashAcct:null;// Display trade amount ex-fee; balance moves by full total (trade+fee together via separate fee row)
+        const displayTotal = tx.fee>0 ? parseFloat((total - tx.fee).toFixed(2)) : total;
+        entries.push({date:tx.date||'',desc:`${tx.side==='buy'?'Buy':'Sell'} ${f(tx.qty,tx.qty%1===0?0:4)} ${item.ticker}${item.name?' — '+item.name:''}`,type:'trade',amount:displayTotal,balanceAmount:parseFloat((total-tx.fee).toFixed(10)),isDebit:tx.side==='buy',deletable:false,reversible:true,assetType,assetIdx,txnIdx,txnId:txId,isBrokerageFee:false,cashAcct:ca});if(tx.fee>0){entries.push({date:tx.date||'',desc:`Brokerage — ${item.ticker} ${tx.side}`,type:'fee',amount:tx.fee,balanceAmount:tx.fee,isDebit:true,deletable:false,reversible:false,txnId:txId,isBrokerageFee:true,cashAcct:ca});}});});});
+    let filtered=showBalance?entries.filter(e=>e.cashAcct!=null&&parseInt(e.cashAcct)===acctIndex):entries;
     filtered.sort((a,b)=>new Date(a.date)-new Date(b.date));
-    if(showBalance){let running=S.cash[acctIndex]?.balance||0;for(let i=filtered.length-1;i>=0;i--){const e=filtered[i];const credit=!e.isDebit||e.type==='income'||e.type==='contribution';e._runningBalance=running;running+=credit?-e.amount:e.amount;}}
+    if(showBalance){let running=S.cash[acctIndex]?.balance||0;for(let i=filtered.length-1;i>=0;i--){const e=filtered[i];const moveAmt=e.balanceAmount!=null?e.balanceAmount:e.amount;const credit=!e.isDebit||e.type==='income'||e.type==='contribution';e._runningBalance=parseFloat(running.toFixed(2));running+=credit?-moveAmt:moveAmt;}}
     filtered.reverse();
     const fyFees=entries.filter(e=>e.type==='fee'&&e.isDebit&&(()=>{const d=new Date(e.date);return d>=fy.start&&d<=fy.end;})()).reduce((s,e)=>s+e.amount,0);
     document.getElementById('feesFyLabel').textContent=fy.label+' total fees:';
