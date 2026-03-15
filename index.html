@@ -1747,6 +1747,74 @@ function renderAllocTable(){
   }).join('');
 }
 
+function summary(){
+  const showAud=document.getElementById('audToggle').checked,r=S.audUsd;
+  let usU=0,asxA=0,cryA=0,metA=0,usCU=0,asxCA=0,cryCA=0,metCA=0;
+  S.us.forEach(item=>{const p=S.prices['us:'+item.ticker];if(p&&item.qty){usU+=p.price*item.qty;if(item.cost)usCU+=item.cost*item.qty;}});
+  S.asx.forEach(item=>{const p=S.prices['asx:'+item.ticker];if(p&&item.qty){asxA+=p.price*item.qty;if(item.cost)asxCA+=item.cost*item.qty;}});
+  S.cry.forEach(item=>{const p=S.prices['cry:'+item.ticker];if(p&&item.qty){cryA+=p.price*item.qty;if(item.cost)cryCA+=item.cost*item.qty;}});
+  S.met.forEach(item=>{const p=S.prices['met:'+item.ticker];if(p&&item.qty){metA+=p.price*item.qty;if(item.cost)metCA+=item.cost*item.qty;}});
+  const cashA=S.cash.reduce((s,a)=>s+(a.balance||0),0);
+  const usA=usU/r,total=usA+asxA+cryA+metA+cashA,totalCost=usCU+asxCA+cryCA+metCA;
+  function glStr(val,cost){if(!cost||!val)return'';const gl=val-cost,pct=cost>0?(gl/cost)*100:0;const cls=gl>0?'gain-pos':gl<0?'gain-neg':'gain-neu';const sign=gl>=0?'+':'';return`<span class="${cls}">${sign}$${f(Math.abs(gl))} (${sign}${f(pct,1)}%)</span>`;}
+  document.getElementById('tot').textContent=total>0?'$'+f(total):'\u2014';
+  // Update topbar P&L
+  (function(){
+    const pnlEl=document.getElementById('topbar-pnl-val');
+    const pnlPct=document.getElementById('topbar-pnl-pct');
+    if(!pnlEl||!pnlPct)return;
+    // Compute today's estimated P&L from price changes
+    let dayPnl=0;
+    S.us.forEach(item=>{const p=S.prices['us:'+item.ticker];if(p&&p.change&&item.qty){const curAud=p.price*item.qty/S.audUsd;const prevAud=curAud/(1+(p.change/100));dayPnl+=curAud-prevAud;}});
+    S.asx.forEach(item=>{const p=S.prices['asx:'+item.ticker];if(p&&p.change&&item.qty){const cur=p.price*item.qty;const prev=cur/(1+(p.change/100));dayPnl+=cur-prev;}});
+    S.cry.forEach(item=>{const p=S.prices['cry:'+item.ticker];if(p&&p.change&&item.qty){const cur=p.price*item.qty;const prev=cur/(1+(p.change/100));dayPnl+=cur-prev;}});
+    S.met.forEach(item=>{const p=S.prices['met:'+item.ticker];if(p&&p.change&&item.qty){const cur=p.price*item.qty;const prev=cur/(1+(p.change/100));dayPnl+=cur-prev;}});
+    if(total>0&&dayPnl!==0){
+      const sign=dayPnl>=0?'+':'';const pct=total>0?(dayPnl/total*100):0;
+      pnlEl.textContent=(dayPnl>=0?'+':'')+f(dayPnl);
+      pnlEl.style.color=dayPnl>=0?'var(--gain-pos)':'var(--gain-neg)';
+      pnlPct.textContent=(pct>=0?'\u25b2 ':'\u25bc ')+Math.abs(pct).toFixed(2)+'%';
+      pnlPct.style.background=dayPnl>=0?'var(--gl-pos-bg)':'var(--gl-neg-bg)';
+      pnlPct.style.color=dayPnl>=0?'var(--gain-pos)':'var(--gain-neg)';
+    }
+  })();
+  if(total>0)animateValue(document.getElementById('tot'),total);
+  if(usA>0)animateValue(document.getElementById('usT'),usA);else document.getElementById('usT').textContent='\u2014';
+  document.getElementById('usGL').innerHTML=usCU>0?glStr(usA,usCU):'';
+  if(asxA>0)animateValue(document.getElementById('asxT'),asxA);else document.getElementById('asxT').textContent='\u2014';
+  document.getElementById('asxGL').innerHTML=asxCA>0?glStr(asxA,asxCA):'';
+  if(cryA>0)animateValue(document.getElementById('crypT'),cryA);else document.getElementById('crypT').textContent='\u2014';
+  document.getElementById('crypGL').innerHTML=cryCA>0?glStr(cryA,cryCA):'';
+  if(metA>0)animateValue(document.getElementById('metT'),metA);else document.getElementById('metT').textContent='\u2014';
+  document.getElementById('metGL').innerHTML=metCA>0?glStr(metA,metCA):'';
+  if(cashA>0)animateValue(document.getElementById('cashT'),cashA);else document.getElementById('cashT').textContent='\u2014';
+  const invested=usA+asxA+cryA+metA;
+  const subInv=document.getElementById('tot-invested');const subCash=document.getElementById('tot-cash');const subRate=document.getElementById('tot-rate');
+  if(subInv)subInv.textContent=invested>0?'$'+f(invested):'\u2014';
+  if(subCash)subCash.textContent=cashA>0?'$'+f(cashA):'\u2014';
+  if(subRate)subRate.textContent=S.audUsd.toFixed(4);
+  document.getElementById('cashSecTot').textContent=cashA>0?'$'+f(cashA)+' AUD':'';
+  document.getElementById('usSecTot').textContent=usU>0?'$'+f(showAud?usA:usU)+' '+(showAud?'AUD':'USD'):'';
+  document.getElementById('asxSecTot').textContent=asxA>0?'$'+f(asxA)+' AUD':'';
+  document.getElementById('crypSecTot').textContent=cryA>0?'$'+f(cryA)+' AUD':'';
+  document.getElementById('metSecTot').textContent=metA>0?'$'+f(metA)+' AUD':'';
+  if(total>0){
+    const up=v=>((v/total)*100).toFixed(1)+'%';const pct=v=>total>0?((v/total)*100).toFixed(0)+'%':'0%';
+    document.getElementById('allocBar').innerHTML=`<div class="alloc-seg" style="background:#378ADD;width:${up(usA)};min-width:${usA>0?'4px':'0'}"></div><div class="alloc-seg" style="background:#639922;width:${up(asxA)};min-width:${asxA>0?'4px':'0'}"></div><div class="alloc-seg" style="background:#BA7517;width:${up(cryA)};min-width:${cryA>0?'4px':'0'}"></div><div class="alloc-seg" style="background:#888780;width:${up(metA)};min-width:${metA>0?'4px':'0'}"></div><div class="alloc-seg" style="background:#397968;width:${up(cashA)};min-width:${cashA>0?'4px':'0'}"></div>`;
+    document.getElementById('usAllocVal').textContent=usA>0?'$'+f(usA):'\u2014';
+    document.getElementById('asxAllocVal').textContent=asxA>0?'$'+f(asxA):'\u2014';
+    document.getElementById('crypAllocVal').textContent=cryA>0?'$'+f(cryA):'\u2014';
+    document.getElementById('metAllocVal').textContent=metA>0?'$'+f(metA):'\u2014';
+    document.getElementById('cashAllocVal').textContent=cashA>0?'$'+f(cashA):'\u2014';
+    document.getElementById('usAlloc').textContent=pct(usA);document.getElementById('asxAlloc').textContent=pct(asxA);
+    document.getElementById('crypAlloc').textContent=pct(cryA);document.getElementById('metAlloc').textContent=pct(metA);document.getElementById('cashAlloc').textContent=pct(cashA);
+  }
+  updatePie();setTimeout(applyRowTints,100);
+  if(total>0&&Object.keys(S.prices).length>0)saveSnapshot(total);
+  renderSparklines();
+}
+
+
 function recalcFromTxns(type,i){const txns=S[type][i].txns||[];if(!txns.length)return;let totalQty=0,totalCost=0;[...txns].sort((a,b)=>new Date(a.date)-new Date(b.date)).forEach(tx=>{if(tx.side==='buy'){totalCost+=tx.qty*tx.price+(tx.fee||0);totalQty+=tx.qty;}else{const sf=Math.min(tx.qty/(totalQty||1),1);totalCost-=totalCost*sf;totalQty-=tx.qty;if(totalQty<0)totalQty=0;if(totalCost<0)totalCost=0;}});S[type][i].qty=parseFloat(totalQty.toFixed(8));S[type][i].cost=totalQty>0?parseFloat((totalCost/totalQty).toFixed(6)):0;}
 function recalcAll(){['us','asx','cry','met'].forEach(type=>{S[type].forEach((item,i)=>{if((item.txns||[]).length)recalcFromTxns(type,i);});});}
 
@@ -1846,6 +1914,74 @@ async function fetchWl(){
 }
 
 async function fetchRate(){const sources=[async()=>{const r=await fetch('https://api.frankfurter.app/latest?from=USD&to=AUD');const d=await r.json();if(d.rates&&d.rates.AUD)return 1/d.rates.AUD;return null;},async()=>{const r=await fetch('https://api.coingecko.com/api/v3/simple/price?ids=usd&vs_currencies=aud');const d=await r.json();if(d.usd&&d.usd.aud)return 1/d.usd.aud;return null;}];for(const source of sources){try{const rate=await source();if(rate&&rate>0.5&&rate<1.2){S.audUsd=rate;return;}}catch(e){}}}
+function summary(){
+  const showAud=document.getElementById('audToggle').checked,r=S.audUsd;
+  let usU=0,asxA=0,cryA=0,metA=0,usCU=0,asxCA=0,cryCA=0,metCA=0;
+  S.us.forEach(item=>{const p=S.prices['us:'+item.ticker];if(p&&item.qty){usU+=p.price*item.qty;if(item.cost)usCU+=item.cost*item.qty;}});
+  S.asx.forEach(item=>{const p=S.prices['asx:'+item.ticker];if(p&&item.qty){asxA+=p.price*item.qty;if(item.cost)asxCA+=item.cost*item.qty;}});
+  S.cry.forEach(item=>{const p=S.prices['cry:'+item.ticker];if(p&&item.qty){cryA+=p.price*item.qty;if(item.cost)cryCA+=item.cost*item.qty;}});
+  S.met.forEach(item=>{const p=S.prices['met:'+item.ticker];if(p&&item.qty){metA+=p.price*item.qty;if(item.cost)metCA+=item.cost*item.qty;}});
+  const cashA=S.cash.reduce((s,a)=>s+(a.balance||0),0);
+  const usA=usU/r,total=usA+asxA+cryA+metA+cashA,totalCost=usCU+asxCA+cryCA+metCA;
+  function glStr(val,cost){if(!cost||!val)return'';const gl=val-cost,pct=cost>0?(gl/cost)*100:0;const cls=gl>0?'gain-pos':gl<0?'gain-neg':'gain-neu';const sign=gl>=0?'+':'';return`<span class="${cls}">${sign}$${f(Math.abs(gl))} (${sign}${f(pct,1)}%)</span>`;}
+  document.getElementById('tot').textContent=total>0?'$'+f(total):'\u2014';
+  // Update topbar P&L
+  (function(){
+    const pnlEl=document.getElementById('topbar-pnl-val');
+    const pnlPct=document.getElementById('topbar-pnl-pct');
+    if(!pnlEl||!pnlPct)return;
+    // Compute today's estimated P&L from price changes
+    let dayPnl=0;
+    S.us.forEach(item=>{const p=S.prices['us:'+item.ticker];if(p&&p.change&&item.qty){const curAud=p.price*item.qty/S.audUsd;const prevAud=curAud/(1+(p.change/100));dayPnl+=curAud-prevAud;}});
+    S.asx.forEach(item=>{const p=S.prices['asx:'+item.ticker];if(p&&p.change&&item.qty){const cur=p.price*item.qty;const prev=cur/(1+(p.change/100));dayPnl+=cur-prev;}});
+    S.cry.forEach(item=>{const p=S.prices['cry:'+item.ticker];if(p&&p.change&&item.qty){const cur=p.price*item.qty;const prev=cur/(1+(p.change/100));dayPnl+=cur-prev;}});
+    S.met.forEach(item=>{const p=S.prices['met:'+item.ticker];if(p&&p.change&&item.qty){const cur=p.price*item.qty;const prev=cur/(1+(p.change/100));dayPnl+=cur-prev;}});
+    if(total>0&&dayPnl!==0){
+      const sign=dayPnl>=0?'+':'';const pct=total>0?(dayPnl/total*100):0;
+      pnlEl.textContent=(dayPnl>=0?'+':'')+f(dayPnl);
+      pnlEl.style.color=dayPnl>=0?'var(--gain-pos)':'var(--gain-neg)';
+      pnlPct.textContent=(pct>=0?'\u25b2 ':'\u25bc ')+Math.abs(pct).toFixed(2)+'%';
+      pnlPct.style.background=dayPnl>=0?'var(--gl-pos-bg)':'var(--gl-neg-bg)';
+      pnlPct.style.color=dayPnl>=0?'var(--gain-pos)':'var(--gain-neg)';
+    }
+  })();
+  if(total>0)animateValue(document.getElementById('tot'),total);
+  if(usA>0)animateValue(document.getElementById('usT'),usA);else document.getElementById('usT').textContent='\u2014';
+  document.getElementById('usGL').innerHTML=usCU>0?glStr(usA,usCU):'';
+  if(asxA>0)animateValue(document.getElementById('asxT'),asxA);else document.getElementById('asxT').textContent='\u2014';
+  document.getElementById('asxGL').innerHTML=asxCA>0?glStr(asxA,asxCA):'';
+  if(cryA>0)animateValue(document.getElementById('crypT'),cryA);else document.getElementById('crypT').textContent='\u2014';
+  document.getElementById('crypGL').innerHTML=cryCA>0?glStr(cryA,cryCA):'';
+  if(metA>0)animateValue(document.getElementById('metT'),metA);else document.getElementById('metT').textContent='\u2014';
+  document.getElementById('metGL').innerHTML=metCA>0?glStr(metA,metCA):'';
+  if(cashA>0)animateValue(document.getElementById('cashT'),cashA);else document.getElementById('cashT').textContent='\u2014';
+  const invested=usA+asxA+cryA+metA;
+  const subInv=document.getElementById('tot-invested');const subCash=document.getElementById('tot-cash');const subRate=document.getElementById('tot-rate');
+  if(subInv)subInv.textContent=invested>0?'$'+f(invested):'\u2014';
+  if(subCash)subCash.textContent=cashA>0?'$'+f(cashA):'\u2014';
+  if(subRate)subRate.textContent=S.audUsd.toFixed(4);
+  document.getElementById('cashSecTot').textContent=cashA>0?'$'+f(cashA)+' AUD':'';
+  document.getElementById('usSecTot').textContent=usU>0?'$'+f(showAud?usA:usU)+' '+(showAud?'AUD':'USD'):'';
+  document.getElementById('asxSecTot').textContent=asxA>0?'$'+f(asxA)+' AUD':'';
+  document.getElementById('crypSecTot').textContent=cryA>0?'$'+f(cryA)+' AUD':'';
+  document.getElementById('metSecTot').textContent=metA>0?'$'+f(metA)+' AUD':'';
+  if(total>0){
+    const up=v=>((v/total)*100).toFixed(1)+'%';const pct=v=>total>0?((v/total)*100).toFixed(0)+'%':'0%';
+    document.getElementById('allocBar').innerHTML=`<div class="alloc-seg" style="background:#378ADD;width:${up(usA)};min-width:${usA>0?'4px':'0'}"></div><div class="alloc-seg" style="background:#639922;width:${up(asxA)};min-width:${asxA>0?'4px':'0'}"></div><div class="alloc-seg" style="background:#BA7517;width:${up(cryA)};min-width:${cryA>0?'4px':'0'}"></div><div class="alloc-seg" style="background:#888780;width:${up(metA)};min-width:${metA>0?'4px':'0'}"></div><div class="alloc-seg" style="background:#397968;width:${up(cashA)};min-width:${cashA>0?'4px':'0'}"></div>`;
+    document.getElementById('usAllocVal').textContent=usA>0?'$'+f(usA):'\u2014';
+    document.getElementById('asxAllocVal').textContent=asxA>0?'$'+f(asxA):'\u2014';
+    document.getElementById('crypAllocVal').textContent=cryA>0?'$'+f(cryA):'\u2014';
+    document.getElementById('metAllocVal').textContent=metA>0?'$'+f(metA):'\u2014';
+    document.getElementById('cashAllocVal').textContent=cashA>0?'$'+f(cashA):'\u2014';
+    document.getElementById('usAlloc').textContent=pct(usA);document.getElementById('asxAlloc').textContent=pct(asxA);
+    document.getElementById('crypAlloc').textContent=pct(cryA);document.getElementById('metAlloc').textContent=pct(metA);document.getElementById('cashAlloc').textContent=pct(cashA);
+  }
+  updatePie();setTimeout(applyRowTints,100);
+  if(total>0&&Object.keys(S.prices).length>0)saveSnapshot(total);
+  renderSparklines();
+}
+
+
 async function fetchUS(){setDot('usDot','loading');clearErr('us');const tickers=S.us.map(a=>a.ticker);if(!tickers.length){setDot('usDot','stale');return;}let ok=false;await Promise.all(tickers.map(async tk=>{try{const r=await fetch(`https://finnhub.io/api/v1/quote?symbol=${tk}&token=${FINHUB_KEY}`);const d=await r.json();if(d&&d.c&&d.c>0){S.prices['us:'+tk]={price:d.c,change:d.pc>0?((d.c-d.pc)/d.pc*100):0};ok=true;}}catch(e){}}));setDot('usDot',ok?'live':'err');if(!ok)showErr('us','Could not load US prices.');rows('us');}
 async function fetchASX(){setDot('asxDot','loading');clearErr('asx');const tickers=S.asx.map(a=>a.ticker);if(!tickers.length){setDot('asxDot','stale');return;}let ok=false;await Promise.all(tickers.map(async tk=>{try{
     // Yahoo Finance — free, no key required, covers ASX with .AX suffix
