@@ -1300,7 +1300,7 @@ function renderFees(){
     });
     ['us','asx','cry','met'].forEach(assetType=>{S[assetType].forEach((item,assetIdx)=>{(item.txns||[]).forEach((tx,txnIdx)=>{const total=tx.price*tx.qty;const txId=tx.txnId||'—';const ca=tx.cashAcct!=null?tx.cashAcct:null;// Display trade amount ex-fee; balance moves by full total (trade+fee together via separate fee row)
         const displayTotal = tx.fee>0 ? parseFloat((total - tx.fee).toFixed(2)) : total;
-        entries.push({date:tx.date||'',desc:`${tx.side==='buy'?'Buy':'Sell'} ${f(tx.qty,tx.qty%1===0?0:4)} ${item.ticker}${item.name?' — '+item.name:''}`,type:'trade',amount:displayTotal,balanceAmount:parseFloat((total-tx.fee).toFixed(10)),isDebit:tx.side==='buy',deletable:false,reversible:true,assetType,assetIdx,txnIdx,txnId:txId,isBrokerageFee:false,cashAcct:ca});if(tx.fee>0){entries.push({date:tx.date||'',desc:`Brokerage — ${item.ticker} ${tx.side}`,type:'fee',amount:tx.fee,balanceAmount:tx.fee,isDebit:true,deletable:false,reversible:false,txnId:txId,isBrokerageFee:true,cashAcct:ca});}});});});
+        entries.push({date:tx.date||'',desc:`${tx.side==='buy'?'Buy':'Sell'} ${f(tx.qty,tx.qty%1===0?0:4)} ${item.ticker}${item.name?' — '+item.name:''}`,type:'trade',amount:displayTotal,balanceAmount:parseFloat(displayTotal.toFixed(10)),isDebit:tx.side==='buy',deletable:false,reversible:true,assetType,assetIdx,txnIdx,txnId:txId,isBrokerageFee:false,cashAcct:ca});if(tx.fee>0){entries.push({date:tx.date||'',desc:`Brokerage — ${item.ticker} ${tx.side}`,type:'fee',amount:tx.fee,balanceAmount:tx.fee,isDebit:true,deletable:false,reversible:false,txnId:txId,isBrokerageFee:true,cashAcct:ca});}});});});
     let filtered=showBalance?entries.filter(e=>e.cashAcct!=null&&parseInt(e.cashAcct)===acctIndex):entries;
     filtered.sort((a,b)=>new Date(a.date)-new Date(b.date));
     if(showBalance){let running=S.cash[acctIndex]?.balance||0;for(let i=filtered.length-1;i>=0;i--){const e=filtered[i];const moveAmt=e.balanceAmount!=null?e.balanceAmount:e.amount;const credit=!e.isDebit||e.type==='income'||e.type==='contribution';e._runningBalance=parseFloat(running.toFixed(2));running+=credit?-moveAmt:moveAmt;}}
@@ -2048,7 +2048,7 @@ function importCommsecIntlCSV(input) {
         t.audProc = parseFloat(((audTotalProceeds || 0) * share).toFixed(6));
         t.audComm = parseFloat(((audTotalComm     || 0) * share).toFixed(6));
         // AUD price per share ex-fee
-        t.audPrice = t.qty > 0 ? parseFloat((t.audProc / t.qty).toFixed(6)) : 0;
+        t.audPrice = t.qty > 0 ? parseFloat(((t.audProc - t.audComm) / t.qty).toFixed(6)) : 0;
       });
 
       // ── Extract deposits ──
@@ -2067,7 +2067,7 @@ function importCommsecIntlCSV(input) {
 
       // ── Summary for user prompt ──
       const tradeLines = stockTrades.map(t =>
-        `${t.side.toUpperCase()} ${t.qty} x ${t.symbol} @ $${t.audPrice.toFixed(2)} AUD/share (fee $${t.audComm.toFixed(2)} AUD)`
+        `${t.side.toUpperCase()} ${t.qty} x ${t.symbol} @ $${t.audPrice.toFixed(2)} AUD/share + $${t.audComm.toFixed(2)} fee`
       ).join('\n');
       const depositLines = deposits.length
         ? '\n\nDeposits found:\n' + deposits.map(d => `$${d.amount.toLocaleString()} AUD — ${d.desc}`).join('\n')
@@ -2143,8 +2143,8 @@ function importCommsecIntlCSV(input) {
         // Adjust cash balance: deduct trade value + commission
         if(cashAcctIdx !== null && S.cash[cashAcctIdx]) {
           const move = t.side === 'buy'
-            ? -(t.audProc + t.audComm)   // deduct trade + fee for buys
-            : (t.audProc - t.audComm);   // credit trade - fee for sells
+            ? -t.audProc                  // deduct trade value only (fee is separate ledger row)
+            : t.audProc;                  // credit trade value only
           S.cash[cashAcctIdx].balance = (S.cash[cashAcctIdx].balance||0) + move;
         }
 
