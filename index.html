@@ -528,6 +528,7 @@ tr.hrow-met td{border-left:2px solid rgba(148,163,184,0.35);}
   </div>
 
   <div class="sessions" id="sessions"></div>
+<div id="debugPanel" style="display:none;background:rgba(255,0,0,0.1);border:1px solid red;border-radius:8px;padding:12px;margin-bottom:12px;font-size:11px;font-family:monospace;color:#f87171;white-space:pre-wrap;word-break:break-all;"></div>
 
   <div class="tab-bar">
     <button class="tab-btn active" data-action="switchTab" data-tab="portfolio">📊 Portfolio</button>
@@ -1124,6 +1125,25 @@ async function loadPortfolio(portfolioId) {
 
     // Recalculate avg cost and qty from transaction history
     recalcAll();
+
+    // Debug panel — shows on mobile
+    try {
+      const dp = document.getElementById('debugPanel');
+      if(dp) {
+        const info = [
+          `Holdings: US=${S.us.length} ASX=${S.asx.length} CRY=${S.cry.length} MET=${S.met.length}`,
+          `Cash accounts: ${S.cash.length}`,
+          `Fees: ${S.fees.length} Income: ${S.income.length} Contributions: ${S.contributions.length} Transfers: ${S.transfers.length}`,
+          `Transactions (raw from Xano): ${data.transactions?.length || 0}`,
+        ];
+        S.us.concat(S.cry).forEach(h => {
+          info.push(`${h.ticker}: qty=${h.qty} cost=${h.cost} txns=${h.txns?.length||0}`);
+          (h.txns||[]).forEach((tx,i) => info.push(`  tx${i}: ${tx.side} ${tx.qty} @ ${tx.price} fee=${tx.fee} _id=${tx._id}`));
+        });
+        dp.textContent = info.join('\n');
+        dp.style.display = 'block';
+      }
+    } catch(e) {}
 
     syncUI('synced', 'Loaded · ' + new Date().toLocaleTimeString('en-AU',{hour:'2-digit',minute:'2-digit'}));
     ['us','asx','cry','met','cash','fees','wl'].forEach(t => rows(t));
