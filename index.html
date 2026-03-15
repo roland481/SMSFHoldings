@@ -1050,8 +1050,9 @@ function importSwyftxCSV(input) {
           price:    parseFloat(((row.audVal - row.fee) / row.amount).toFixed(6)),
           fee:      row.fee,
           txnId:    generateTxnId(row.date),
-          swyftxId: row.uuid,
-          cashAcct: cashAcctIdx
+          swyftxId:   row.uuid,
+          priceExFee: true,          // price already excludes fee
+          cashAcct:   cashAcctIdx
         });
 
         // Adjust cash balance
@@ -1299,7 +1300,7 @@ function renderFees(){
       entries.push({date:item.date||'',desc:`Transfer from ${fromName}${item.desc?' — '+item.desc:''}`,type:'transfer',amount:item.amount||0,isDebit:false,orig,deletable:false,reversible:false,txnId:item.txnId||'—',isBrokerageFee:false,cashAcct:item.to});
     });
     ['us','asx','cry','met'].forEach(assetType=>{S[assetType].forEach((item,assetIdx)=>{(item.txns||[]).forEach((tx,txnIdx)=>{const total=tx.price*tx.qty;const txId=tx.txnId||'—';const ca=tx.cashAcct!=null?tx.cashAcct:null;// Display trade amount ex-fee; balance moves by full total (trade+fee together via separate fee row)
-        const displayTotal = tx.fee>0 ? parseFloat((total - tx.fee).toFixed(2)) : total;
+        const displayTotal = (tx.fee>0 && !tx.priceExFee) ? parseFloat((total - tx.fee).toFixed(2)) : total;
         entries.push({date:tx.date||'',desc:`${tx.side==='buy'?'Buy':'Sell'} ${f(tx.qty,tx.qty%1===0?0:4)} ${item.ticker}${item.name?' — '+item.name:''}`,type:'trade',amount:displayTotal,balanceAmount:parseFloat(displayTotal.toFixed(10)),isDebit:tx.side==='buy',deletable:false,reversible:true,assetType,assetIdx,txnIdx,txnId:txId,isBrokerageFee:false,cashAcct:ca});if(tx.fee>0){entries.push({date:tx.date||'',desc:`Brokerage — ${item.ticker} ${tx.side}`,type:'fee',amount:tx.fee,balanceAmount:tx.fee,isDebit:true,deletable:false,reversible:false,txnId:txId,isBrokerageFee:true,cashAcct:ca});}});});});
     let filtered=showBalance?entries.filter(e=>e.cashAcct!=null&&parseInt(e.cashAcct)===acctIndex):entries;
     filtered.sort((a,b)=>new Date(a.date)-new Date(b.date));
@@ -1857,10 +1858,13 @@ function exportCSV(){
     S[type].forEach(item=>{
       (item.txns||[]).forEach(tx=>{
         const d=new Date(tx.date);if(d<fy.start||d>fy.end)return;
-        const audTotal=parseFloat((tx.price*tx.qty).toFixed(2));
+        const rawTotal=parseFloat((tx.price*tx.qty).toFixed(2));
+        // For priceExFee imports, price already excludes fee so rawTotal is the net trade amount
+        // For legacy imports, price includes fee so subtract it for correct display
+        const audTotal=tx.fee>0&&!tx.priceExFee?parseFloat((rawTotal-tx.fee).toFixed(2)):rawTotal;
         const side=tx.side==='buy'?'Buy':'Sell';
         const acctName=tx.cashAcct!=null&&S.cash[tx.cashAcct]?S.cash[tx.cashAcct].name:'';
-        entries.push({date:tx.date,id:tx.txnId||'—',type:'Trade',category:typeLabel,ticker:item.ticker,name:item.name,side,qty:tx.qty,price:tx.price.toFixed(4),amount:side==='Buy'?-audTotal:audTotal,account:acctName,ref:'',desc:`${side} ${tx.qty} ${item.ticker} @ $${tx.price.toFixed(2)} AUD`});
+        entries.push({date:tx.date,id:tx.txnId||'—',type:'Trade',category:typeLabel,ticker:item.ticker,name:item.name,side,qty:tx.qty,price:tx.price.toFixed(4),amount:side==='Buy'?-audTotal:audTotal,account:acctName,ref:'',desc:`${side} ${tx.qty} ${item.ticker} @ $${tx.price.toFixed(2)} AUD/share`});
         if(tx.fee>0){entries.push({date:tx.date,id:(tx.txnId||'—')+'-FEE',type:'Fee',category:'Brokerage',ticker:item.ticker,name:item.name,side:'',qty:'',price:'',amount:-tx.fee,account:acctName,ref:tx.txnId||'—',desc:`Brokerage — ${side} ${item.ticker}`});}
       });
     });
@@ -2002,8 +2006,9 @@ function importCommsecIntlCSV(input) {
       // ── Extract trades (stock rows only, Order discriminator) ──
       // Format: Trades,Data,Order,Stocks,USD,SYMBOL,DATE,TIME,QTY,T.PRICE,C.PRICE,PROCEEDS,COMM,BASIS,...
       const stockTrades = [];
-      let audTotalProceeds = null; // from Trades,Total,,Stocks,AUD row
-      let audTotalComm     = null;
+      let audTotalProceeds = null; // from Trades,Total,,Stocks,AUD row (market value in AUD)
+      let audTotalComm     = null; // AUD commission
+      let audCashDeducted  = null; // from Cash Report,Trades (Purchase),AUD — actual AUD that left wallet
 
       // Get AUD totals for the whole statement (used to apportion per-trade AUD values)
       // For single-trade statements this equals the trade's AUD values directly
@@ -2012,6 +2017,11 @@ function importCommsecIntlCSV(input) {
           // Proceeds col = 10 (index), Comm col = 11
           audTotalProceeds = Math.abs(parseFloat(r[10])||0); // purchase = negative proceeds
           audTotalComm     = Math.abs(parseFloat(r[11])||0);
+        }
+        // Cash Report shows actual AUD deducted from wallet (forex conversion cost)
+        // This is the ground truth for what actually left the account
+        if(r[0]==='Cash Report' && r[1]==='Data' && r[2]==='Trades (Purchase)' && r[3]==='AUD') {
+          audCashDeducted = Math.abs(parseFloat(r[4])||0);
         }
       }
 
@@ -2045,10 +2055,11 @@ function importCommsecIntlCSV(input) {
       const totalUsdProc = stockTrades.reduce((s,t) => s + t.usdProc, 0);
       stockTrades.forEach(t => {
         const share = totalUsdProc > 0 ? t.usdProc / totalUsdProc : 1 / stockTrades.length;
-        t.audProc = parseFloat(((audTotalProceeds || 0) * share).toFixed(6));
-        t.audComm = parseFloat(((audTotalComm     || 0) * share).toFixed(6));
-        // AUD price per share ex-fee
-        t.audPrice = t.qty > 0 ? parseFloat(((t.audProc - t.audComm) / t.qty).toFixed(6)) : 0;
+        t.audProc      = parseFloat(((audTotalProceeds || 0) * share).toFixed(6)); // market value display
+        t.audComm      = parseFloat(((audTotalComm     || 0) * share).toFixed(6)); // commission
+        t.audCashMove  = parseFloat(((audCashDeducted  || audTotalProceeds || 0) * share).toFixed(6)); // actual AUD that left wallet
+        // AUD price per share = (cash deducted - commission) / qty  — pure trade cost ex-fee
+        t.audPrice = t.qty > 0 ? parseFloat(((t.audCashMove - t.audComm) / t.qty).toFixed(6)) : 0;
       });
 
       // ── Extract deposits ──
@@ -2067,7 +2078,7 @@ function importCommsecIntlCSV(input) {
 
       // ── Summary for user prompt ──
       const tradeLines = stockTrades.map(t =>
-        `${t.side.toUpperCase()} ${t.qty} x ${t.symbol} @ $${t.audPrice.toFixed(2)} AUD/share + $${t.audComm.toFixed(2)} fee`
+        `${t.side.toUpperCase()} ${t.qty} x ${t.symbol} @ $${t.audPrice.toFixed(2)} AUD/share (ex-fee) + $${t.audComm.toFixed(2)} AUD brokerage | Cash deducted: $${t.audCashMove.toFixed(2)} AUD`
       ).join('\n');
       const depositLines = deposits.length
         ? '\n\nDeposits found:\n' + deposits.map(d => `$${d.amount.toLocaleString()} AUD — ${d.desc}`).join('\n')
@@ -2137,14 +2148,15 @@ function importCommsecIntlCSV(input) {
           fee:           t.audComm,    // AUD commission
           txnId:         generateTxnId(t.dateStr),
           commsecIntlId: t.dedupId,    // fingerprint for dedup
+          priceExFee:    true,          // price already excludes fee
           cashAcct:      cashAcctIdx
         });
 
-        // Adjust cash balance: deduct trade value + commission
+        // Adjust cash balance: use actual AUD deducted from wallet (forex conversion cost)
         if(cashAcctIdx !== null && S.cash[cashAcctIdx]) {
           const move = t.side === 'buy'
-            ? -t.audProc                  // deduct trade value only (fee is separate ledger row)
-            : t.audProc;                  // credit trade value only
+            ? -t.audCashMove              // actual AUD forex cost for buys
+            : t.audCashMove;              // credit for sells
           S.cash[cashAcctIdx].balance = (S.cash[cashAcctIdx].balance||0) + move;
         }
 
