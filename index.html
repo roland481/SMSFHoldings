@@ -381,7 +381,7 @@ tr.row-up td{animation:rowFlashUp 1.8s ease-out forwards;}
 tr.row-down td{animation:rowFlashDown 1.8s ease-out forwards;}
 tr.tint-up td{background:rgba(94,225,109,0.06)!important;}
 tr.tint-down td{background:rgba(196,96,97,0.06)!important;}
-.sessions{display:flex;gap:6px;flex-wrap:nowrap;margin-bottom:1rem;overflow-x:auto;scrollbar-width:none;}.sessions::-webkit-scrollbar{display:none;}
+.sessions{display:flex;gap:5px;flex-wrap:nowrap;margin-bottom:8px;overflow-x:auto;scrollbar-width:none;}.sessions::-webkit-scrollbar{display:none;}
 .session-pill{display:flex;align-items:center;gap:6px;font-size:11px;font-weight:500;padding:4px 10px;border-radius:99px;border:1px solid var(--border4);color:var(--text2);background:var(--surface);}
 .session-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0;}
 .session-open .session-dot{background:#5ee16d;animation:pulse 2s infinite;}
@@ -422,23 +422,68 @@ tr.hrow-met td{border-left:2px solid rgba(154,162,200,0.45);}
   .sidebar{position:fixed;top:0;left:0;height:100vh;width:240px;z-index:200;transform:translateX(-100%);transition:transform 0.25s ease;}
   .sidebar.mobile-open{transform:translateX(0);}
   .bottom-nav{display:flex;}
-  .wrap{margin-left:0;padding:14px 14px calc(80px + env(safe-area-inset-bottom));width:100%;}
-  .summary{grid-template-columns:repeat(2,minmax(0,1fr));gap:6px;}
-  .scard{border-radius:12px;padding:0.9rem 0.85rem;}
+
+  /* ── Wrap & spacing ── */
+  .wrap{margin-left:0;padding:10px 10px calc(72px + env(safe-area-inset-bottom));width:100%;}
+
+  /* ── Topbar ── */
+  .topbar{gap:6px;margin-bottom:8px;padding:8px 12px;position:sticky;top:0;z-index:40;}
+  .title-block h1{font-size:16px;font-weight:800;}
+  .sync-bar{font-size:10px;}
+  .rfbtn{font-size:11px;padding:7px 10px;}
+  .rfbtn-label{display:none;}
+  .aud-pill{display:none;}
+  .mob-hide{display:none;}
+  #hamburgerBtn{display:flex!important;}
+  .user-name{display:none;}
+  .user-role-badge{display:none;}
+  .user-badge{padding:4px 8px;}
+
+  /* ── Summary cards — 1 col for total, 2 col for rest ── */
+  .summary{
+    grid-template-columns:1fr 1fr;
+    gap:7px;
+  }
+  /* Total value card spans full width */
+  .summary .scard:first-child{
+    grid-column:1 / -1;
+  }
+  .scard{border-radius:12px;padding:11px 13px;}
+  .slabel{font-size:9px;margin-bottom:3px;}
+  .sval{font-size:16px;font-weight:500;}
+  .ssub{font-size:10px;}
+  /* Hide sparklines on small cards to save space */
+  .scard:not(:first-child) .sparkline{height:30px!important;margin-top:6px!important;}
+  .scard-row2{grid-template-columns:1fr 1fr;gap:8px;margin-top:8px;}
+  .scard-sub-col:last-child{display:none;}
+
+  /* ── Mid row — stack ── */
+  .mid-row{grid-template-columns:1fr;gap:8px;}
   .dash{flex-direction:column;align-items:stretch;border-radius:12px;}
   .dash-divider{width:100%;height:1px;}
   .pie-section{width:100%;}
-  .topbar{gap:8px;margin-bottom:0.875rem;padding:10px 14px;}
-  .title-block h1{font-size:15px;}
-  .rfbtn{font-size:12px;padding:8px 12px;}
-  .rfbtn-label{display:none;}
-  .mob-hide{display:none;}
-  .sval{font-size:17px;}
-  #hamburgerBtn{display:flex!important;}
-  .aud-pill{display:none;}
-  .mid-row{grid-template-columns:1fr;}
-  .readonly-notice{padding:8px 14px;top:48px;}
-  .user-name{display:none;}
+
+  /* ── Sessions ── */
+  .sessions{gap:4px;margin-bottom:8px;}
+  .session-pill{font-size:9px;padding:3px 8px;}
+
+  /* ── Holdings table ── */
+  .section{border-radius:12px;}
+  .sec-head{padding:10px 12px;}
+  .sec-title{font-size:12px;}
+  td,th{padding:8px 10px;}
+  .scard-sub-col:nth-child(3){display:none;}
+
+  /* ── Bottom nav ── */
+  .bottom-nav{padding:6px 0 max(10px,env(safe-area-inset-bottom));}
+  .bn-item{font-size:9px;padding:3px 12px;}
+  .bn-item svg{width:18px;height:18px;}
+
+  /* ── Readonly notice ── */
+  .readonly-notice{padding:6px 12px;top:48px;font-size:11px;}
+
+  /* ── Add button ── */
+  #topbarAddBtn{padding:6px 12px;font-size:11px;}
 }
 @media(min-width:801px){
   body{display:flex;align-items:flex-start;}
