@@ -2025,6 +2025,41 @@ document.getElementById('loginEmail').addEventListener('keydown', e => { if(e.ke
 // ── Mobile swipe ──────────────────────────────────────────────
 (function(){const TABS=['portfolio','fees','watchlist','import'];let touchStartX=0,touchStartY=0,touchStartTime=0;document.addEventListener('touchstart',e=>{if(e.target.closest('.tbl-wrap,.modal,.sidebar'))return;touchStartX=e.touches[0].clientX;touchStartY=e.touches[0].clientY;touchStartTime=Date.now();},{passive:true});document.addEventListener('touchend',e=>{if(!touchStartX)return;const dx=e.changedTouches[0].clientX-touchStartX;const dy=e.changedTouches[0].clientY-touchStartY;const dt=Date.now()-touchStartTime;touchStartX=0;if(Math.abs(dx)<60)return;if(Math.abs(dy)>80)return;if(dt>400)return;if(Math.abs(dy)>Math.abs(dx))return;const cur=TABS.find(t=>{const el=document.getElementById('tab-'+t);return el&&el.classList.contains('active');})||'portfolio';const idx=TABS.indexOf(cur);if(dx<0&&idx<TABS.length-1)switchTab(TABS[idx+1]);if(dx>0&&idx>0)switchTab(TABS[idx-1]);},{passive:true});})();
 
+// ══════════════════════════════════════════════════════════════
+// ── THEME SYSTEM ─────────────────────────────────────────────
+// ══════════════════════════════════════════════════════════════
+function applyTheme(theme) {
+  theme = theme || 'dark';
+  document.documentElement.setAttribute('data-theme', theme);
+  localStorage.setItem('smsf_theme', theme);
+  const isDark = theme !== 'light';
+  const icon = document.getElementById('themeToggleIcon');
+  const label = document.getElementById('themeToggleLabel');
+  const pill = document.getElementById('themeTogglePill');
+  const mobileIcon = document.getElementById('mobileThemeIcon');
+  const mobilePill = document.getElementById('mobileThemeToggle');
+  if (icon) icon.textContent = isDark ? '🌙' : '☀️';
+  if (label) label.textContent = isDark ? 'Dark mode' : 'Light mode';
+  if (pill) pill.style.justifyContent = isDark ? 'flex-end' : 'flex-start';
+  if (mobileIcon) mobileIcon.textContent = isDark ? '🌙' : '☀️';
+  if (mobilePill) mobilePill.style.justifyContent = isDark ? 'flex-end' : 'flex-start';
+  const metaTheme = document.querySelector('meta[name="theme-color"]');
+  if (metaTheme) metaTheme.setAttribute('content', isDark ? '#060a14' : '#c2d4e6');
+  if (typeof pieChart !== 'undefined' && pieChart) setTimeout(() => { try { pieChart.update(); } catch(e) {} }, 50);
+  if (typeof historyChart !== 'undefined' && historyChart) setTimeout(() => { try { historyChart.destroy(); historyChart = null; renderHistoryChart(); } catch(e) {} }, 50);
+  setTimeout(() => { try { renderSparklines(); } catch(e) {} }, 100);
+}
+
+function toggleTheme() {
+  const current = document.documentElement.getAttribute('data-theme') || 'dark';
+  applyTheme(current === 'light' ? 'dark' : 'light');
+}
+
+function initTheme() {
+  const saved = localStorage.getItem('smsf_theme') || 'dark';
+  applyTheme(saved);
+}
+
 // ── Boot ──────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', async function(){
   document.getElementById('todayDate').textContent = new Date().toLocaleDateString('en-AU',{weekday:'short',day:'numeric',month:'long',year:'numeric'});
