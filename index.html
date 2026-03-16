@@ -140,6 +140,10 @@
 [data-theme="light"] .gl-chip.gl-pos{background:rgba(46,138,58,0.1);color:#42ac5c;}
 [data-theme="light"] .gl-chip.gl-neg{background:rgba(211,107,90,0.1);color:#c25040;}
 [data-theme="light"] .gl-chip.gl-neu{background:rgba(84,84,232,0.06);color:#8794cb;}
+/* import drop zone */
+#importDropZone:hover{border-color:var(--accent);background:var(--gold-bg);}
+#importDropZone.drag-over{border-color:var(--accent);background:var(--gold-bg);transform:scale(1.01);}
+
 /* scrollbar */
 ::-webkit-scrollbar{width:4px;height:4px;}
 ::-webkit-scrollbar-track{background:transparent;}
@@ -929,25 +933,75 @@ tr.hrow-met td{border-left:2px solid rgba(154,162,200,0.45);}
         Import transactions
       </div>
     </div>
-    <div style="padding:20px 24px;display:flex;flex-direction:column;gap:16px;">
-      <div style="display:flex;align-items:center;justify-content:space-between;padding:16px 20px;background:var(--surface2);border:1px solid var(--border4);border-radius:12px;gap:16px;flex-wrap:wrap;">
-        <div style="display:flex;flex-direction:column;gap:4px;">
-          <div style="display:flex;align-items:center;gap:8px;"><span style="font-size:13px;font-weight:600;color:var(--text);">Swyftx</span><span class="badge b-amber">Crypto</span></div>
-          <div style="font-size:12px;color:var(--text3);">Import your Swyftx Transaction Report CSV. Deduplicates by UUID.</div>
-          <div style="font-size:11px;color:var(--text4);">Swyftx app → Reports → Transaction Report → Export CSV</div>
+    <div style="padding:20px 24px;display:flex;flex-direction:column;gap:20px;">
+
+      <!-- Universal drop zone -->
+      <div id="importDropZone" onclick="document.getElementById('importFileInput').click()"
+        style="border:2px dashed var(--border4);border-radius:16px;padding:40px 24px;text-align:center;cursor:pointer;transition:all 0.2s;background:var(--surface2);">
+        <div style="font-size:32px;margin-bottom:12px;">📂</div>
+        <div style="font-size:15px;font-weight:600;color:var(--text);margin-bottom:6px;">Drop any file here or click to browse</div>
+        <div style="font-size:12px;color:var(--text3);margin-bottom:16px;">Automatically detects file type and imports accordingly</div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:center;">
+          <span style="font-size:11px;padding:3px 10px;border-radius:99px;background:rgba(186,117,23,0.15);color:#cea350;border:1px solid rgba(186,117,23,0.3);">Swyftx CSV</span>
+          <span style="font-size:11px;padding:3px 10px;border-radius:99px;background:rgba(186,117,23,0.15);color:#cea350;border:1px solid rgba(186,117,23,0.3);">Swyftx Invoice PDF</span>
+          <span style="font-size:11px;padding:3px 10px;border-radius:99px;background:rgba(55,138,221,0.15);color:#378ADD;border:1px solid rgba(55,138,221,0.3);">CommSec Intl CSV</span>
+          <span style="font-size:11px;padding:3px 10px;border-radius:99px;background:var(--surface3);color:var(--text3);border:1px solid var(--border4);">+ more coming</span>
         </div>
-        <button class="write-only" onclick="document.getElementById('swyftxCSVInput').click()" style="flex-shrink:0;font-size:13px;font-weight:600;padding:8px 20px;border:none;background:linear-gradient(135deg,#BA7517,#e89c2a);color:#fff;border-radius:99px;cursor:pointer;font-family:Arial,Helvetica,sans-serif;">⬇ Import Swyftx CSV</button>
+        <input type="file" id="importFileInput" accept=".csv,.pdf" style="display:none;" onchange="handleUniversalImport(this)">
       </div>
-      <div style="display:flex;align-items:center;justify-content:space-between;padding:16px 20px;background:var(--surface2);border:1px solid var(--border4);border-radius:12px;gap:16px;flex-wrap:wrap;">
-        <div style="display:flex;flex-direction:column;gap:4px;">
-          <div style="display:flex;align-items:center;gap:8px;"><span style="font-size:13px;font-weight:600;color:var(--text);">CommSec International</span><span class="badge b-blue">US Stocks</span></div>
-          <div style="font-size:12px;color:var(--text3);">Import CommSec International Activity Statement CSV. Values in AUD at trade time.</div>
-          <div style="font-size:11px;color:var(--text4);">CommSec International → Reports → Activity → Export CSV</div>
+
+      <!-- Status / result area -->
+      <div id="importStatusArea" style="display:none;padding:14px 18px;border-radius:12px;font-size:13px;"></div>
+
+      <!-- Supported formats reference -->
+      <div style="border-top:1px solid var(--border2);padding-top:16px;">
+        <div style="font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:12px;">Supported formats</div>
+        <div style="display:flex;flex-direction:column;gap:8px;">
+          <div style="display:flex;align-items:center;gap:12px;font-size:12px;color:var(--text3);">
+            <span style="width:6px;height:6px;border-radius:50%;background:#cea350;flex-shrink:0;"></span>
+            <strong style="color:var(--text);min-width:160px;">Swyftx Transaction CSV</strong>
+            <span>Swyftx app → Reports → Transaction Report → Export CSV</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:12px;font-size:12px;color:var(--text3);">
+            <span style="width:6px;height:6px;border-radius:50%;background:#cea350;flex-shrink:0;"></span>
+            <strong style="color:var(--text);min-width:160px;">Swyftx Invoice PDF</strong>
+            <span>Swyftx app → Orders → select order → Download Invoice</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:12px;font-size:12px;color:var(--text3);">
+            <span style="width:6px;height:6px;border-radius:50%;background:#378ADD;flex-shrink:0;"></span>
+            <strong style="color:var(--text);min-width:160px;">CommSec Intl CSV</strong>
+            <span>CommSec International → Reports → Activity → Export CSV</span>
+          </div>
         </div>
-        <button class="write-only" onclick="document.getElementById('commsecIntlCSVInput').click()" style="flex-shrink:0;font-size:13px;font-weight:600;padding:8px 20px;border:none;background:linear-gradient(135deg,#1a5fa8,#378ADD);color:#fff;border-radius:99px;cursor:pointer;font-family:Arial,Helvetica,sans-serif;">⬇ Import CommSec Intl CSV</button>
       </div>
+
+      <!-- Hidden legacy inputs kept for compatibility -->
+      <div style="display:none;">
+        <input type="file" id="swyftxCSVInput" accept=".csv" onchange="importSwyftxCSV(this)">
+        <input type="file" id="commsecIntlCSVInput" accept=".csv" onchange="importCommsecIntlCSV(this)">
+        <input type="file" id="swyftxPDFInput" accept=".pdf" onchange="importSwyftxPDF(this)">
+      </div>
+      <div id="swyftxPDFStatus" style="display:none;"></div>
     </div>
   </div>
+  </div>
+
+  <!-- Swyftx PDF Invoice Preview Modal -->
+  <div class="modal-overlay" id="swyftxPDFModal" style="display:none;visibility:hidden;">
+    <div class="modal" style="max-width:480px;">
+      <button class="modal-close" onclick="closeSwyftxPDFModal()">✕</button>
+      <div class="modal-title">📄 Swyftx Invoice — Review & Import</div>
+      <div class="modal-sub">AI-parsed from your invoice. Review before saving.</div>
+      <div id="swyftxPDFPreview" style="margin-bottom:16px;"></div>
+      <div class="modal-field">
+        <label class="modal-label">Cash account to debit/credit (optional)</label>
+        <select class="modal-select" id="swyftxPDFAccount"><option value="">— Don't adjust cash —</option></select>
+      </div>
+      <div class="modal-footer">
+        <button class="addbtn" onclick="closeSwyftxPDFModal()">Cancel</button>
+        <button class="okbtn" id="swyftxPDFConfirmBtn" onclick="confirmSwyftxPDFImport()">Save Transaction</button>
+      </div>
+    </div>
   </div>
 
   <!-- Manage Access Modal (admin only) -->
@@ -2098,7 +2152,26 @@ async function fetchASX(){setDot('asxDot','loading');clearErr('asx');const ticke
     }
   }catch(e){}}));setDot('asxDot',ok?'live':'err');if(!ok)showErr('asx','Could not load ASX prices — check ticker is correct (e.g. CBA, BHP, SVL).');rows('asx');}
 async function fetchCry(){setDot('crypDot','loading');const coins=S.cry.map(a=>CID[a.ticker.toUpperCase()]||a.ticker.toLowerCase());if(!coins.length){setDot('crypDot','stale');return;}try{const r=await fetch(`https://api.coingecko.com/api/v3/simple/price?ids=${coins.join(',')}&vs_currencies=aud&include_24hr_change=true`);const d=await r.json();S.cry.forEach(item=>{const id=CID[item.ticker.toUpperCase()]||item.ticker.toLowerCase();if(d[id])S.prices['cry:'+item.ticker]={price:d[id].aud,change:d[id].aud_24h_change};});setDot('crypDot','live');}catch(e){setDot('crypDot','err');}rows('cry');}
-async function fetchMetals(){setDot('metDot','loading');clearErr('met');if(!S.met.length){setDot('metDot','stale');return;}let ok=false;await Promise.all(S.met.map(async item=>{try{const r=await fetch(`https://api.gold-api.com/price/${item.ticker.toUpperCase()}`);const d=await r.json();if(d&&d.price&&d.price>0){const pa=d.price/S.audUsd;const pv=d.prev_close_price>0?d.prev_close_price/S.audUsd:null;S.prices['met:'+item.ticker]={price:pa,change:pv?((pa-pv)/pv*100):null};ok=true;}}catch(e){}}));setDot('metDot',ok?'live':'err');if(!ok)showErr('met','Could not load metal prices.');rows('met');}
+async function fetchMetals(){setDot('metDot','loading');clearErr('met');if(!S.met.length){setDot('metDot','stale');return;}let ok=false;const r=S.audUsd&&S.audUsd>0.3&&S.audUsd<1.5?S.audUsd:0.63;await Promise.all(S.met.map(async item=>{try{
+    const res=await fetch(`https://api.gold-api.com/price/${item.ticker.toUpperCase()}/AUD`);
+    const d=await res.json();
+    if(d&&d.price&&d.price>0){
+      // gold-api returns chp (change%) and ch (change amount) directly
+      const change=d.chp!=null?d.chp:(d.ch!=null&&d.price>0?(d.ch/d.price*100):null);
+      S.prices['met:'+item.ticker]={price:d.price,change};
+      ok=true;
+    } else {
+      // Fallback: USD endpoint + convert
+      const res2=await fetch(`https://api.gold-api.com/price/${item.ticker.toUpperCase()}`);
+      const d2=await res2.json();
+      if(d2&&d2.price&&d2.price>0){
+        const pa=d2.price/r;
+        const change=d2.chp!=null?d2.chp:(d2.ch!=null&&d2.price>0?(d2.ch/d2.price*100):null);
+        S.prices['met:'+item.ticker]={price:pa,change};
+        ok=true;
+      }
+    }
+  }catch(e){}}));setDot('metDot',ok?'live':'err');if(!ok)showErr('met','Could not load metal prices.');rows('met');}
 
 async function refreshAll(){const btn=document.getElementById('rfBtn'),icon=document.getElementById('rfIcon');btn.disabled=true;icon.classList.add('spin');try{await fetchRate();await Promise.allSettled([fetchUS(),fetchASX(),fetchCry(),fetchMetals(),fetchWl()]);summary();renderAllHoldings();renderAllocTable();
       // Save snapshot to Xano after price refresh
@@ -2658,10 +2731,235 @@ async function xanoLoadSnapshots(portfolioId) {
   }
 }
 
+// ── Universal File Import Handler ────────────────────────────
+function initImportDropZone(){
+  const zone=document.getElementById('importDropZone');
+  if(!zone)return;
+  zone.addEventListener('dragover',e=>{e.preventDefault();zone.classList.add('drag-over');});
+  zone.addEventListener('dragleave',e=>{zone.classList.remove('drag-over');});
+  zone.addEventListener('drop',e=>{
+    e.preventDefault();
+    zone.classList.remove('drag-over');
+    const files=e.dataTransfer?.files;
+    if(files&&files[0])routeImportFile(files[0]);
+  });
+}
+
+function handleUniversalImport(input){
+  if(input.files&&input.files[0])routeImportFile(input.files[0]);
+  input.value='';
+}
+
+async function routeImportFile(file){
+  const statusArea=document.getElementById('importStatusArea');
+  statusArea.style.display='block';
+  statusArea.style.background='var(--surface2)';
+  statusArea.style.color='var(--text3)';
+  statusArea.innerHTML='<span style="opacity:0.7;">🔍 Detecting file type...</span>';
+
+  const name=file.name.toLowerCase();
+  const isPDF=file.type==='application/pdf'||name.endsWith('.pdf');
+  const isCSV=file.type==='text/csv'||name.endsWith('.csv');
+
+  if(isPDF){
+    // Route to Swyftx PDF invoice importer
+    statusArea.innerHTML='<span>📄 Detected: <strong>Swyftx Invoice PDF</strong> — reading with AI...</span>';
+    await importSwyftxPDFFile(file,statusArea);
+    return;
+  }
+
+  if(isCSV){
+    // Read first few lines to detect format
+    const text=await file.text();
+    const firstLine=text.split('\n')[0].toLowerCase();
+    if(firstLine.includes('uuid')||firstLine.includes('swyftx')||firstLine.includes('asset')){
+      statusArea.innerHTML='<span>📊 Detected: <strong>Swyftx Transaction CSV</strong> — importing...</span>';
+      await importSwyftxCSVText(text,statusArea);
+    } else if(firstLine.includes('commsec')||firstLine.includes('settlement')||firstLine.includes('proceeds')||firstLine.includes('security')){
+      statusArea.innerHTML='<span>📊 Detected: <strong>CommSec International CSV</strong> — importing...</span>';
+      await importCommsecIntlCSVText(text,statusArea);
+    } else {
+      statusArea.style.background='rgba(248,113,113,0.1)';
+      statusArea.style.color='var(--gain-neg)';
+      statusArea.innerHTML="⚠ Could not detect file format. Check file is a Swyftx or CommSec International export.";
+    }
+    return;
+  }
+
+  statusArea.style.background='rgba(248,113,113,0.1)';
+  statusArea.style.color='var(--gain-neg)';
+  statusArea.innerHTML='⚠ Unsupported file type. Please upload a CSV or PDF file.';
+}
+
+function setImportStatus(el,type,msg){
+  if(!el)return;
+  el.style.display='block';
+  if(type==='success'){el.style.background='rgba(93,227,108,0.1)';el.style.color='var(--gain-pos)';}
+  else if(type==='error'){el.style.background='rgba(248,113,113,0.1)';el.style.color='var(--gain-neg)';}
+  else{el.style.background='var(--surface2)';el.style.color='var(--text3)';}
+  el.innerHTML=msg;
+}
+
+// ── Swyftx PDF Invoice Importer ───────────────────────────── ─────────────────────────────
+let _swyftxPDFParsed = null;
+
+function closeSwyftxPDFModal(){
+  document.getElementById('swyftxPDFModal').style.display='none';
+  document.getElementById('swyftxPDFModal').style.visibility='hidden';
+  _swyftxPDFParsed=null;
+  document.getElementById('swyftxPDFInput').value='';
+}
+
+async function importSwyftxPDF(input){
+  if(!input.files||!input.files[0])return;
+  await importSwyftxPDFFile(input.files[0],document.getElementById('swyftxPDFStatus'));
+}
+
+async function importSwyftxPDFFile(file,statusEl){
+  if(!statusEl)statusEl={textContent:'',style:{}};
+  statusEl.textContent='Reading invoice...';
+  statusEl.style.color='var(--text3)';
+  try{
+    // Convert PDF to base64
+    const base64=await new Promise((res,rej)=>{
+      const reader=new FileReader();
+      reader.onload=()=>res(reader.result.split(',')[1]);
+      reader.onerror=()=>rej(new Error('Failed to read file'));
+      reader.readAsDataURL(file);
+    });
+    statusEl.textContent='AI is reading your invoice...';
+    // Call Claude API to parse the PDF
+    const response=await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        model:'claude-sonnet-4-20250514',
+        max_tokens:1000,
+        messages:[{
+          role:'user',
+          content:[
+            {type:'document',source:{type:'base64',media_type:'application/pdf',data:base64}},
+            {type:'text',text:`Extract the trade details from this Swyftx invoice and return ONLY a JSON object with these exact fields:
+{
+  "side": "buy" or "sell",
+  "ticker": "e.g. SOL, BTC, ETH",
+  "qty": number,
+  "price": number (AUD per unit),
+  "fee": number (AUD),
+  "date": "YYYY-MM-DD",
+  "invoiceRef": "invoice reference number"
+}
+Return only the JSON object, no explanation.`}
+          ]
+        }]
+      })
+    });
+    const data=await response.json();
+    const text=data.content?.[0]?.text||'';
+    // Parse JSON from response
+    const clean=text.replace(/```json|```/g,'').trim();
+    const parsed=JSON.parse(clean);
+    _swyftxPDFParsed=parsed;
+    statusEl.textContent='Invoice read successfully';
+    statusEl.style.color='var(--gain-pos)';
+    // Show preview modal
+    showSwyftxPDFPreview(parsed);
+  }catch(e){
+    statusEl.textContent='Failed to read invoice: '+e.message;
+    statusEl.style.color='var(--gain-neg)';
+    console.error('PDF import error:',e);
+  }
+}
+
+function showSwyftxPDFPreview(parsed){
+  const modal=document.getElementById('swyftxPDFModal');
+  const preview=document.getElementById('swyftxPDFPreview');
+  const acctSel=document.getElementById('swyftxPDFAccount');
+  // Populate account selector
+  acctSel.innerHTML='<option value="">— Don\'t adjust cash —</option>'+
+    S.cash.map((a,i)=>`<option value="${i}" ${a.name.toLowerCase().includes('swyftx')?'selected':''}>${a.name} ($${f(a.balance||0)} AUD)</option>`).join('');
+  // Find matching holding
+  const existingIdx=S.cry.findIndex(h=>h.ticker.toUpperCase()===parsed.ticker.toUpperCase());
+  const existingName=existingIdx>=0?S.cry[existingIdx].name:null;
+  const total=(parsed.qty*parsed.price)+(parsed.side==='buy'?parsed.fee:-parsed.fee);
+  preview.innerHTML=`
+    <div style="background:var(--surface2);border-radius:12px;padding:16px;margin-bottom:12px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+        <span style="font-size:16px;font-weight:700;color:var(--text);">${parsed.side==='buy'?'🟢 Buy':'🔴 Sell'} ${parsed.qty} ${parsed.ticker}</span>
+        <span style="font-size:12px;color:var(--text3);">${parsed.date}</span>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:13px;">
+        <div><span style="color:var(--text3);">Price</span><br><strong>$${f(parsed.price)} AUD</strong></div>
+        <div><span style="color:var(--text3);">Fee</span><br><strong>$${f(parsed.fee)} AUD</strong></div>
+        <div><span style="color:var(--text3);">Qty</span><br><strong>${parsed.qty}</strong></div>
+        <div><span style="color:var(--text3);">Total ${parsed.side==='buy'?'cost':'proceeds'}</span><br><strong style="color:${parsed.side==='buy'?'var(--gain-neg)':'var(--gain-pos)'};">${parsed.side==='buy'?'-':'+'}$${f(total)} AUD</strong></div>
+      </div>
+      ${existingName?`<div style="margin-top:10px;padding:8px 12px;background:rgba(93,227,108,0.1);border-radius:8px;font-size:12px;color:var(--gain-pos);">✓ Matches existing holding: <strong>${existingName}</strong></div>`:`<div style="margin-top:10px;padding:8px 12px;background:rgba(248,113,113,0.1);border-radius:8px;font-size:12px;color:var(--gain-neg);">⚠ No existing ${parsed.ticker} holding found — a new one will be created</div>`}
+      <div style="margin-top:8px;font-size:11px;color:var(--text4);">Ref: ${parsed.invoiceRef||'—'}</div>
+    </div>`;
+  modal.style.display='flex';
+  modal.style.visibility='visible';
+}
+
+async function confirmSwyftxPDFImport(){
+  if(!_swyftxPDFParsed)return;
+  const parsed=_swyftxPDFParsed;
+  const acctVal=document.getElementById('swyftxPDFAccount').value;
+  const cashAcct=acctVal!==''?parseInt(acctVal):null;
+  const btn=document.getElementById('swyftxPDFConfirmBtn');
+  btn.disabled=true;btn.textContent='Saving...';
+  try{
+    const ticker=parsed.ticker.toUpperCase();
+    let typeIdx=S.cry.findIndex(h=>h.ticker.toUpperCase()===ticker);
+    if(typeIdx<0){
+      // Create new holding
+      S.cry.push({ticker,name:ticker,qty:0,cost:0,txns:[]});
+      typeIdx=S.cry.length-1;
+      await xanoAddHolding('cry');
+    }
+    const item=S.cry[typeIdx];
+    const txnId=generateTxnId(parsed.date);
+    item.txns.push({date:parsed.date,side:parsed.side,qty:parsed.qty,price:parsed.price,fee:parsed.fee,txnId,cashAcct});
+    recalcFromTxns('cry',typeIdx);
+    if(cashAcct!==null&&S.cash[cashAcct]){
+      const net=parsed.qty*parsed.price;
+      S.cash[cashAcct].balance=(S.cash[cashAcct].balance||0)+(parsed.side==='buy'?-(net+parsed.fee):(net-parsed.fee));
+      await xanoUpdateCash(cashAcct);
+      renderCash();
+    }
+    await xanoUpdateHolding('cry',typeIdx);
+    await xanoAddTransaction('cry',typeIdx);
+    syncUI('synced','Invoice imported — '+parsed.side+' '+parsed.qty+' '+ticker);
+    renderAllHoldings();renderFees();
+    closeSwyftxPDFModal();
+    document.getElementById('swyftxPDFStatus').textContent='✓ Imported successfully';
+    document.getElementById('swyftxPDFStatus').style.color='var(--gain-pos)';
+  }catch(e){
+    syncUI('err','Import failed: '+e.message);
+    btn.disabled=false;btn.textContent='Save Transaction';
+  }
+}
+
+async function importSwyftxCSVText(text,statusEl){
+  // Create a fake input-like object and reuse existing importer
+  const lines=text.split('\n');
+  // Call existing logic inline
+  const fakeInput={files:[new File([text],'swyftx.csv',{type:'text/csv'})]};
+  await importSwyftxCSV(fakeInput);
+  if(statusEl)setImportStatus(statusEl,'success','✓ Swyftx CSV imported successfully');
+}
+
+async function importCommsecIntlCSVText(text,statusEl){
+  const fakeInput={files:[new File([text],'commsec.csv',{type:'text/csv'})]};
+  await importCommsecIntlCSV(fakeInput);
+  if(statusEl)setImportStatus(statusEl,'success','✓ CommSec International CSV imported successfully');
+}
+
 // ── Boot ──────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', async function(){
   document.getElementById('todayDate').textContent = new Date().toLocaleDateString('en-AU',{weekday:'short',day:'numeric',month:'long',year:'numeric'});
   initTheme();
+  initImportDropZone();
   function updateSidebarMode(){const sb=document.getElementById('sidebar');if(window.innerWidth>800){sb.classList.add('desktop-visible');sb.classList.remove('mobile-open');document.getElementById('sidebarOverlay').classList.remove('visible');document.body.style.overflow='';}else{sb.classList.remove('desktop-visible');}}
   updateSidebarMode();window.addEventListener('resize',updateSidebarMode);
   if(localStorage.getItem('smsf_sb_collapsed')==='1')document.getElementById('sidebar').classList.add('collapsed');
