@@ -1541,6 +1541,7 @@ async function xanoDeleteHolding(type, i) {
 async function xanoAddTransaction(type, i) {
   const item = S[type][i];
   const tx = item.txns[item.txns.length - 1];
+  if(!item._id) throw new Error('Holding has no Xano ID (_id is ' + item._id + '). Try deleting and re-adding this holding.');
   const cashId = tx.cashAcct != null && S.cash[tx.cashAcct] ? S.cash[tx.cashAcct]._id : null;
   const rec = await xano('POST', '/transaction', {
     holding: item._id,
@@ -1762,7 +1763,14 @@ async function saveTxn(type,i){
     await xanoUpdateHolding(type, i);
     await xanoAddTransaction(type, i);
     syncUI('synced','Saved · '+new Date().toLocaleTimeString('en-AU',{hour:'2-digit',minute:'2-digit'}));
-  } catch(e) { syncUI('err','Save failed: '+e.message); }
+  } catch(e) {
+    syncUI('err','Save failed: '+e.message);
+    // Rollback local state if Xano save failed
+    S[type][i].txns.pop();
+    recalcFromTxns(type,i);
+    console.error('saveTxn error:', e);
+    alert('Transaction save failed: ' + e.message + '\nholding._id: ' + S[type][i]?._id + '\nportfolioId: ' + AUTH.currentPortfolioId);
+  }
   rows(type);renderAllHoldings();renderFees();
 }
 
