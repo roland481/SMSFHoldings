@@ -2309,7 +2309,7 @@ async function submitAddModal(){
   }else if(smartMode==='contribution'){
     const date=document.getElementById('modal-contrib-date').value;const amt=parseFloat(document.getElementById('modal-contrib-amt').value)||0;const member=document.getElementById('modal-contrib-member').value.trim();const type=document.getElementById('modal-contrib-type').value;const acctIdx=document.getElementById('modal-contrib-account').value;
     if(!amt||!member)return;const txnId=generateTxnId(date);const cashId=acctIdx!==''&&S.cash[parseInt(acctIdx)]?S.cash[parseInt(acctIdx)]._id:null;
-    try{const recId=await xanoAddLedger({portfolio:AUTH.currentPortfolioId,date,type:'contribution',category:type,description:`${type} contribution — ${member}`,amount:amt,txn_id:txnId,cash_acct_id:cashId,meta:{member}});S.contributions.push({_id:recId,date,member,type,amount:amt,txnId,cashAcct:acctIdx!==''?parseInt(acctIdx):null});if(acctIdx!==''){const idx=parseInt(acctIdx);S.cash[idx].balance=(S.cash[idx].balance||0)+amt;await xanoUpdateCash(idx);renderCash();}renderFees();syncUI('synced','Saved');}catch(e){syncUI('err','Save failed');}
+    try{const recId=await xanoAddLedger({portfolio:AUTH.currentPortfolioId,date,type:'contribution',category:type,description:`${type} contribution — ${member}`,amount:amt,txn_id:txnId,cash_acct_id:cashId,cash_account:cashId,meta:{member,destination_account:acctIdx!==''?S.cash[parseInt(acctIdx)]?.name:null}});S.contributions.push({_id:recId,date,member,type,amount:amt,txnId,cashAcct:acctIdx!==''?parseInt(acctIdx):null});if(acctIdx!==''){const idx=parseInt(acctIdx);S.cash[idx].balance=(S.cash[idx].balance||0)+amt;await xanoUpdateCash(idx);renderCash();}renderFees();syncUI('synced','Saved');}catch(e){syncUI('err','Save failed');}
   }else if(smartMode==='transfer'){
     const date=document.getElementById('modal-transfer-date').value;const from=document.getElementById('modal-transfer-from').value;const to=document.getElementById('modal-transfer-to').value;const amt=parseFloat(document.getElementById('modal-transfer-amt').value)||0;const desc=document.getElementById('modal-transfer-desc').value.trim();
     if(!amt||from===''||to===''||from===to)return;const fromIdx=parseInt(from),toIdx=parseInt(to);const txnId=generateTxnId(date);const fromId=S.cash[fromIdx]?._id,toId=S.cash[toIdx]?._id;
@@ -2415,7 +2415,7 @@ async function importSwyftxCSV(input){
       const text=e.target.result;const allLines=text.split('\n').map(l=>l.trim());
       const isHeaderRow=l=>{const low=l.toLowerCase();return low.includes('date')&&low.includes('event')&&low.includes('asset');};
       const tradeRows=[];let headers=null;
-      for(let i=0;i<allLines.length;i++){const line=allLines[i];if(!line)continue;if(isHeaderRow(line)){headers=line.split(',').map(h=>h.trim().replace(/^"|"$/g,'').toLowerCase());continue;}if(!headers)continue;const cols=line.split(',').map(c=>(c||'').trim().replace(/^"|"$/g,''));if(!cols[0]||cols[0].toLowerCase().includes('sub total'))continue;if(cols.length<5)continue;const get=name=>{const idx=headers.indexOf(name);return idx>=0?(cols[idx]||'').trim():'';};const event=get('event').toLowerCase();const asset=get('asset').toUpperCase();if(event!=='buy'&&event!=='sell')continue;if(!asset||asset==='AUD')continue;const amount=parseFloat(get('amount'))||0;const audVal=parseFloat(get('aud value'))||0;const fee=parseFloat(get('fee amount'))||0;const rawDate=get('date');const uuid=get('uuid');if(!amount||!audVal||!rawDate)continue;let date='';if(rawDate.includes('/')){const p=rawDate.split('/');if(p.length===3)date=`${p[2]}-${p[1].padStart(2,'0')}-${p[0].padStart(2,'0')}`;}else{date=rawDate.slice(0,10);}if(!date||date.startsWith('NaN')||date.length<10)continue;const price=amount>0?audVal/amount:0;if(!price)continue;tradeRows.push({date,event,asset,amount,audVal,fee,uuid});}
+      for(let i=0;i<allLines.length;i++){const line=allLines[i];if(!line)continue;if(isHeaderRow(line)){headers=line.split(',').map(h=>h.trim().replace(/^"|"$/g,'').toLowerCase());continue;}if(!headers)continue;const cols=line.split(',').map(c=>(c||'').trim().replace(/^"|"$/g,''));if(!cols[0]||cols[0].toLowerCase().includes('sub total'))continue;if(cols.length<5)continue;const get=name=>{const idx=headers.findIndex(h=>h.toLowerCase()===name.toLowerCase());return idx>=0?(cols[idx]||'').trim():'';};const event=get('event').toLowerCase();const asset=get('asset').toUpperCase();if(event!=='buy'&&event!=='sell')continue;if(!asset||asset==='AUD')continue;const amount=parseFloat(get('amount'))||0;const audVal=parseFloat(get('aud value'))||0;const fee=parseFloat(get('fee amount'))||0;const rawDate=get('date');const uuid=get('uuid');if(!amount||!audVal||!rawDate)continue;let date='';if(rawDate.includes('/')){const p=rawDate.split('/');if(p.length===3)date=`${p[2]}-${p[1].padStart(2,'0')}-${p[0].padStart(2,'0')}`;}else{date=rawDate.slice(0,10);}if(!date||date.startsWith('NaN')||date.length<10)continue;const price=amount>0?audVal/amount:0;if(!price)continue;tradeRows.push({date,event,asset,amount,audVal,fee,uuid});}
       if(!tradeRows.length){alert('No buy/sell trades found in this CSV.');return;}
       let cashAcctIdx=null;if(S.cash.length>0){const opts=S.cash.map((a,i)=>`${i+1}. ${a.name} ($${f(a.balance||0)} AUD)`).join('\n');const ans=prompt(`Found ${tradeRows.length} trade${tradeRows.length!==1?'s':''}.\n\nDeduct from which cash account?\n\n${opts}\n\nEnter number, or 0 to skip:`);if(ans===null)return;const n=parseInt(ans);if(n>=1&&n<=S.cash.length)cashAcctIdx=n-1;}
       let imported=0,skipped=0;
@@ -2614,7 +2614,26 @@ function applyTheme(theme) {
   const metaTheme = document.querySelector('meta[name="theme-color"]');
   if (metaTheme) metaTheme.setAttribute('content', isDark ? '#212851' : '#e8e8f4');
   if (typeof pieChart !== 'undefined' && pieChart) setTimeout(() => { try { pieChart.update(); } catch(e) {} }, 50);
-  if (typeof historyChart !== 'undefined' && historyChart) setTimeout(() => { try { historyChart.destroy(); historyChart = null; renderHistoryChart(); } catch(e) {} }, 50);
+  // Theme switch: update chart colors in-place rather than destroy/rebuild
+  if (typeof historyChart !== 'undefined' && historyChart) {
+    setTimeout(() => {
+      try {
+        const isLight = theme === 'light';
+        const gridColor = isLight ? 'rgba(0,0,0,0.06)' : 'rgba(255,255,255,0.06)';
+        const textColor = isLight ? '#999' : '#444';
+        const lineColor = isLight ? '#42ac5c' : '#5de36c';
+        historyChart.data.datasets[0].borderColor = lineColor;
+        historyChart.options.scales.x.grid.color = gridColor;
+        historyChart.options.scales.x.ticks.color = textColor;
+        historyChart.options.scales.y.grid.color = gridColor;
+        historyChart.options.scales.y.ticks.color = textColor;
+        historyChart.update('none'); // 'none' = no animation, preserves data
+      } catch(e) {
+        // Only fall back to full rebuild if update fails
+        try { historyChart.destroy(); historyChart = null; renderHistoryChart(S.snapshots||null); } catch(e2) {}
+      }
+    }, 50);
+  }
   setTimeout(() => { try { renderSparklines(); } catch(e) {} }, 100);
 }
 
@@ -2777,13 +2796,19 @@ async function routeImportFile(file){
   }
 
   if(isCSV){
-    // Read first few lines to detect format
     const text=await file.text();
-    const firstLine=text.split('\n')[0].toLowerCase();
-    if(firstLine.includes('uuid')||firstLine.includes('swyftx')||firstLine.includes('asset')){
+    // Check first 5 lines — Swyftx reports have a title row before headers
+    const lines=text.split('\n').slice(0,5).map(l=>l.toLowerCase());
+    const allText=lines.join(' ');
+    const isSwyftx=allText.includes('uuid')||allText.includes('swyftx')||
+                   allText.includes('crypto transactions')||allText.includes('transaction id')||
+                   (allText.includes('asset')&&allText.includes('event'));
+    const isCommsec=allText.includes('commsec')||allText.includes('settlement')||
+                    allText.includes('proceeds')||allText.includes('security');
+    if(isSwyftx){
       statusArea.innerHTML='<span>📊 Detected: <strong>Swyftx Transaction CSV</strong> — importing...</span>';
       await importSwyftxCSVText(text,statusArea);
-    } else if(firstLine.includes('commsec')||firstLine.includes('settlement')||firstLine.includes('proceeds')||firstLine.includes('security')){
+    } else if(isCommsec){
       statusArea.innerHTML='<span>📊 Detected: <strong>CommSec International CSV</strong> — importing...</span>';
       await importCommsecIntlCSVText(text,statusArea);
     } else {
@@ -2837,33 +2862,10 @@ async function importSwyftxPDFFile(file,statusEl){
     });
     statusEl.textContent='AI is reading your invoice...';
     // Call Claude API to parse the PDF
-    const response=await fetch('https://api.anthropic.com/v1/messages',{
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({
-        model:'claude-sonnet-4-20250514',
-        max_tokens:1000,
-        messages:[{
-          role:'user',
-          content:[
-            {type:'document',source:{type:'base64',media_type:'application/pdf',data:base64}},
-            {type:'text',text:`Extract the trade details from this Swyftx invoice and return ONLY a JSON object with these exact fields:
-{
-  "side": "buy" or "sell",
-  "ticker": "e.g. SOL, BTC, ETH",
-  "qty": number,
-  "price": number (AUD per unit),
-  "fee": number (AUD),
-  "date": "YYYY-MM-DD",
-  "invoiceRef": "invoice reference number"
-}
-Return only the JSON object, no explanation.`}
-          ]
-        }]
-      })
-    });
-    const data=await response.json();
-    const text=data.content?.[0]?.text||'';
+    // Route through Xano to avoid CORS and keep API key server-side
+    const response = await xano('POST', '/parse-invoice', { pdf_data: base64 });
+    // Xano returns the Anthropic response — extract text content
+    const text = response?.content?.[0]?.text || response?.text || JSON.stringify(response) || '';
     // Parse JSON from response
     const clean=text.replace(/```json|```/g,'').trim();
     const parsed=JSON.parse(clean);
@@ -2985,6 +2987,13 @@ document.addEventListener('DOMContentLoaded', async function(){
   }
   // If no token, login screen is shown by default (not hidden)
 });
+function _cashName(idx){
+  if(idx==null||idx===''||idx===undefined)return'';
+  const i=parseInt(idx);
+  if(isNaN(i)||!S.cash[i])return'';
+  return S.cash[i].name||'';
+}
+
 function exportCSV(){
   const fyVal=document.getElementById('fyFilter')?.value;
   const acctVal=document.getElementById('ledgerAccountFilter')?.value;
@@ -3000,19 +3009,19 @@ function exportCSV(){
   // Build flat entry list (same as renderFees) so nothing is missed
   const entries=[];
   ['us','asx','cry','met'].forEach(type=>{S[type].forEach(h=>{(h.txns||[]).forEach(tx=>{
-    const acct=tx.cashAcct!=null&&S.cash[tx.cashAcct]?S.cash[tx.cashAcct].name:'';
+    const acct=_cashName(tx.cashAcct);
     const acctIdx=tx.cashAcct!=null?tx.cashAcct:null;
     const total=tx.price*tx.qty;
     const audTotal=tx.fee>0&&!tx.priceExFee?parseFloat((total-tx.fee).toFixed(2)):total;
     entries.push({date:tx.date||'',type:'trade',cat:h.ticker,desc:h.name+' '+tx.side,amount:(tx.side==='buy'?-1:1)*audTotal,acct,acctIdx,txnId:tx.txnId||''});
     if(tx.fee>0)entries.push({date:tx.date||'',type:'fee',cat:'brokerage',desc:'Brokerage — '+h.ticker+' '+tx.side,amount:-tx.fee,acct,acctIdx,txnId:(tx.txnId||'')+'-FEE'});
   });});});
-  S.fees.filter(e=>inFY(e.date)&&matchAcct(e)).forEach(e=>{const acct=e.cashAcct!=null&&S.cash[e.cashAcct]?S.cash[e.cashAcct].name:'';entries.push({date:e.date||'',type:'fee',cat:e.cat||'',desc:e.desc,amount:-e.amount,acct,acctIdx:e.cashAcct,txnId:e.txnId||''});});
-  S.income.filter(e=>inFY(e.date)&&matchAcct(e)).forEach(e=>{const acct=e.cashAcct!=null&&S.cash[e.cashAcct]?S.cash[e.cashAcct].name:'';entries.push({date:e.date||'',type:'income',cat:e.type||'',desc:e.source||'',amount:e.amount,acct,acctIdx:e.cashAcct,txnId:e.txnId||''});});
-  S.contributions.filter(e=>inFY(e.date)&&matchAcct(e)).forEach(e=>{const acct=e.cashAcct!=null&&S.cash[e.cashAcct]?S.cash[e.cashAcct].name:'';entries.push({date:e.date||'',type:'contribution',cat:e.type||'',desc:e.member||'',amount:e.amount,acct,acctIdx:e.cashAcct,txnId:e.txnId||''});});
+  S.fees.filter(e=>inFY(e.date)&&matchAcct(e)).forEach(e=>{const acct=_cashName(e.cashAcct);entries.push({date:e.date||'',type:'fee',cat:e.cat||'',desc:e.desc,amount:-e.amount,acct,acctIdx:e.cashAcct,txnId:e.txnId||''});});
+  S.income.filter(e=>inFY(e.date)&&matchAcct(e)).forEach(e=>{const acct=_cashName(e.cashAcct);entries.push({date:e.date||'',type:'income',cat:e.type||'',desc:e.source||'',amount:e.amount,acct,acctIdx:e.cashAcct,txnId:e.txnId||''});});
+  S.contributions.filter(e=>inFY(e.date)&&matchAcct(e)).forEach(e=>{const acct=_cashName(e.cashAcct);entries.push({date:e.date||'',type:'contribution',cat:e.type||'',desc:e.member||'',amount:e.amount,acct,acctIdx:e.cashAcct,txnId:e.txnId||''});});
   S.transfers.filter(e=>inFY(e.date)&&matchAcct(e)).forEach(e=>{
-    const fromAcct=e.from!=null&&S.cash[e.from]?S.cash[e.from].name:'';
-    const toAcct=e.to!=null&&S.cash[e.to]?S.cash[e.to].name:'';
+    const fromAcct=_cashName(e.from);
+    const toAcct=_cashName(e.to);
     entries.push({date:e.date||'',type:'transfer',cat:'',desc:'Transfer to '+toAcct+(e.desc?' — '+e.desc:''),amount:-e.amount,acct:fromAcct,acctIdx:e.from,txnId:e.txnId||''});
     entries.push({date:e.date||'',type:'transfer',cat:'',desc:'Transfer from '+fromAcct+(e.desc?' — '+e.desc:''),amount:e.amount,acct:toAcct,acctIdx:e.to,txnId:e.txnId||''});
   });
@@ -3055,7 +3064,7 @@ function exportCSV(){
   const csv=csvRows.map(r=>r.map(v=>'"'+String(v||'').replace(/"/g,'""')+'"').join(',')).join('\n');
   const a=document.createElement('a');a.href='data:text/csv;charset=utf-8,'+encodeURIComponent(csv);
   const fyLbl=fyVal?'FY'+fyVal:'All';
-  a.download='SMSF_'+fyLbl+(acctVal?'_'+S.cash[parseInt(acctVal)]?.name.replace(/\s+/g,'_'):'')+'_export.csv';
+  a.download='SMSF_'+fyLbl+(acctVal?'_'+(_cashName(acctVal)||'account').replace(/\s+/g,'_'):'')+'_export.csv';
   a.click();
 }
 
@@ -3144,7 +3153,8 @@ function renderFees(){
     S.fees.forEach((item,orig)=>{if(!inFY(item.date)||!matchAcct(item))return;entries.push({date:item.date||'',desc:item.desc||'—',type:'fee',amount:item.amount||0,isDebit:true,orig,deletable:true,txnId:item.txnId||'—',cashAcct:item.cashAcct??null,_id:item._id});});
     (S.income||[]).forEach((item,orig)=>{if(!inFY(item.date)||!matchAcct(item))return;entries.push({date:item.date||'',desc:`${item.type} — ${item.source}${item.franking>0?' (Franking: $'+f(item.franking)+')':''}`,type:'income',amount:item.amount||0,isDebit:false,orig,deletable:true,txnId:item.txnId||'—',cashAcct:item.cashAcct??null,_id:item._id});});
     (S.contributions||[]).forEach((item,orig)=>{if(!inFY(item.date)||!matchAcct(item))return;entries.push({date:item.date||'',desc:`${item.type} contribution — ${item.member}`,type:'contribution',amount:item.amount||0,isDebit:false,orig,deletable:true,txnId:item.txnId||'—',cashAcct:item.cashAcct??null,_id:item._id});});
-    (S.transfers||[]).forEach((item,orig)=>{if(!inFY(item.date)||!matchAcct(item))return;const fromName=S.cash[item.from]?.name||'Unknown';const toName=S.cash[item.to]?.name||'Unknown';entries.push({date:item.date||'',desc:`Transfer to ${toName}${item.desc?' — '+item.desc:''}`,type:'transfer',amount:item.amount||0,isDebit:true,orig,deletable:true,txnId:item.txnId||'—',cashAcct:item.from,_id:item._id});entries.push({date:item.date||'',desc:`Transfer from ${fromName}${item.desc?' — '+item.desc:''}`,type:'transfer',amount:item.amount||0,isDebit:false,orig,deletable:false,txnId:item.txnId||'—',cashAcct:item.to,_id:item._id});});
+    (S.transfers||[]).forEach((item,orig)=>{if(!inFY(item.date)||!matchAcct(item))return;const fromName=(()=>{if(item.from==null)return'Unknown';const byIdx=S.cash[item.from];if(byIdx)return byIdx.name;const byId=S.cash.find(c=>c._id===item.from||c._id===parseInt(item.from));return byId?.name||'Unknown';})();
+      const toName=(()=>{if(item.to==null)return'Unknown';const byIdx=S.cash[item.to];if(byIdx)return byIdx.name;const byId=S.cash.find(c=>c._id===item.to||c._id===parseInt(item.to));return byId?.name||'Unknown';})();entries.push({date:item.date||'',desc:`Transfer to ${toName}${item.desc?' — '+item.desc:''}`,type:'transfer',amount:item.amount||0,isDebit:true,orig,deletable:true,txnId:item.txnId||'—',cashAcct:item.from,_id:item._id});entries.push({date:item.date||'',desc:`Transfer from ${fromName}${item.desc?' — '+item.desc:''}`,type:'transfer',amount:item.amount||0,isDebit:false,orig,deletable:false,txnId:item.txnId||'—',cashAcct:item.to,_id:item._id});});
     ['us','asx','cry','met'].forEach(assetType=>{S[assetType].forEach((item,assetIdx)=>{(item.txns||[]).forEach((tx,txIdx)=>{if(!inFY(tx.date))return;const total=tx.price*tx.qty;const audTotal=tx.fee>0&&!tx.priceExFee?parseFloat((total-tx.fee).toFixed(2)):total;entries.push({date:tx.date||'',desc:`${tx.side==='buy'?'Buy':'Sell'} ${f(tx.qty,tx.qty%1===0?0:4)} ${item.ticker}`,type:'trade',amount:audTotal,isDebit:tx.side==='buy',deletable:false,reversible:true,assetType,assetIdx,txnIdx:txIdx,txnId:tx.txnId||tx.txn_id||'—',cashAcct:tx.cashAcct??null,_txId:tx._id});if(tx.fee>0)entries.push({date:tx.date||'',desc:`Brokerage — ${item.ticker} ${tx.side}`,type:'fee',amount:tx.fee,isDebit:true,deletable:false,txnId:(tx.txnId||'—')+'-FEE',cashAcct:tx.cashAcct??null});});});});
     // Totals
     const fyFees=entries.filter(e=>e.type==='fee'&&e.isDebit).reduce((s,e)=>s+e.amount,0);
