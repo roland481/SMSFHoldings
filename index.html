@@ -943,11 +943,9 @@ tr.hrow-met td{border-left:2px solid rgba(154,162,200,0.45);}
         <div style="font-size:12px;color:var(--text3);margin-bottom:16px;">Automatically detects file type and imports accordingly</div>
         <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:center;">
           <span style="font-size:11px;padding:3px 10px;border-radius:99px;background:rgba(186,117,23,0.15);color:#cea350;border:1px solid rgba(186,117,23,0.3);">Swyftx CSV</span>
-          <span style="font-size:11px;padding:3px 10px;border-radius:99px;background:rgba(186,117,23,0.15);color:#cea350;border:1px solid rgba(186,117,23,0.3);">Swyftx Invoice PDF</span>
-          <span style="font-size:11px;padding:3px 10px;border-radius:99px;background:rgba(55,138,221,0.15);color:#378ADD;border:1px solid rgba(55,138,221,0.3);">CommSec Intl CSV</span>
-          <span style="font-size:11px;padding:3px 10px;border-radius:99px;background:var(--surface3);color:var(--text3);border:1px solid var(--border4);">+ more coming</span>
+          <span style="font-size:11px;padding:3px 10px;border-radius:99px;background:rgba(55,138,221,0.15);color:#378ADD;border:1px solid rgba(55,138,221,0.3);">CommSec Intl HTML</span>
         </div>
-        <input type="file" id="importFileInput" accept=".csv,.pdf" style="display:none;" onchange="handleUniversalImport(this)">
+        <input type="file" id="importFileInput" accept=".csv,.htm,.html" style="display:none;" onchange="handleUniversalImport(this)">
       </div>
 
       <!-- Status / result area -->
@@ -963,14 +961,9 @@ tr.hrow-met td{border-left:2px solid rgba(154,162,200,0.45);}
             <span>Swyftx app → Reports → Transaction Report → Export CSV</span>
           </div>
           <div style="display:flex;align-items:center;gap:12px;font-size:12px;color:var(--text3);">
-            <span style="width:6px;height:6px;border-radius:50%;background:#cea350;flex-shrink:0;"></span>
-            <strong style="color:var(--text);min-width:160px;">Swyftx Invoice PDF</strong>
-            <span>Swyftx app → Orders → select order → Download Invoice</span>
-          </div>
-          <div style="display:flex;align-items:center;gap:12px;font-size:12px;color:var(--text3);">
             <span style="width:6px;height:6px;border-radius:50%;background:#378ADD;flex-shrink:0;"></span>
-            <strong style="color:var(--text);min-width:160px;">CommSec Intl CSV</strong>
-            <span>CommSec International → Reports → Activity → Export CSV</span>
+            <strong style="color:var(--text);min-width:160px;">CommSec Intl HTML</strong>
+            <span>CommSec International → Reports → Trade Confirmation → Download (HTML/HTM file)</span>
           </div>
         </div>
       </div>
@@ -979,30 +972,11 @@ tr.hrow-met td{border-left:2px solid rgba(154,162,200,0.45);}
       <div style="display:none;">
         <input type="file" id="swyftxCSVInput" accept=".csv" onchange="importSwyftxCSV(this)">
         <input type="file" id="commsecIntlCSVInput" accept=".csv" onchange="importCommsecIntlCSV(this)">
-        <input type="file" id="swyftxPDFInput" accept=".pdf" onchange="importSwyftxPDF(this)">
       </div>
-      <div id="swyftxPDFStatus" style="display:none;"></div>
     </div>
   </div>
   </div>
 
-  <!-- Swyftx PDF Invoice Preview Modal -->
-  <div class="modal-overlay" id="swyftxPDFModal" style="display:none;visibility:hidden;">
-    <div class="modal" style="max-width:480px;">
-      <button class="modal-close" onclick="closeSwyftxPDFModal()">✕</button>
-      <div class="modal-title">📄 Swyftx Invoice — Review & Import</div>
-      <div class="modal-sub">AI-parsed from your invoice. Review before saving.</div>
-      <div id="swyftxPDFPreview" style="margin-bottom:16px;"></div>
-      <div class="modal-field">
-        <label class="modal-label">Cash account to debit/credit (optional)</label>
-        <select class="modal-select" id="swyftxPDFAccount"><option value="">— Don't adjust cash —</option></select>
-      </div>
-      <div class="modal-footer">
-        <button class="addbtn" onclick="closeSwyftxPDFModal()">Cancel</button>
-        <button class="okbtn" id="swyftxPDFConfirmBtn" onclick="confirmSwyftxPDFImport()">Save Transaction</button>
-      </div>
-    </div>
-  </div>
 
   <!-- Manage Access Modal (admin only) -->
   <div class="modal-overlay" id="accessModal" style="display:none;visibility:hidden;" data-action="closeAccessModal">
@@ -2415,9 +2389,11 @@ async function importSwyftxCSV(input){
       const text=e.target.result;const allLines=text.split('\n').map(l=>l.trim());
       const isHeaderRow=l=>{const low=l.toLowerCase();return low.includes('date')&&low.includes('event')&&low.includes('asset');};
       const tradeRows=[];let headers=null;
-      for(let i=0;i<allLines.length;i++){const line=allLines[i];if(!line)continue;if(isHeaderRow(line)){headers=line.split(',').map(h=>h.trim().replace(/^"|"$/g,'').toLowerCase());continue;}if(!headers)continue;const cols=line.split(',').map(c=>(c||'').trim().replace(/^"|"$/g,''));if(!cols[0]||cols[0].toLowerCase().includes('sub total'))continue;if(cols.length<5)continue;const get=name=>{const idx=headers.findIndex(h=>h.toLowerCase()===name.toLowerCase());return idx>=0?(cols[idx]||'').trim():'';};const event=get('event').toLowerCase();const asset=get('asset').toUpperCase();if(event!=='buy'&&event!=='sell')continue;if(!asset||asset==='AUD')continue;const amount=parseFloat(get('amount'))||0;const audVal=parseFloat(get('aud value'))||0;const fee=parseFloat(get('fee amount'))||0;const rawDate=get('date');const uuid=get('uuid');if(!amount||!audVal||!rawDate)continue;let date='';if(rawDate.includes('/')){const p=rawDate.split('/');if(p.length===3)date=`${p[2]}-${p[1].padStart(2,'0')}-${p[0].padStart(2,'0')}`;}else{date=rawDate.slice(0,10);}if(!date||date.startsWith('NaN')||date.length<10)continue;const price=amount>0?audVal/amount:0;if(!price)continue;tradeRows.push({date,event,asset,amount,audVal,fee,uuid});}
+      for(let i=0;i<allLines.length;i++){const line=allLines[i];if(!line)continue;if(isHeaderRow(line)){headers=line.split(',').map(h=>h.trim().replace(/^"|"$/g,'').toLowerCase());continue;}if(!headers)continue;const cols=line.split(',').map(c=>(c||'').trim().replace(/^"|"$/g,''));if(!cols[0]||cols[0].toLowerCase().includes('sub total'))continue;if(cols.length<5)continue;const get=name=>{const idx=headers.findIndex(h=>h.toLowerCase()===name.toLowerCase());return idx>=0?(cols[idx]||'').trim():'';};const event=get('event').toLowerCase();const asset=get('asset').toUpperCase();if(event!=='buy'&&event!=='sell')continue;if(!asset||asset==='AUD')continue;const amount=parseFloat(get('amount'))||0;const audVal=parseFloat(get('aud value'))||0;const fee=parseFloat(get('fee amount'))||0;const rawDate=get('date');const uuid=get('uuid');if(!amount||!audVal||!rawDate)continue;let date='';if(rawDate.includes('/')){const p=rawDate.split('/');if(p.length===3)date=p[2]+'-'+p[1].padStart(2,'0')+'-'+p[0].padStart(2,'0');}else{date=rawDate.slice(0,10);}if(!date||date.startsWith('NaN')||date.length<10)continue;
+      const price=amount>0?parseFloat((audVal/amount).toFixed(6)):0;
+      if(!price)continue;tradeRows.push({date,event,asset,amount,audVal,fee,uuid});}
       if(!tradeRows.length){alert('No buy/sell trades found in this CSV.');return;}
-      let cashAcctIdx=null;if(S.cash.length>0){const opts=S.cash.map((a,i)=>`${i+1}. ${a.name} ($${f(a.balance||0)} AUD)`).join('\n');const ans=prompt(`Found ${tradeRows.length} trade${tradeRows.length!==1?'s':''}.\n\nDeduct from which cash account?\n\n${opts}\n\nEnter number, or 0 to skip:`);if(ans===null)return;const n=parseInt(ans);if(n>=1&&n<=S.cash.length)cashAcctIdx=n-1;}
+      let cashAcctIdx=null;if(S.cash.length>0){const opts=S.cash.map((a,i)=>(i+1)+'. '+a.name+' ($'+f(a.balance||0)+' AUD)').join('\n');const ans=prompt('Found '+tradeRows.length+' trade'+(tradeRows.length!==1?'s':'')+'.\n\nDeduct total (purchase + fee) from which cash account?\n\n'+opts+'\n\nEnter number, or 0 to skip:');if(ans===null)return;const n=parseInt(ans);if(n>=1&&n<=S.cash.length)cashAcctIdx=n-1;}
       let imported=0,skipped=0;
       for(const row of tradeRows){
         if(row.uuid){const isDupe=S.cry.some(h=>(h.txns||[]).some(tx=>tx.swyftxId===row.uuid));if(isDupe){skipped++;continue;}}
@@ -2425,58 +2401,114 @@ async function importSwyftxCSV(input){
         if(idx===-1){S.cry.push({ticker:row.asset,name:row.asset,qty:0,cost:0,txns:[]});idx=S.cry.length-1;try{await xanoAddHolding('cry');}catch(e){S.cry.pop();continue;}}
         if(!S.cry[idx].txns)S.cry[idx].txns=[];
         const txnId=generateTxnId(row.date);
-        S.cry[idx].txns.push({date:row.date,side:row.event,qty:row.amount,price:parseFloat(((row.audVal-row.fee)/row.amount).toFixed(6)),fee:row.fee,txnId,swyftxId:row.uuid,priceExFee:true,cashAcct:cashAcctIdx});
+        S.cry[idx].txns.push({date:row.date,side:row.event,qty:row.amount,price:parseFloat((row.audVal/row.amount).toFixed(6)),fee:row.fee,txnId,swyftxId:row.uuid,cashAcct:cashAcctIdx});
         recalcFromTxns('cry',idx);
         try{await xanoUpdateHolding('cry',idx);await xanoAddTransaction('cry',idx);}catch(e){console.warn('Xano save failed for trade',e);}
-        if(cashAcctIdx!==null&&S.cash[cashAcctIdx]){S.cash[cashAcctIdx].balance=(S.cash[cashAcctIdx].balance||0)-row.audVal;await xanoUpdateCash(cashAcctIdx);}
+        if(cashAcctIdx!==null&&S.cash[cashAcctIdx]){S.cash[cashAcctIdx].balance=(S.cash[cashAcctIdx].balance||0)-(row.audVal+row.fee);await xanoUpdateCash(cashAcctIdx);}
+        if(row.fee>0){
+          const feeTxnId=generateTxnId(row.date);
+          const feeDesc='Swyftx brokerage — '+row.event.toUpperCase()+' '+row.amount+' '+row.asset;
+          try{const feeRecId=await xanoAddLedger({portfolio:AUTH.currentPortfolioId,date:row.date,type:'fee',category:'Brokerage',description:feeDesc,amount:row.fee,txn_id:feeTxnId,cash_acct_id:cashAcctIdx!==null&&S.cash[cashAcctIdx]?S.cash[cashAcctIdx]._id:null});S.fees.push({_id:feeRecId,date:row.date,desc:feeDesc,cat:'Brokerage',amount:row.fee,txnId:feeTxnId,cashAcct:cashAcctIdx});}catch(e){console.warn('Fee ledger save failed',e);}
+        }
         imported++;
       }
       if(imported>0){rows('cry');renderAllHoldings();renderCash();renderFees();summary();}
-      alert(`✓ Swyftx import complete!\n\n${imported} trade${imported!==1?'s':''} imported\n${skipped} duplicate${skipped!==1?'s':''} skipped`);
-    }catch(err){console.error('CSV import error:',err);alert(`Import failed: ${err.message}`);}
+      alert('\u2713 Swyftx import complete!\n\n'+imported+' trade'+(imported!==1?'s':'')+' imported\nFees recorded separately in ledger\n'+skipped+' duplicate'+(skipped!==1?'s':'')+' skipped');
+    }catch(err){console.error('CSV import error:',err);alert('Import failed: '+err.message);}
   };
   reader.readAsText(file);
 }
 
-async function importCommsecIntlCSV(input){
-  if(isReadOnly()){alert('You have read-only access.');input.value='';return;}
-  // Full CommSec importer logic preserved — same as original but with xanoAddHolding/xanoAddTransaction calls
-  const file=input.files[0];if(!file)return;input.value='';
-  const reader=new FileReader();
-  reader.onload=async function(e){
-    try{
-      const text=e.target.result;
-      function parseCSVLine(line){const result=[];let cur='',inQuote=false;for(let i=0;i<line.length;i++){const ch=line[i];if(ch==='"'){inQuote=!inQuote;}else if(ch===','&&!inQuote){result.push(cur.trim());cur='';}else{cur+=ch;}}result.push(cur.trim());return result;}
-      const csvRows=text.split('\n').map(parseCSVLine);
-      const stockTrades=[];let audTotalProceeds=null,audTotalComm=null,audCashDeducted=null;
-      for(const r of csvRows){if(r[0]==='Trades'&&r[1]==='Total'&&r[3]==='Stocks'&&r[4]==='AUD'){audTotalProceeds=Math.abs(parseFloat(r[10])||0);audTotalComm=Math.abs(parseFloat(r[11])||0);}if(r[0]==='Cash Report'&&r[1]==='Data'&&r[2]==='Trades (Purchase)'&&r[3]==='AUD'){audCashDeducted=Math.abs(parseFloat(r[4])||0);}}
-      for(const r of csvRows){if(r[0]==='Trades'&&r[1]==='Data'&&r[2]==='Order'&&r[3]==='Stocks'){const symbol=(r[5]||'').trim().toUpperCase();const dateStr=(r[6]||'').split(',')[0].trim();const qtyRaw=parseFloat(r[7])||0;const usdPrice=parseFloat(r[8])||0;const usdProc=parseFloat(r[10])||0;if(!symbol||!qtyRaw||!usdPrice)continue;const side=qtyRaw>0?'buy':'sell';const qty=Math.abs(qtyRaw);const dedupId=`CSINTL_${symbol}_${dateStr}_${qty}_${usdPrice}`;stockTrades.push({symbol,dateStr,side,qty,usdPrice,usdProc:Math.abs(usdProc),dedupId});}}
-      if(!stockTrades.length){alert('No stock trades found.');return;}
-      const totalUsdProc=stockTrades.reduce((s,t)=>s+t.usdProc,0);
-      stockTrades.forEach(t=>{const share=totalUsdProc>0?t.usdProc/totalUsdProc:1/stockTrades.length;t.audProc=parseFloat(((audTotalProceeds||0)*share).toFixed(6));t.audComm=parseFloat(((audTotalComm||0)*share).toFixed(6));t.audCashMove=parseFloat(((audCashDeducted||audTotalProceeds||0)*share).toFixed(6));t.audPrice=t.qty>0?parseFloat(((t.audCashMove-t.audComm)/t.qty).toFixed(6)):0;});
-      const tradeLines=stockTrades.map(t=>`${t.side.toUpperCase()} ${t.qty} x ${t.symbol} @ $${t.audPrice.toFixed(2)} AUD/share + $${t.audComm.toFixed(2)} brokerage`).join('\n');
-      if(!confirm(`CommSec International import preview:\n\n${tradeLines}\n\nProceed?`))return;
-      let cashAcctIdx=null;if(S.cash.length>0){const opts=S.cash.map((a,i)=>`${i+1}. ${a.name} ($${f(a.balance||0)} AUD)`).join('\n');const ans=prompt(`Which cash account?\n\n${opts}\n\nEnter number:`);if(ans===null)return;const n=parseInt(ans);if(n>=1&&n<=S.cash.length)cashAcctIdx=n-1;}
-      let imported=0,skipped=0;
-      for(const t of stockTrades){
-        const isDupe=S.us.some(h=>(h.txns||[]).some(tx=>tx.commsecIntlId===t.dedupId));
-        if(isDupe){skipped++;continue;}
-        let idx=S.us.findIndex(h=>h.ticker===t.symbol);
-        if(idx===-1){S.us.push({ticker:t.symbol,name:t.symbol,qty:0,cost:0,txns:[]});idx=S.us.length-1;try{await xanoAddHolding('us');}catch(e){S.us.pop();continue;}}
-        if(!S.us[idx].txns)S.us[idx].txns=[];
-        const txnId=generateTxnId(t.dateStr);
-        S.us[idx].txns.push({date:t.dateStr,side:t.side,qty:t.qty,price:t.audPrice,fee:t.audComm,txnId,commsecIntlId:t.dedupId,priceExFee:true,cashAcct:cashAcctIdx});
-        recalcFromTxns('us',idx);
-        try{await xanoUpdateHolding('us',idx);await xanoAddTransaction('us',idx);}catch(e){console.warn('Xano save failed',e);}
-        if(cashAcctIdx!==null&&S.cash[cashAcctIdx]){S.cash[cashAcctIdx].balance=(S.cash[cashAcctIdx].balance||0)-(t.side==='buy'?t.audCashMove:-t.audCashMove);await xanoUpdateCash(cashAcctIdx);}
-        imported++;
+async function importCommsecIntlHTML(htmlText,statusEl){
+  if(isReadOnly()){if(statusEl)setImportStatus(statusEl,'error','You have read-only access.');return;}
+  try{
+    const parser=new DOMParser();
+    const doc=parser.parseFromString(htmlText,'text/html');
+    let audPerUsd=null;
+    const allRows=[...doc.querySelectorAll('tbody tr')];
+    for(const tr of allRows){
+      const cells=[...tr.querySelectorAll('td')].map(td=>td.textContent.trim());
+      if(cells.length>=8&&cells.some(c=>c==='AUD.USD')&&cells.some(c=>c==='SELL')){
+        for(let ci=7;ci<cells.length;ci++){const v=parseFloat(cells[ci].replace(/,/g,''));if(v>0.3&&v<1.5){audPerUsd=parseFloat((1/v).toFixed(6));break;}}
+        if(audPerUsd)break;
       }
-      if(imported>0){rows('us');renderAllHoldings();renderCash();renderFees();summary();}
-      alert(`✓ CommSec International import complete!\n\n${imported} trade${imported!==1?'s':''} imported\n${skipped} duplicate${skipped!==1?'s':''} skipped`);
-    }catch(err){console.error('CommSec Intl import error:',err);alert(`Import failed: ${err.message}`);}
-  };
-  reader.readAsText(file);
+    }
+    if(!audPerUsd||audPerUsd<0.5){audPerUsd=1.414;}
+    const stockTrades=[];
+    let inStocks=false;
+    const tbodies=[...doc.querySelectorAll('tbody')];
+    for(const tbody of tbodies){
+      const assetHeader=tbody.querySelector('td.header-asset');
+      if(assetHeader){inStocks=assetHeader.textContent.trim()==='Stocks';continue;}
+      if(tbody.querySelector('td.header-currency'))continue;
+      if(!inStocks)continue;
+      const summaryRows=tbody.querySelectorAll('tr.row-summary');
+      for(const tr of summaryRows){
+        const cells=[...tr.querySelectorAll('td')].map(td=>td.textContent.replace(/\u00a0/g,' ').trim());
+        if(cells.length<10)continue;
+        const symbol=(cells[1]||'').toUpperCase();
+        const dateTimeStr=cells[2]||'';
+        const typeStr=(cells[5]||'').toUpperCase();
+        const qtyRaw=parseFloat((cells[6]||'').replace(/,/g,''))||0;
+        const usdPriceRaw=parseFloat((cells[7]||'').replace(/,/g,''))||0;
+        const commUsdRaw=Math.abs(parseFloat((cells[9]||'').replace(/,/g,''))||0);
+        if(!symbol||symbol==='TOTAL'||!qtyRaw||!usdPriceRaw)continue;
+        if(typeStr!=='BUY'&&typeStr!=='SELL')continue;
+        const dateStr=dateTimeStr.split(',')[0].trim();
+        const qty=Math.abs(qtyRaw);
+        const usdPrice=Math.abs(usdPriceRaw);
+        const audPrice=parseFloat((usdPrice*audPerUsd).toFixed(6));
+        const audComm=parseFloat((commUsdRaw*audPerUsd).toFixed(6));
+        const audTotal=parseFloat((qty*audPrice).toFixed(2));
+        const side=typeStr==='BUY'?'buy':'sell';
+        const dedupId='CSINTL_HTML_'+symbol+'_'+dateStr+'_'+qty+'_'+usdPrice;
+        stockTrades.push({symbol,dateStr,side,qty,usdPrice,audPrice,audComm,audTotal,dedupId});
+      }
+    }
+    if(!stockTrades.length){if(statusEl)setImportStatus(statusEl,'error','No stock trades found in this HTML file.');return;}
+    const tradeLines=stockTrades.map(t=>t.side.toUpperCase()+' '+t.qty+' x '+t.symbol+' @ $'+t.audPrice.toFixed(2)+' AUD/share = $'+t.audTotal.toFixed(2)+' AUD + $'+t.audComm.toFixed(2)+' brokerage\n  (USD $'+t.usdPrice.toFixed(4)+'  x  AUD/USD '+audPerUsd.toFixed(4)+')').join('\n\n');
+    if(!confirm('CommSec International import preview:\n\n'+tradeLines+'\n\nAll values converted to AUD. Proceed?'))return;
+    let cashAcctIdx=null;if(S.cash.length>0){const opts=S.cash.map((a,i)=>(i+1)+'. '+a.name+' ($'+f(a.balance||0)+' AUD)').join('\n');const ans=prompt('Deduct total (purchase + brokerage) from which cash account?\n\n'+opts+'\n\nEnter number, or 0 to skip:');if(ans===null)return;const n=parseInt(ans);if(n>=1&&n<=S.cash.length)cashAcctIdx=n-1;}
+    let imported=0,skipped=0;
+    for(const t of stockTrades){
+      const isDupe=S.us.some(h=>(h.txns||[]).some(tx=>tx.commsecIntlId===t.dedupId));
+      if(isDupe){skipped++;continue;}
+      let idx=S.us.findIndex(h=>h.ticker===t.symbol);
+      if(idx===-1){S.us.push({ticker:t.symbol,name:t.symbol,qty:0,cost:0,txns:[]});idx=S.us.length-1;try{await xanoAddHolding('us');}catch(e){S.us.pop();continue;}}
+      if(!S.us[idx].txns)S.us[idx].txns=[];
+      const txnId=generateTxnId(t.dateStr);
+      S.us[idx].txns.push({date:t.dateStr,side:t.side,qty:t.qty,price:t.audPrice,fee:t.audComm,txnId,commsecIntlId:t.dedupId,cashAcct:cashAcctIdx});
+      recalcFromTxns('us',idx);
+      try{await xanoUpdateHolding('us',idx);await xanoAddTransaction('us',idx);}catch(e){console.warn('Xano save failed',e);}
+      const totalOutlay=t.audTotal+t.audComm;
+      if(cashAcctIdx!==null&&S.cash[cashAcctIdx]){S.cash[cashAcctIdx].balance=(S.cash[cashAcctIdx].balance||0)-(t.side==='buy'?totalOutlay:-totalOutlay);await xanoUpdateCash(cashAcctIdx);}
+      if(t.audComm>0){
+        const feeTxnId=generateTxnId(t.dateStr);
+        const feeDesc='CommSec Intl brokerage — '+t.side.toUpperCase()+' '+t.qty+' '+t.symbol+' (USD $'+parseFloat((t.audComm/audPerUsd).toFixed(2))+' x '+audPerUsd.toFixed(4)+')';
+        try{const feeRecId=await xanoAddLedger({portfolio:AUTH.currentPortfolioId,date:t.dateStr,type:'fee',category:'Brokerage',description:feeDesc,amount:t.audComm,txn_id:feeTxnId,cash_acct_id:cashAcctIdx!==null&&S.cash[cashAcctIdx]?S.cash[cashAcctIdx]._id:null});S.fees.push({_id:feeRecId,date:t.dateStr,desc:feeDesc,cat:'Brokerage',amount:t.audComm,txnId:feeTxnId,cashAcct:cashAcctIdx});}catch(e){console.warn('Fee ledger save failed',e);}
+      }
+      imported++;
+    }
+    if(imported>0){rows('us');renderAllHoldings();renderCash();renderFees();summary();}
+    const msg='\u2713 CommSec Intl import complete \u2014 '+imported+' trade'+(imported!==1?'s':'')+' imported, fees in ledger, '+skipped+' duplicate'+(skipped!==1?'s':'')+' skipped';
+    if(statusEl)setImportStatus(statusEl,'success',msg);else alert(msg);
+  }catch(err){console.error('CommSec HTML import error:',err);if(statusEl)setImportStatus(statusEl,'error','Import failed: '+err.message);else alert('Import failed: '+err.message);}
 }
+
+async function importCommsecIntlCSV(input){
+  alert('CommSec Intl CSV import has been replaced \u2014 please upload the HTML Trade Confirmation file instead.');
+}
+
+async function importSwyftxCSVText(text,statusEl){
+  const fakeInput={files:[new File([text],'swyftx.csv',{type:'text/csv'})]};
+  await importSwyftxCSV(fakeInput);
+  if(statusEl)setImportStatus(statusEl,'success','\u2713 Swyftx CSV imported successfully');
+}
+
+async function importCommsecIntlCSVText(text,statusEl){
+  if(statusEl)setImportStatus(statusEl,'error','CommSec CSV is no longer supported \u2014 please use the HTML Trade Confirmation file.');
+}
+
 
 function animateValue(el,newVal,prefix='$',decimals=2){if(!el)return;const raw=el.getAttribute('data-raw');const oldVal=raw?parseFloat(raw):null;el.setAttribute('data-raw',newVal);if(oldVal===null||isNaN(oldVal)||oldVal===newVal){el.textContent=prefix+f(newVal,decimals);return;}const dir=newVal>oldVal?'up':'down';el.classList.remove('flash-up','flash-down');void el.offsetWidth;el.classList.add('flash-'+dir);setTimeout(()=>el.classList.remove('flash-up','flash-down'),1200);const duration=600,steps=30,increment=(newVal-oldVal)/steps;let current=oldVal,step=0;const timer=setInterval(()=>{step++;current+=increment;if(step>=steps){current=newVal;clearInterval(timer);}el.textContent=prefix+f(current,decimals);},duration/steps);}
 
@@ -2785,43 +2817,46 @@ async function routeImportFile(file){
   statusArea.innerHTML='<span style="opacity:0.7;">🔍 Detecting file type...</span>';
 
   const name=file.name.toLowerCase();
-  const isPDF=file.type==='application/pdf'||name.endsWith('.pdf');
   const isCSV=file.type==='text/csv'||name.endsWith('.csv');
-
-  if(isPDF){
-    // Route to Swyftx PDF invoice importer
-    statusArea.innerHTML='<span>📄 Detected: <strong>Swyftx Invoice PDF</strong> — reading with AI...</span>';
-    await importSwyftxPDFFile(file,statusArea);
-    return;
-  }
+  const isHTML=name.endsWith('.htm')||name.endsWith('.html')||file.type==='text/html';
 
   if(isCSV){
     const text=await file.text();
-    // Check first 5 lines — Swyftx reports have a title row before headers
     const lines=text.split('\n').slice(0,5).map(l=>l.toLowerCase());
     const allText=lines.join(' ');
     const isSwyftx=allText.includes('uuid')||allText.includes('swyftx')||
                    allText.includes('crypto transactions')||allText.includes('transaction id')||
                    (allText.includes('asset')&&allText.includes('event'));
-    const isCommsec=allText.includes('commsec')||allText.includes('settlement')||
-                    allText.includes('proceeds')||allText.includes('security');
     if(isSwyftx){
       statusArea.innerHTML='<span>📊 Detected: <strong>Swyftx Transaction CSV</strong> — importing...</span>';
       await importSwyftxCSVText(text,statusArea);
-    } else if(isCommsec){
-      statusArea.innerHTML='<span>📊 Detected: <strong>CommSec International CSV</strong> — importing...</span>';
-      await importCommsecIntlCSVText(text,statusArea);
     } else {
       statusArea.style.background='rgba(248,113,113,0.1)';
       statusArea.style.color='var(--gain-neg)';
-      statusArea.innerHTML="⚠ Could not detect file format. Check file is a Swyftx or CommSec International export.";
+      statusArea.innerHTML='⚠ Could not detect file format. Expected a Swyftx Transaction Report CSV.';
+    }
+    return;
+  }
+
+  if(isHTML){
+    const text=await file.text();
+    const lower=text.toLowerCase();
+    const isCommsecHTML=lower.includes('trade confirmation report')||lower.includes('commonwealth securities')||
+                        lower.includes('commsec')||(lower.includes('interactive brokers')&&lower.includes('stocks'));
+    if(isCommsecHTML){
+      statusArea.innerHTML='<span>📄 Detected: <strong>CommSec International Trade Confirmation</strong> — importing...</span>';
+      await importCommsecIntlHTML(text,statusArea);
+    } else {
+      statusArea.style.background='rgba(248,113,113,0.1)';
+      statusArea.style.color='var(--gain-neg)';
+      statusArea.innerHTML='⚠ Could not detect file format. Expected a CommSec International Trade Confirmation HTML file.';
     }
     return;
   }
 
   statusArea.style.background='rgba(248,113,113,0.1)';
   statusArea.style.color='var(--gain-neg)';
-  statusArea.innerHTML='⚠ Unsupported file type. Please upload a CSV or PDF file.';
+  statusArea.innerHTML='⚠ Unsupported file type. Please upload a Swyftx CSV or CommSec International HTML file.';
 }
 
 function setImportStatus(el,type,msg){
@@ -2833,137 +2868,7 @@ function setImportStatus(el,type,msg){
   el.innerHTML=msg;
 }
 
-// ── Swyftx PDF Invoice Importer ───────────────────────────── ─────────────────────────────
-let _swyftxPDFParsed = null;
 
-function closeSwyftxPDFModal(){
-  document.getElementById('swyftxPDFModal').style.display='none';
-  document.getElementById('swyftxPDFModal').style.visibility='hidden';
-  _swyftxPDFParsed=null;
-  document.getElementById('swyftxPDFInput').value='';
-}
-
-async function importSwyftxPDF(input){
-  if(!input.files||!input.files[0])return;
-  await importSwyftxPDFFile(input.files[0],document.getElementById('swyftxPDFStatus'));
-}
-
-async function importSwyftxPDFFile(file,statusEl){
-  if(!statusEl)statusEl={textContent:'',style:{}};
-  statusEl.textContent='Reading invoice...';
-  statusEl.style.color='var(--text3)';
-  try{
-    // Convert PDF to base64
-    const base64=await new Promise((res,rej)=>{
-      const reader=new FileReader();
-      reader.onload=()=>res(reader.result.split(',')[1]);
-      reader.onerror=()=>rej(new Error('Failed to read file'));
-      reader.readAsDataURL(file);
-    });
-    statusEl.textContent='AI is reading your invoice...';
-    // Call Claude API to parse the PDF
-    // Route through Xano to avoid CORS and keep API key server-side
-    const response = await xano('POST', '/parse-invoice', { pdf_data: base64 });
-    // Xano returns the Anthropic response — extract text content
-    const text = response?.content?.[0]?.text || response?.text || JSON.stringify(response) || '';
-    // Parse JSON from response
-    const clean=text.replace(/```json|```/g,'').trim();
-    const parsed=JSON.parse(clean);
-    _swyftxPDFParsed=parsed;
-    statusEl.textContent='Invoice read successfully';
-    statusEl.style.color='var(--gain-pos)';
-    // Show preview modal
-    showSwyftxPDFPreview(parsed);
-  }catch(e){
-    statusEl.textContent='Failed to read invoice: '+e.message;
-    statusEl.style.color='var(--gain-neg)';
-    console.error('PDF import error:',e);
-  }
-}
-
-function showSwyftxPDFPreview(parsed){
-  const modal=document.getElementById('swyftxPDFModal');
-  const preview=document.getElementById('swyftxPDFPreview');
-  const acctSel=document.getElementById('swyftxPDFAccount');
-  // Populate account selector
-  acctSel.innerHTML='<option value="">— Don\'t adjust cash —</option>'+
-    S.cash.map((a,i)=>`<option value="${i}" ${a.name.toLowerCase().includes('swyftx')?'selected':''}>${a.name} ($${f(a.balance||0)} AUD)</option>`).join('');
-  // Find matching holding
-  const existingIdx=S.cry.findIndex(h=>h.ticker.toUpperCase()===parsed.ticker.toUpperCase());
-  const existingName=existingIdx>=0?S.cry[existingIdx].name:null;
-  const total=(parsed.qty*parsed.price)+(parsed.side==='buy'?parsed.fee:-parsed.fee);
-  preview.innerHTML=`
-    <div style="background:var(--surface2);border-radius:12px;padding:16px;margin-bottom:12px;">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
-        <span style="font-size:16px;font-weight:700;color:var(--text);">${parsed.side==='buy'?'🟢 Buy':'🔴 Sell'} ${parsed.qty} ${parsed.ticker}</span>
-        <span style="font-size:12px;color:var(--text3);">${parsed.date}</span>
-      </div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:13px;">
-        <div><span style="color:var(--text3);">Price</span><br><strong>$${f(parsed.price)} AUD</strong></div>
-        <div><span style="color:var(--text3);">Fee</span><br><strong>$${f(parsed.fee)} AUD</strong></div>
-        <div><span style="color:var(--text3);">Qty</span><br><strong>${parsed.qty}</strong></div>
-        <div><span style="color:var(--text3);">Total ${parsed.side==='buy'?'cost':'proceeds'}</span><br><strong style="color:${parsed.side==='buy'?'var(--gain-neg)':'var(--gain-pos)'};">${parsed.side==='buy'?'-':'+'}$${f(total)} AUD</strong></div>
-      </div>
-      ${existingName?`<div style="margin-top:10px;padding:8px 12px;background:rgba(93,227,108,0.1);border-radius:8px;font-size:12px;color:var(--gain-pos);">✓ Matches existing holding: <strong>${existingName}</strong></div>`:`<div style="margin-top:10px;padding:8px 12px;background:rgba(248,113,113,0.1);border-radius:8px;font-size:12px;color:var(--gain-neg);">⚠ No existing ${parsed.ticker} holding found — a new one will be created</div>`}
-      <div style="margin-top:8px;font-size:11px;color:var(--text4);">Ref: ${parsed.invoiceRef||'—'}</div>
-    </div>`;
-  modal.style.display='flex';
-  modal.style.visibility='visible';
-}
-
-async function confirmSwyftxPDFImport(){
-  if(!_swyftxPDFParsed)return;
-  const parsed=_swyftxPDFParsed;
-  const acctVal=document.getElementById('swyftxPDFAccount').value;
-  const cashAcct=acctVal!==''?parseInt(acctVal):null;
-  const btn=document.getElementById('swyftxPDFConfirmBtn');
-  btn.disabled=true;btn.textContent='Saving...';
-  try{
-    const ticker=parsed.ticker.toUpperCase();
-    let typeIdx=S.cry.findIndex(h=>h.ticker.toUpperCase()===ticker);
-    if(typeIdx<0){
-      // Create new holding
-      S.cry.push({ticker,name:ticker,qty:0,cost:0,txns:[]});
-      typeIdx=S.cry.length-1;
-      await xanoAddHolding('cry');
-    }
-    const item=S.cry[typeIdx];
-    const txnId=generateTxnId(parsed.date);
-    item.txns.push({date:parsed.date,side:parsed.side,qty:parsed.qty,price:parsed.price,fee:parsed.fee,txnId,cashAcct});
-    recalcFromTxns('cry',typeIdx);
-    if(cashAcct!==null&&S.cash[cashAcct]){
-      const net=parsed.qty*parsed.price;
-      S.cash[cashAcct].balance=(S.cash[cashAcct].balance||0)+(parsed.side==='buy'?-(net+parsed.fee):(net-parsed.fee));
-      await xanoUpdateCash(cashAcct);
-      renderCash();
-    }
-    await xanoUpdateHolding('cry',typeIdx);
-    await xanoAddTransaction('cry',typeIdx);
-    syncUI('synced','Invoice imported — '+parsed.side+' '+parsed.qty+' '+ticker);
-    renderAllHoldings();renderFees();
-    closeSwyftxPDFModal();
-    document.getElementById('swyftxPDFStatus').textContent='✓ Imported successfully';
-    document.getElementById('swyftxPDFStatus').style.color='var(--gain-pos)';
-  }catch(e){
-    syncUI('err','Import failed: '+e.message);
-    btn.disabled=false;btn.textContent='Save Transaction';
-  }
-}
-
-async function importSwyftxCSVText(text,statusEl){
-  // Create a fake input-like object and reuse existing importer
-  const lines=text.split('\n');
-  // Call existing logic inline
-  const fakeInput={files:[new File([text],'swyftx.csv',{type:'text/csv'})]};
-  await importSwyftxCSV(fakeInput);
-  if(statusEl)setImportStatus(statusEl,'success','✓ Swyftx CSV imported successfully');
-}
-
-async function importCommsecIntlCSVText(text,statusEl){
-  const fakeInput={files:[new File([text],'commsec.csv',{type:'text/csv'})]};
-  await importCommsecIntlCSV(fakeInput);
-  if(statusEl)setImportStatus(statusEl,'success','✓ CommSec International CSV imported successfully');
-}
 
 // ── Boot ──────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', async function(){
