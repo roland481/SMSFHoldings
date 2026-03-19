@@ -2437,7 +2437,6 @@ async function importCommsecIntlHTML(htmlText,statusEl){
     for(const tr of allRows){
       const cells=[...tr.querySelectorAll('td')].map(td=>td.textContent.trim());
       if(cells.length>=8&&cells.some(c=>c==='AUD.USD')&&cells.some(c=>c==='SELL')){
-        console.log(cells);
         for(let ci=7;ci<cells.length;ci++){const v=parseFloat(cells[ci].replace(/,/g,''));if(v>0.3&&v<1.5){audPerUsd=parseFloat((1/v).toFixed(6));break;}}
         if(audPerUsd)break;
       }
@@ -2474,7 +2473,6 @@ async function importCommsecIntlHTML(htmlText,statusEl){
         stockTrades.push({symbol,dateStr,side,qty,usdPrice,audPrice,audComm,audTotal,dedupId});
       }
     }
-    console.log(stockTrades);
     if(!stockTrades.length){if(statusEl)setImportStatus(statusEl,'error','No stock trades found in this HTML file.');return;}
     const tradeLines=stockTrades.map(t=>t.side.toUpperCase()+' '+t.qty+' x '+t.symbol+' @ $'+t.audPrice.toFixed(2)+' AUD/share = $'+t.audTotal.toFixed(2)+' AUD + $'+t.audComm.toFixed(2)+' brokerage\n  (USD $'+t.usdPrice.toFixed(4)+'  x  AUD/USD '+audPerUsd.toFixed(4)+')').join('\n\n');
     if(!confirm('CommSec International import preview:\n\n'+tradeLines+'\n\nAll values converted to AUD. Proceed?'))return;
@@ -3066,7 +3064,7 @@ function renderFees(){
     (S.contributions||[]).forEach((item,orig)=>{if(!inFY(item.date)||!matchAcct(item))return;entries.push({date:item.date||'',desc:`${item.type} contribution — ${item.member}`,type:'contribution',amount:item.amount||0,isDebit:false,orig,deletable:true,txnId:item.txnId||'—',cashAcct:item.cashAcct??null,_id:item._id});});
     (S.transfers||[]).forEach((item,orig)=>{if(!inFY(item.date)||!matchAcct(item))return;const fromName=(()=>{if(item.from==null)return'Unknown';const byIdx=S.cash[item.from];if(byIdx)return byIdx.name;const byId=S.cash.find(c=>c._id===item.from||c._id===parseInt(item.from));return byId?.name||'Unknown';})();
       const toName=(()=>{if(item.to==null)return'Unknown';const byIdx=S.cash[item.to];if(byIdx)return byIdx.name;const byId=S.cash.find(c=>c._id===item.to||c._id===parseInt(item.to));return byId?.name||'Unknown';})();entries.push({date:item.date||'',desc:`Transfer to ${toName}${item.desc?' — '+item.desc:''}`,type:'transfer',amount:item.amount||0,isDebit:true,orig,deletable:true,txnId:item.txnId||'—',cashAcct:item.from,_id:item._id});entries.push({date:item.date||'',desc:`Transfer from ${fromName}${item.desc?' — '+item.desc:''}`,type:'transfer',amount:item.amount||0,isDebit:false,orig,deletable:false,txnId:item.txnId||'—',cashAcct:item.to,_id:item._id});});
-    ['us','asx','cry','met'].forEach(assetType=>{S[assetType].forEach((item,assetIdx)=>{(item.txns||[]).forEach((tx,txIdx)=>{if(!inFY(tx.date))return;const total=tx.price*tx.qty;const audTotal=tx.fee>0&&!tx.priceExFee?parseFloat((total-tx.fee).toFixed(2)):total;entries.push({date:tx.date||'',desc:`${tx.side==='buy'?'Buy':'Sell'} ${f(tx.qty,tx.qty%1===0?0:4)} ${item.ticker}`,type:'trade',amount:audTotal,isDebit:tx.side==='buy',deletable:false,reversible:true,assetType,assetIdx,txnIdx:txIdx,txnId:tx.txnId||tx.txn_id||'—',cashAcct:tx.cashAcct??null,_txId:tx._id});if(tx.fee>0)entries.push({date:tx.date||'',desc:`Brokerage — ${item.ticker} ${tx.side}`,type:'fee',amount:tx.fee,isDebit:true,deletable:false,txnId:(tx.txnId||'—')+'-FEE',cashAcct:tx.cashAcct??null});});});});
+    ['us','asx','cry','met'].forEach(assetType=>{S[assetType].forEach((item,assetIdx)=>{(item.txns||[]).forEach((tx,txIdx)=>{if(!inFY(tx.date))return;const total=parseFloat((tx.price*tx.qty).toFixed(2));const audTotal=total;entries.push({date:tx.date||'',desc:`${tx.side==='buy'?'Buy':'Sell'} ${f(tx.qty,tx.qty%1===0?0:4)} ${item.ticker}`,type:'trade',amount:audTotal,isDebit:tx.side==='buy',deletable:false,reversible:true,assetType,assetIdx,txnIdx:txIdx,txnId:tx.txnId||tx.txn_id||'—',cashAcct:tx.cashAcct??null,_txId:tx._id});if(tx.fee>0)entries.push({date:tx.date||'',desc:`Brokerage — ${item.ticker} ${tx.side}`,type:'fee',amount:tx.fee,isDebit:true,deletable:false,txnId:(tx.txnId||'—')+'-FEE',cashAcct:tx.cashAcct??null});});});});
     // Totals
     const fyFees=entries.filter(e=>e.type==='fee'&&e.isDebit).reduce((s,e)=>s+e.amount,0);
     const contribTotal=entries.filter(e=>e.type==='contribution').reduce((s,e)=>s+e.amount,0);
