@@ -2921,7 +2921,7 @@ function exportCSV(){
     const acct=_cashName(tx.cashAcct);
     const acctIdx=tx.cashAcct!=null?tx.cashAcct:null;
     const total=tx.price*tx.qty;
-    const audTotal=tx.fee>0&&!tx.priceExFee?parseFloat((total-tx.fee).toFixed(2)):total;
+    const audTotal=parseFloat(total.toFixed(2));
     entries.push({date:tx.date||'',type:'trade',cat:h.ticker,desc:h.name+' '+tx.side,amount:(tx.side==='buy'?-1:1)*audTotal,acct,acctIdx,txnId:tx.txnId||''});
     if(tx.fee>0)entries.push({date:tx.date||'',type:'fee',cat:'brokerage',desc:'Brokerage — '+h.ticker+' '+tx.side,amount:-tx.fee,acct,acctIdx,txnId:(tx.txnId||'')+'-FEE'});
   });});});
