@@ -2437,6 +2437,7 @@ async function importCommsecIntlHTML(htmlText,statusEl){
     for(const tr of allRows){
       const cells=[...tr.querySelectorAll('td')].map(td=>td.textContent.trim());
       if(cells.length>=8&&cells.some(c=>c==='AUD.USD')&&cells.some(c=>c==='SELL')){
+        console.log(cells);
         for(let ci=7;ci<cells.length;ci++){const v=parseFloat(cells[ci].replace(/,/g,''));if(v>0.3&&v<1.5){audPerUsd=parseFloat((1/v).toFixed(6));break;}}
         if(audPerUsd)break;
       }
@@ -2473,6 +2474,7 @@ async function importCommsecIntlHTML(htmlText,statusEl){
         stockTrades.push({symbol,dateStr,side,qty,usdPrice,audPrice,audComm,audTotal,dedupId});
       }
     }
+    console.log(stockTrades);
     if(!stockTrades.length){if(statusEl)setImportStatus(statusEl,'error','No stock trades found in this HTML file.');return;}
     const tradeLines=stockTrades.map(t=>t.side.toUpperCase()+' '+t.qty+' x '+t.symbol+' @ $'+t.audPrice.toFixed(2)+' AUD/share = $'+t.audTotal.toFixed(2)+' AUD + $'+t.audComm.toFixed(2)+' brokerage\n  (USD $'+t.usdPrice.toFixed(4)+'  x  AUD/USD '+audPerUsd.toFixed(4)+')').join('\n\n');
     if(!confirm('CommSec International import preview:\n\n'+tradeLines+'\n\nAll values converted to AUD. Proceed?'))return;
