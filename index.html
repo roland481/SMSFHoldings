@@ -1750,13 +1750,25 @@ async function saveTxn(type,i){
 
 async function delTxn(type,i,ti){
   if(isReadOnly()) return;
-  const tx=S[type][i].txns[ti];
-  S[type][i].txns.splice(ti,1);
+  const item=S[type][i];
+  const tx=item.txns[ti];
+  if(!tx) return;
+  const xanoId=tx._id;
+  item.txns.splice(ti,1);
   recalcFromTxns(type,i);
   try {
-    await xanoDeleteTransaction(tx?._id);
+    // Update holding qty/cost first, then delete the transaction record
     await xanoUpdateHolding(type,i);
-    syncUI('synced','Saved · '+new Date().toLocaleTimeString('en-AU',{hour:'2-digit',minute:'2-digit'}));
+    await xanoDeleteTransaction(xanoId);
+    // Reverse cash account balance if the transaction was linked to one
+    if(tx.cashAcct!=null&&S.cash[tx.cashAcct]){
+      const tradeTotal=tx.qty*tx.price;
+      const withFee=tx.fee>0?tradeTotal+tx.fee:tradeTotal;
+      S.cash[tx.cashAcct].balance=(S.cash[tx.cashAcct].balance||0)+(tx.side==='buy'?withFee:-withFee);
+      await xanoUpdateCash(tx.cashAcct);
+      renderCash();
+    }
+    syncUI('synced','Transaction removed · '+new Date().toLocaleTimeString('en-AU',{hour:'2-digit',minute:'2-digit'}));
   } catch(e) { syncUI('err','Delete failed: '+e.message); }
   rows(type);renderAllHoldings();renderFees();
 }
@@ -2405,11 +2417,7 @@ async function importSwyftxCSV(input){
         recalcFromTxns('cry',idx);
         try{await xanoUpdateHolding('cry',idx);await xanoAddTransaction('cry',idx);}catch(e){console.warn('Xano save failed for trade',e);}
         if(cashAcctIdx!==null&&S.cash[cashAcctIdx]){S.cash[cashAcctIdx].balance=(S.cash[cashAcctIdx].balance||0)-(row.audVal+row.fee);await xanoUpdateCash(cashAcctIdx);}
-        if(row.fee>0){
-          const feeTxnId=generateTxnId(row.date);
-          const feeDesc='Swyftx brokerage — '+row.event.toUpperCase()+' '+row.amount+' '+row.asset;
-          try{const feeRecId=await xanoAddLedger({portfolio:AUTH.currentPortfolioId,date:row.date,type:'fee',category:'Brokerage',description:feeDesc,amount:row.fee,txn_id:feeTxnId,cash_acct_id:cashAcctIdx!==null&&S.cash[cashAcctIdx]?S.cash[cashAcctIdx]._id:null});S.fees.push({_id:feeRecId,date:row.date,desc:feeDesc,cat:'Brokerage',amount:row.fee,txnId:feeTxnId,cashAcct:cashAcctIdx});}catch(e){console.warn('Fee ledger save failed',e);}
-        }
+        // Fee is stored on the transaction and Xano creates the ledger entry server-side via /transaction POST
         imported++;
       }
       if(imported>0){rows('cry');renderAllHoldings();renderCash();renderFees();summary();}
@@ -2482,11 +2490,7 @@ async function importCommsecIntlHTML(htmlText,statusEl){
       try{await xanoUpdateHolding('us',idx);await xanoAddTransaction('us',idx);}catch(e){console.warn('Xano save failed',e);}
       const totalOutlay=t.audTotal+t.audComm;
       if(cashAcctIdx!==null&&S.cash[cashAcctIdx]){S.cash[cashAcctIdx].balance=(S.cash[cashAcctIdx].balance||0)-(t.side==='buy'?totalOutlay:-totalOutlay);await xanoUpdateCash(cashAcctIdx);}
-      if(t.audComm>0){
-        const feeTxnId=generateTxnId(t.dateStr);
-        const feeDesc='CommSec Intl brokerage — '+t.side.toUpperCase()+' '+t.qty+' '+t.symbol+' (USD $'+parseFloat((t.audComm/audPerUsd).toFixed(2))+' x '+audPerUsd.toFixed(4)+')';
-        try{const feeRecId=await xanoAddLedger({portfolio:AUTH.currentPortfolioId,date:t.dateStr,type:'fee',category:'Brokerage',description:feeDesc,amount:t.audComm,txn_id:feeTxnId,cash_acct_id:cashAcctIdx!==null&&S.cash[cashAcctIdx]?S.cash[cashAcctIdx]._id:null});S.fees.push({_id:feeRecId,date:t.dateStr,desc:feeDesc,cat:'Brokerage',amount:t.audComm,txnId:feeTxnId,cashAcct:cashAcctIdx});}catch(e){console.warn('Fee ledger save failed',e);}
-      }
+      // Fee stored on transaction; Xano creates the ledger entry server-side via /transaction POST
       imported++;
     }
     if(imported>0){rows('us');renderAllHoldings();renderCash();renderFees();summary();}
