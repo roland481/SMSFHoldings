@@ -1217,7 +1217,7 @@ tr.hrow-met td{border-left:2px solid rgba(154,162,200,0.45);}
     </div>
   </div>
 
-  <div class="footer">Prices: Finnhub (US) · Yahoo Finance (ASX) · gold-api.com (metals) · CoinGecko (crypto). Cash and fees entered manually. Portfolio synced to Xano. Verify all figures with your SMSF accountant.</div>
+  <div class="footer">Prices: Finnhub (US) · Yahoo Finance (ASX) · GoldAPI.io (metals) · CoinGecko (crypto). Cash and fees entered manually. Portfolio synced to Xano. Verify all figures with your SMSF accountant.</div>
 </div>
 
 <script>
@@ -2050,7 +2050,7 @@ async function fetchWl(){
     ...usItems.map(async w=>{try{const res=await fetch(`https://finnhub.io/api/v1/quote?symbol=${w.ticker}&token=${FINHUB_KEY}`);const d=await res.json();if(d&&d.c&&d.c>0){S.prices['wl:us:'+w.ticker]={price:d.c/r,change:d.pc>0?((d.c-d.pc)/d.pc*100):0};ok=true;}}catch(e){}}),
     ...asxItems.map(async w=>{try{const yahooUrl=`https://query1.finance.yahoo.com/v8/finance/chart/${w.ticker}.AX?interval=1d&range=2d`;const proxyUrl=`https://api.allorigins.win/get?url=${encodeURIComponent(yahooUrl)}`;const res=await fetch(proxyUrl);const outer=await res.json();if(!outer.contents)return;const d=JSON.parse(outer.contents);const meta=d?.chart?.result?.[0]?.meta;if(meta&&meta.regularMarketPrice>0){const prev=meta.chartPreviousClose||meta.previousClose||meta.regularMarketPrice;S.prices['wl:asx:'+w.ticker]={price:meta.regularMarketPrice,change:prev>0?((meta.regularMarketPrice-prev)/prev*100):0};ok=true;}}catch(e){}}),
     cryptoItems.length?fetch(`https://api.coingecko.com/api/v3/simple/price?ids=${cryptoItems.map(w=>CID[w.ticker]||w.ticker.toLowerCase()).join(',')}&vs_currencies=aud&include_24hr_change=true`).then(r=>r.json()).then(d=>{cryptoItems.forEach(w=>{const id=CID[w.ticker]||w.ticker.toLowerCase();if(d[id]){S.prices['wl:crypto:'+w.ticker]={price:d[id].aud,change:d[id].aud_24h_change};ok=true;}});}).catch(()=>{}):Promise.resolve(),
-    ...metalItems.map(async w=>{try{const res=await fetch(`https://api.gold-api.com/price/${w.ticker}`);const d=await res.json();if(d&&d.price>0){const r=S.audUsd||0.64;const pa=d.price/r;const prev=d.prev_close_price>0?d.prev_close_price/r:pa;S.prices['wl:metal:'+w.ticker]={price:pa,change:prev>0?((pa-prev)/prev*100):0};ok=true;}}catch(e){}}),
+    ...metalItems.map(async w=>{try{const res=await fetch(XANO_BASE+'/metals/price?symbol='+w.ticker,{headers:authHeaders()});const d=await res.json();if(d&&d.price>0){S.prices['wl:metal:'+w.ticker]={price:d.price,change:d.chp!=null?d.chp:0};ok=true;}}catch(e){}}),
   ]);
   setDot('wlDot',ok?'live':'err');renderWl();
 }
@@ -2146,26 +2146,17 @@ async function fetchASX(){setDot('asxDot','loading');clearErr('asx');const ticke
     }
   }catch(e){}}));setDot('asxDot',ok?'live':'err');if(!ok)showErr('asx','Could not load ASX prices — check ticker is correct (e.g. CBA, BHP, SVL).');rows('asx');}
 async function fetchCry(){setDot('crypDot','loading');const coins=S.cry.map(a=>CID[a.ticker.toUpperCase()]||a.ticker.toLowerCase());if(!coins.length){setDot('crypDot','stale');return;}try{const r=await fetch(`https://api.coingecko.com/api/v3/simple/price?ids=${coins.join(',')}&vs_currencies=aud&include_24hr_change=true`);const d=await r.json();S.cry.forEach(item=>{const id=CID[item.ticker.toUpperCase()]||item.ticker.toLowerCase();if(d[id])S.prices['cry:'+item.ticker]={price:d[id].aud,change:d[id].aud_24h_change};});setDot('crypDot','live');}catch(e){setDot('crypDot','err');}rows('cry');}
-async function fetchMetals(){setDot('metDot','loading');clearErr('met');if(!S.met.length){setDot('metDot','stale');return;}let ok=false;const r=S.audUsd&&S.audUsd>0.3&&S.audUsd<1.5?S.audUsd:0.63;await Promise.all(S.met.map(async item=>{try{
-    const res=await fetch(`https://api.gold-api.com/price/${item.ticker.toUpperCase()}/AUD`);
+async function fetchMetals(){setDot('metDot','loading');clearErr('met');if(!S.met.length){setDot('metDot','stale');return;}let ok=false;await Promise.all(S.met.map(async item=>{try{
+    // GoldAPI.io via Xano proxy — API key stays server-side
+    const res=await fetch(XANO_BASE+'/metals/price?symbol='+item.ticker.toUpperCase(),{headers:authHeaders()});
     const d=await res.json();
     if(d&&d.price&&d.price>0){
-      // gold-api returns chp (change%) and ch (change amount) directly
-      const change=d.chp!=null?d.chp:(d.ch!=null&&d.price>0?(d.ch/d.price*100):null);
+      const change=d.chp!=null?d.chp:(d.ch!=null&&d.price>0?(d.ch/d.price*100):0);
       S.prices['met:'+item.ticker]={price:d.price,change};
       ok=true;
-    } else {
-      // Fallback: USD endpoint + convert
-      const res2=await fetch(`https://api.gold-api.com/price/${item.ticker.toUpperCase()}`);
-      const d2=await res2.json();
-      if(d2&&d2.price&&d2.price>0){
-        const pa=d2.price/r;
-        const change=d2.chp!=null?d2.chp:(d2.ch!=null&&d2.price>0?(d2.ch/d2.price*100):null);
-        S.prices['met:'+item.ticker]={price:pa,change};
-        ok=true;
-      }
     }
-  }catch(e){}}));setDot('metDot',ok?'live':'err');if(!ok)showErr('met','Could not load metal prices.');rows('met');}
+  }catch(e){console.warn('Metal fetch failed:',item.ticker,e);}}));setDot('metDot',ok?'live':'err');if(!ok)showErr('met','Could not load metal prices.');rows('met');}
+  
 
 async function refreshAll(){const btn=document.getElementById('rfBtn'),icon=document.getElementById('rfIcon');btn.disabled=true;icon.classList.add('spin');try{await fetchRate();await Promise.allSettled([fetchUS(),fetchASX(),fetchCry(),fetchMetals(),fetchWl()]);summary();renderAllHoldings();renderAllocTable();
       // Save snapshot to Xano after price refresh
