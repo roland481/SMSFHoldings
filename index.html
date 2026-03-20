@@ -2050,7 +2050,7 @@ async function fetchWl(){
     ...usItems.map(async w=>{try{const res=await fetch(`https://finnhub.io/api/v1/quote?symbol=${w.ticker}&token=${FINHUB_KEY}`);const d=await res.json();if(d&&d.c&&d.c>0){S.prices['wl:us:'+w.ticker]={price:d.c/r,change:d.pc>0?((d.c-d.pc)/d.pc*100):0};ok=true;}}catch(e){}}),
     ...asxItems.map(async w=>{try{const yahooUrl=`https://query1.finance.yahoo.com/v8/finance/chart/${w.ticker}.AX?interval=1d&range=2d`;const proxyUrl=`https://api.allorigins.win/get?url=${encodeURIComponent(yahooUrl)}`;const res=await fetch(proxyUrl);const outer=await res.json();if(!outer.contents)return;const d=JSON.parse(outer.contents);const meta=d?.chart?.result?.[0]?.meta;if(meta&&meta.regularMarketPrice>0){const prev=meta.chartPreviousClose||meta.previousClose||meta.regularMarketPrice;S.prices['wl:asx:'+w.ticker]={price:meta.regularMarketPrice,change:prev>0?((meta.regularMarketPrice-prev)/prev*100):0};ok=true;}}catch(e){}}),
     cryptoItems.length?fetch(`https://api.coingecko.com/api/v3/simple/price?ids=${cryptoItems.map(w=>CID[w.ticker]||w.ticker.toLowerCase()).join(',')}&vs_currencies=aud&include_24hr_change=true`).then(r=>r.json()).then(d=>{cryptoItems.forEach(w=>{const id=CID[w.ticker]||w.ticker.toLowerCase();if(d[id]){S.prices['wl:crypto:'+w.ticker]={price:d[id].aud,change:d[id].aud_24h_change};ok=true;}});}).catch(()=>{}):Promise.resolve(),
-    ...metalItems.map(async w=>{try{const res=await fetch(XANO_BASE+'/metals/price?symbol='+w.ticker,{headers:authHeaders()});const d=await res.json();if(d&&d.price>0){S.prices['wl:metal:'+w.ticker]={price:d.price,change:d.chp!=null?d.chp:0};ok=true;}}catch(e){}}),
+    ...metalItems.map(async w=>{try{const res=await fetch(XANO_BASE+'/metals/price?symbol='+w.ticker,{headers:authHeaders()});const raw=await res.json();const d=raw.response&&raw.response.result?raw.response.result:raw;if(d&&d.price>0){S.prices['wl:metal:'+w.ticker]={price:d.price,change:d.chp!=null?d.chp:0};ok=true;}}catch(e){}}),
   ]);
   setDot('wlDot',ok?'live':'err');renderWl();
 }
@@ -2149,7 +2149,8 @@ async function fetchCry(){setDot('crypDot','loading');const coins=S.cry.map(a=>C
 async function fetchMetals(){setDot('metDot','loading');clearErr('met');if(!S.met.length){setDot('metDot','stale');return;}let ok=false;await Promise.all(S.met.map(async item=>{try{
     // GoldAPI.io via Xano proxy — API key stays server-side
     const res=await fetch(XANO_BASE+'/metals/price?symbol='+item.ticker.toUpperCase(),{headers:authHeaders()});
-    const d=await res.json();
+    const raw=await res.json();
+    const d=raw.response&&raw.response.result?raw.response.result:raw;
     if(d&&d.price&&d.price>0){
       const change=d.chp!=null?d.chp:(d.ch!=null&&d.price>0?(d.ch/d.price*100):0);
       S.prices['met:'+item.ticker]={price:d.price,change};
