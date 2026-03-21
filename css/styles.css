@@ -498,6 +498,60 @@ tr.hrow-met td{border-left:2px solid rgba(154,162,200,0.45);}
   /* ── Add button ── */
   #topbarAddBtn{padding:6px 12px;font-size:11px;}
 }
+
+/* ══════════════════════════════════════════════════════════════
+   ── NARROW SCREEN (Galaxy Z Fold 6 cover screen, ≤420px) ──
+   ══════════════════════════════════════════════════════════════ */
+@media(max-width:420px){
+  /* ── Topbar: hide P&L, simplify sync text ── */
+  #topbar-pnl-val,
+  #topbar-pnl-pct,
+  .topbar .title-block .sync-bar .rfbtn-label{display:none!important;}
+
+  /* ── Hide the Add button on narrow mobile ── */
+  #topbarAddBtn{display:none!important;}
+
+  /* ── Larger refresh button for touch ── */
+  .rfbtn{width:36px;height:36px;padding:0;border-radius:50%;display:flex;align-items:center;justify-content:center;min-width:36px;}
+  .rfbtn svg,.rfbtn #rfIcon{width:18px;height:18px;}
+
+  /* ── Topbar tighter padding ── */
+  .topbar{padding:6px 10px;gap:4px;margin:4px 6px 0;border-radius:10px;}
+  .title-block h1{font-size:14px;}
+  .sync-bar{font-size:9px;gap:4px;}
+
+  /* ── Bottom nav: hide theme toggle (5th item) ── */
+  .bottom-nav .bn-item:last-child{display:none;}
+  .bottom-nav{padding:8px 0 max(12px,env(safe-area-inset-bottom));}
+  .bn-item{font-size:8px;padding:4px 14px;}
+
+  /* ── Summary cards: tighter ── */
+  .summary{gap:5px;}
+  .scard{padding:8px 10px;border-radius:10px;}
+  .sval{font-size:15px;}
+
+  /* ── Wrap: less padding ── */
+  .wrap{padding:8px 6px calc(68px + env(safe-area-inset-bottom));}
+
+  /* ── Modals: ensure they fit narrow screens ── */
+  .modal{width:calc(100vw - 24px);max-width:calc(100vw - 24px);padding:16px;border-radius:14px;}
+  .modal-row{grid-template-columns:1fr;gap:10px;}
+  .modal-input,.modal-select{font-size:14px;padding:10px 12px;}
+
+  /* ── Holdings: tighter cells ── */
+  td,th{padding:6px 6px;}
+  .ni{width:60px;font-size:11px;padding:3px 5px;}
+  .tkr-tile{width:26px;height:26px;font-size:9px;border-radius:6px;}
+  .tkr-sym{font-size:11px;}
+  .tkr-name{font-size:9px;}
+
+  /* ── Session pills: allow scroll ── */
+  .sessions{overflow-x:auto;-webkit-overflow-scrolling:touch;flex-wrap:nowrap;}
+
+  /* ── Cash accounts: prevent REMOVE column cutoff ── */
+  .section{overflow-x:auto;-webkit-overflow-scrolling:touch;}
+}
+
 @media(min-width:801px){
   body{display:flex;align-items:flex-start;}
   .sidebar{position:sticky;top:0;transform:none;z-index:auto;min-height:100vh;}
