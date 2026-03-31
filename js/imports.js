@@ -1,4 +1,15 @@
-// ── CSV Importers (Swyftx — unchanged logic, Xano save) ───────
+// ── Rate limiter — Xano free plan: 10 requests per 20 seconds ──
+// Spaces calls at least 2200ms apart so we never exceed the limit.
+const _xanoQueue = { last: 0 };
+async function xanoThrottle() {
+  const MIN_GAP = 2200; // ms between Xano calls
+  const now = Date.now();
+  const wait = Math.max(0, _xanoQueue.last + MIN_GAP - now);
+  if (wait > 0) await new Promise(r => setTimeout(r, wait));
+  _xanoQueue.last = Date.now();
+}
+
+// ── CSV Importers (Swyftx) ──────────────────────────────────────
 async function importSwyftxCSV(input){
   if(isReadOnly()){alert('You have read-only access.');input.value='';return;}
   const file=input.files[0];if(!file)return;input.value='';
@@ -8,26 +19,98 @@ async function importSwyftxCSV(input){
       const text=e.target.result;const allLines=text.split('\n').map(l=>l.trim());
       const isHeaderRow=l=>{const low=l.toLowerCase();return low.includes('date')&&low.includes('event')&&low.includes('asset');};
       const tradeRows=[];let headers=null;
-      for(let i=0;i<allLines.length;i++){const line=allLines[i];if(!line)continue;if(isHeaderRow(line)){headers=line.split(',').map(h=>h.trim().replace(/^"|"$/g,'').toLowerCase());continue;}if(!headers)continue;const cols=line.split(',').map(c=>(c||'').trim().replace(/^"|"$/g,''));if(!cols[0]||cols[0].toLowerCase().includes('sub total'))continue;if(cols.length<5)continue;const get=name=>{const idx=headers.findIndex(h=>h.toLowerCase()===name.toLowerCase());return idx>=0?(cols[idx]||'').trim():'';};const event=get('event').toLowerCase();const asset=get('asset').toUpperCase();if(event!=='buy'&&event!=='sell')continue;if(!asset||asset==='AUD')continue;const amount=parseFloat(get('amount'))||0;const audVal=parseFloat(get('aud value'))||0;const fee=parseFloat(get('fee amount'))||0;const rawDate=get('date');const uuid=get('uuid');if(!amount||!audVal||!rawDate)continue;let date='';if(rawDate.includes('/')){const p=rawDate.split('/');if(p.length===3)date=p[2]+'-'+p[1].padStart(2,'0')+'-'+p[0].padStart(2,'0');}else{date=rawDate.slice(0,10);}if(!date||date.startsWith('NaN')||date.length<10)continue;
-      const price=amount>0?parseFloat((audVal/amount).toFixed(6)):0;
-      if(!price)continue;tradeRows.push({date,event,asset,amount,audVal,fee,uuid});}
+      for(let i=0;i<allLines.length;i++){
+        const line=allLines[i];
+        if(!line){headers=null;continue;}  // blank line = new section, reset headers
+        if(isHeaderRow(line)){headers=line.split(',').map(h=>h.trim().replace(/^"|"$/g,'').toLowerCase());continue;}
+        if(!headers)continue;
+        const cols=line.split(',').map(c=>(c||'').trim().replace(/^"|"$/g,''));
+        if(!cols[0]||cols[0].toLowerCase().includes('sub total'))continue;
+        if(cols.length<5)continue;
+        const get=name=>{const idx=headers.findIndex(h=>h.toLowerCase()===name.toLowerCase());return idx>=0?(cols[idx]||'').trim():'';};
+        const event=get('event').toLowerCase();
+        const asset=get('asset').toUpperCase();
+        if(event!=='buy'&&event!=='sell')continue;
+        if(!asset||asset==='AUD')continue;
+        const amount=parseFloat(get('amount'))||0;
+        // 'AUD Value' is GROSS — the fee is already embedded inside it
+        const audVal=parseFloat(get('aud value'))||0;
+        // 'Fee Amount' is the fee portion of audVal (NOT additive)
+        const fee=parseFloat(get('fee amount'))||0;
+        const rawDate=get('date');
+        const uuid=get('uuid');
+        if(!amount||!audVal||!rawDate)continue;
+        let date='';
+        if(rawDate.includes('/')){const p=rawDate.split('/');if(p.length===3)date=p[2]+'-'+p[1].padStart(2,'0')+'-'+p[0].padStart(2,'0');}
+        else{date=rawDate.slice(0,10);}
+        if(!date||date.startsWith('NaN')||date.length<10)continue;
+        const price=amount>0?parseFloat((audVal/amount).toFixed(6)):0;
+        if(!price)continue;
+        tradeRows.push({date,event,asset,amount,audVal,fee,uuid});
+      }
       if(!tradeRows.length){alert('No buy/sell trades found in this CSV.');return;}
-      let cashAcctIdx=null;if(S.cash.length>0){const opts=S.cash.map((a,i)=>(i+1)+'. '+a.name+' ($'+f(a.balance||0)+' AUD)').join('\n');const ans=prompt('Found '+tradeRows.length+' trade'+(tradeRows.length!==1?'s':'')+'.\n\nDeduct total (purchase + fee) from which cash account?\n\n'+opts+'\n\nEnter number, or 0 to skip:');if(ans===null)return;const n=parseInt(ans);if(n>=1&&n<=S.cash.length)cashAcctIdx=n-1;}
+
+      // Ask which cash account to deduct from
+      let cashAcctIdx=null;
+      if(S.cash.length>0){
+        const opts=S.cash.map((a,i)=>(i+1)+'. '+a.name+' ($'+f(a.balance||0)+' AUD)').join('\n');
+        const ans=prompt('Found '+tradeRows.length+' trade'+(tradeRows.length!==1?'s':'')+'.\n\nDeduct total from which cash account?\n(audVal already includes fees — no double-deduction)\n\n'+opts+'\n\nEnter number, or 0 to skip:');
+        if(ans===null)return;
+        const n=parseInt(ans);
+        if(n>=1&&n<=S.cash.length)cashAcctIdx=n-1;
+      }
+
       let imported=0,skipped=0;
+
       for(const row of tradeRows){
-        if(row.uuid){const isDupe=S.cry.some(h=>(h.txns||[]).some(tx=>tx.swyftxId&&tx.swyftxId===row.uuid));if(isDupe){skipped++;continue;}}
+        // Skip duplicates — only compare when uuid exists on both sides
+        if(row.uuid){
+          const isDupe=S.cry.some(h=>(h.txns||[]).some(tx=>tx.swyftxId&&tx.swyftxId===row.uuid));
+          if(isDupe){skipped++;continue;}
+        }
+
+        // Find or create holding
         let idx=S.cry.findIndex(h=>h.ticker===row.asset);
-        if(idx===-1){S.cry.push({ticker:row.asset,name:row.asset,qty:0,cost:0,txns:[]});idx=S.cry.length-1;try{await xanoAddHolding('cry');}catch(e){console.warn('xanoAddHolding failed for '+row.asset+':',e);/* keep in local state, retry will happen on next xanoUpdateHolding */}}
+        if(idx===-1){
+          S.cry.push({ticker:row.asset,name:row.asset,qty:0,cost:0,txns:[]});
+          idx=S.cry.length-1;
+          try{
+            await xanoThrottle();
+            await xanoAddHolding('cry');
+          }catch(e){
+            console.warn('xanoAddHolding failed for '+row.asset+':',e);
+            // Keep in local state — xanoUpdateHolding below will upsert it
+          }
+        }
+
         if(!S.cry[idx].txns)S.cry[idx].txns=[];
         const txnId=generateTxnId(row.date);
-        S.cry[idx].txns.push({date:row.date,side:row.event,qty:row.amount,price:parseFloat((row.audVal/row.amount).toFixed(6)),fee:row.fee,txnId,swyftxId:row.uuid,cashAcct:cashAcctIdx});
+
+        // Store price as AUD-per-unit (audVal/qty). Fee stored separately.
+        S.cry[idx].txns.push({
+          date:row.date, side:row.event, qty:row.amount,
+          price:parseFloat((row.audVal/row.amount).toFixed(6)),
+          fee:row.fee, txnId, swyftxId:row.uuid, cashAcct:cashAcctIdx
+        });
         recalcFromTxns('cry',idx);
-        try{await xanoUpdateHolding('cry',idx);await xanoAddTransaction('cry',idx);}catch(e){console.warn('Xano save failed for trade',e);}
-        // audVal is GROSS and already includes the fee — deduct audVal only, not audVal+fee
-        if(cashAcctIdx!==null&&S.cash[cashAcctIdx]){S.cash[cashAcctIdx].balance=(S.cash[cashAcctIdx].balance||0)-row.audVal;await xanoUpdateCash(cashAcctIdx);}
-        // Fee is stored on the transaction and Xano creates the ledger entry server-side via /transaction POST
+
+        try{
+          await xanoThrottle();
+          await xanoUpdateHolding('cry',idx);
+          await xanoThrottle();
+          await xanoAddTransaction('cry',idx);
+        }catch(e){console.warn('Xano save failed for trade',e);}
+
+        // Cash deduction: audVal is GROSS (fee already inside) — deduct once only
+        if(cashAcctIdx!==null&&S.cash[cashAcctIdx]){
+          S.cash[cashAcctIdx].balance=(S.cash[cashAcctIdx].balance||0)-row.audVal;
+          await xanoThrottle();
+          await xanoUpdateCash(cashAcctIdx);
+        }
+
         imported++;
       }
+
       if(imported>0){rows('cry');renderAllHoldings();renderCash();renderFees();summary();}
       alert('\u2713 Swyftx import complete!\n\n'+imported+' trade'+(imported!==1?'s':'')+' imported\nFees recorded separately in ledger\n'+skipped+' duplicate'+(skipped!==1?'s':'')+' skipped');
     }catch(err){console.error('CSV import error:',err);alert('Import failed: '+err.message);}
