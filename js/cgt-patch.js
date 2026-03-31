@@ -339,6 +339,22 @@
     var el = document.getElementById('cgt-summary-container');
     if (!el) return;
 
+    // Guard: S must be loaded from Xano before we can read transactions
+    var state = window.S;
+    if (!state || (!state.cry && !state.us)) {
+      el.innerHTML = '<div style="padding:40px;text-align:center;color:var(--text4);">' +
+        '<div style="font-size:20px;margin-bottom:12px;">⏳</div>' +
+        '<div style="font-size:14px;font-weight:500;margin-bottom:6px;">Loading portfolio data…</div>' +
+        '<div style="font-size:12px;">Please wait for the portfolio to finish loading, then click CGT Summary again.</div>' +
+        '</div>';
+      return;
+    }
+
+    // Count available data for debug
+    var totalTxns = 0;
+    (state.cry || []).forEach(function(h) { totalTxns += (h.txns || []).length; });
+    var priceCount = Object.keys(state.prices || {}).length;
+
     var result  = runCGT();
     var method  = getCGTMethod();
     var allEvs  = result.events;
@@ -470,7 +486,10 @@
       '⚠ Estimates only — verify with your SMSF accountant. ' +
       'CGT rate 15% (accumulation). 12-month discount (⅓, effective 10%) per s.115 ITAA 1997. ' +
       'Cost base includes brokerage per ATO s.110-25 ITAA 1997. ' +
-      'Parcel method: <strong style="color:var(--text3);">'+methLabel+'</strong>.' +
+      'Parcel method: <strong style="color:var(--text3);">'+methLabel+'</strong>. ' +
+      'Reading <strong style="color:var(--text3);">'+totalTxns+'</strong> transactions across ' +
+      (state.cry||[]).length+' crypto holding'+(((state.cry||[]).length)!==1?'s':'')+' · ' +
+      priceCount+' live price'+(priceCount!==1?'s':'')+' loaded.' +
     '</div>';
   };
 
@@ -522,8 +541,21 @@
      ─────────────────────────────────────────────────────────────────────
      The app's switchTab() only knows about 4 tabs. We wrap it to:
      1. Handle 'cgt' — activate the right panel/buttons ourselves
-     2. Pass everything else through to the original
+     2. When switching TO any other tab — deactivate sb-cgt/bn-cgt
+        (the original switchTab never touches these so they stay highlighted)
+     3. Pass everything else through to the original
   ──────────────────────────────────────────────────────────────────────── */
+  function setCGTNavActive(active) {
+    var sbCgt = document.getElementById('sb-cgt');
+    var bnCgt = document.getElementById('bn-cgt');
+    if (sbCgt) sbCgt.classList.toggle('active', active);
+    if (bnCgt) bnCgt.classList.toggle('active', active);
+    // Also sync the top tab-btn for CGT
+    document.querySelectorAll('.tab-btn').forEach(function(b) {
+      if (b.getAttribute('data-tab') === 'cgt') b.classList.toggle('active', active);
+    });
+  }
+
   function hookSwitchTab() {
     var tryWrap = function() {
       if (typeof window.switchTab !== 'function' || window.switchTab._cgtV4) return false;
@@ -531,37 +563,31 @@
 
       window.switchTab = function(name) {
         if (name === 'cgt') {
-          // Deactivate all standard tabs
-          document.querySelectorAll('.tab-btn').forEach(function(b) {
-            b.classList.remove('active');
-          });
-          document.querySelectorAll('.tab-panel').forEach(function(p) {
-            p.classList.remove('active');
-          });
-          // Deactivate sidebar/bottomnav items
-          ['portfolio','fees','watchlist','import'].forEach(function(t) {
-            var sb = document.getElementById('sb-' + t);
-            if (sb) sb.classList.remove('active');
-            var bn = document.getElementById('bn-' + t);
-            if (bn) bn.classList.remove('active');
-          });
-          // Activate CGT items
-          var sbCgt = document.getElementById('sb-cgt');
-          if (sbCgt) sbCgt.classList.add('active');
-          var bnCgt = document.getElementById('bn-cgt');
-          if (bnCgt) bnCgt.classList.add('active');
+          // Let the original run with a dummy name first to reset all standard panels/nav
+          // (passing a non-existent tab name clears all .active states cleanly)
+          orig.call(this, '__none__');
+
+          // Now activate just the CGT tab
+          setCGTNavActive(true);
           var panelCgt = document.getElementById('tab-cgt');
           if (panelCgt) panelCgt.classList.add('active');
-          // Hide + Add button (not relevant for CGT tab)
+
+          // Hide + Add button
           var addBtn = document.getElementById('topbarAddBtn');
           if (addBtn) addBtn.style.display = 'none';
-          // Close mobile sidebar
+
           if (typeof closeMobileSidebar === 'function') closeMobileSidebar();
-          // Render CGT content
+
           setTimeout(window.renderCGTTab, 60);
           return;
         }
-        // All other tabs — pass through to original
+
+        // Switching to any other tab — deactivate CGT nav item first
+        setCGTNavActive(false);
+        var panelCgt = document.getElementById('tab-cgt');
+        if (panelCgt) panelCgt.classList.remove('active');
+
+        // Pass through to original
         orig.call(this, name);
       };
 
@@ -578,102 +604,18 @@
   }
 
   /* ────────────────────────────────────────────────────────────────────────
-     FIX: imports.js cash account double-deduction
-     ─────────────────────────────────────────────────────────────────────
-     In imports.js: S.cash[cashAcctIdx].balance -= (row.audVal + row.fee)
-     But audVal already INCLUDES the fee, so the total deducted is audVal + fee
-     when it should just be audVal.
-
-     We patch importSwyftxCSV to wrap it and fix the cash balance afterwards.
-     Strategy: record cash balances before import, let import run, then
-     correct the over-deduction by adding back the double-counted fees.
-  ──────────────────────────────────────────────────────────────────────── */
-  function hookImport() {
-    var origImport = window.importSwyftxCSV;
-    var origUniversal = window.handleUniversalImport;
-    var origRoute = window.routeImportFile;
-
-    if (typeof origRoute === 'function' && !origRoute._cgtV4) {
-      window.routeImportFile = function(file) {
-        // Snapshot cash balances before import
-        var state = window.S;
-        var preBalances = state && state.cash
-          ? state.cash.map(function(a) { return a.balance || 0; })
-          : [];
-
-        var result = origRoute.call(this, file);
-
-        // After import completes (it's async), fix the double-deduction
-        // We also need to parse the CSV to know the total fees
-        if (file && file.name.toLowerCase().endsWith('.csv')) {
-          file.text().then(function(text) {
-            if (!text.includes('AUD Value Fee')) return;
-            var totalFees = parseSwyftxFees(text);
-            if (totalFees <= 0) return;
-
-            // The import deducted (audVal + fee) per trade but should have deducted audVal only
-            // So cash is under by totalFees — add it back
-            setTimeout(function() {
-              var st = window.S;
-              if (!st || !st.cash) return;
-              // Find which cash account was affected (the one whose balance changed most)
-              var maxChange = -Infinity;
-              var affectedIdx = -1;
-              st.cash.forEach(function(a, i) {
-                var change = preBalances[i] - (a.balance || 0);
-                if (change > maxChange) { maxChange = change; affectedIdx = i; }
-              });
-              if (affectedIdx >= 0 && maxChange > 0) {
-                st.cash[affectedIdx].balance = (st.cash[affectedIdx].balance || 0) + totalFees;
-                if (typeof renderCash === 'function') renderCash();
-                if (typeof xanoUpdateCash === 'function') {
-                  xanoUpdateCash(affectedIdx).catch(function(){});
-                }
-              }
-            }, 2000); // Wait for async import to complete
-          }).catch(function(){});
-        }
-
-        return result;
-      };
-      window.routeImportFile._cgtV4 = true;
-    }
-  }
-
-  function parseSwyftxFees(text) {
-    // Parse CSV and sum up all fee amounts for buy/sell trades
-    var lines = text.split('\n');
-    var col = null;
-    var totalFees = 0;
-
-    lines.forEach(function(line) {
-      line = line.trim();
-      if (!line) { col = null; return; }
-      if (line.includes('AUD Value Fee') && line.includes('Event')) {
-        var hdr = line.split(',').map(function(h) { return h.trim().toLowerCase(); });
-        col = {};
-        hdr.forEach(function(h, i) { col[h] = i; });
-        return;
-      }
-      if (!col) return;
-      var row = line.split(',');
-      var event = (row[col['event']] || '').toLowerCase().trim();
-      if (event !== 'buy' && event !== 'sell') return;
-      var fee = parseFloat(row[col['fee amount']]) || 0;
-      totalFees += fee;
-    });
-    return totalFees;
-  }
-
-  /* ────────────────────────────────────────────────────────────────────────
      TAB CLICK LISTENER — catches data-action="switchTab" data-tab="cgt"
+     Belt-and-braces backup for the switchTab wrapper above.
   ──────────────────────────────────────────────────────────────────────── */
   document.addEventListener('click', function(e) {
     var btn = e.target.closest('[data-action="switchTab"]');
     if (!btn) return;
-    if (btn.getAttribute('data-tab') === 'cgt') {
-      // switchTab wrapper handles this, but fire renderCGTTab as backup
+    var tab = btn.getAttribute('data-tab');
+    if (tab === 'cgt') {
       setTimeout(function() { window.renderCGTTab(); }, 100);
+    } else if (tab) {
+      // Switching away from CGT — ensure CGT nav deactivates
+      setTimeout(function() { setCGTNavActive(false); }, 10);
     }
   }, false);
 
@@ -682,9 +624,6 @@
   ──────────────────────────────────────────────────────────────────────── */
   function boot() {
     hookSwitchTab();
-    // Hook import after app has booted (DOMContentLoaded fires first)
-    setTimeout(hookImport, 1000);
-    setTimeout(hookImport, 3000);
   }
 
   if (document.readyState === 'loading') {
