@@ -86,7 +86,7 @@
 
     // Only crypto assets for now (Swyftx imports go into S.cry)
     // Can extend to S.us / S.asx / S.met in future
-    var state = window.S;
+    var state = (typeof S !== "undefined" ? S : window.S);
     if (!state) return { acq: acq, disp: disp };
 
     ['cry'].forEach(function(type) {
@@ -148,7 +148,7 @@
      PRICES — read directly from S.prices (already populated by fetchCry)
   ──────────────────────────────────────────────────────────────────────── */
   function getLivePrice(ticker) {
-    var state = window.S;
+    var state = (typeof S !== "undefined" ? S : window.S);
     if (!state || !state.prices) return 0;
     // Try all asset type prefixes
     var keys = ['cry:' + ticker, 'us:' + ticker, 'asx:' + ticker, 'met:' + ticker];
@@ -339,9 +339,12 @@
     var el = document.getElementById('cgt-summary-container');
     if (!el) return;
 
-    // Guard: S must be loaded from Xano before we can read transactions
-    var state = window.S;
-    if (!state || (!state.cry && !state.us)) {
+    // Guard: portfolio must be loaded from Xano before we can read transactions.
+    // S is always defined (empty arrays), so we check AUTH.currentPortfolioId
+    // which is only set after bootApp() / loadPortfolio() completes.
+    var state = (typeof S !== 'undefined' ? S : window.S);
+    var auth = (typeof AUTH !== 'undefined' ? AUTH : window.AUTH);
+    if (!state || !auth || !auth.currentPortfolioId) {
       el.innerHTML = '<div style="padding:40px;text-align:center;color:var(--text4);">' +
         '<div style="font-size:20px;margin-bottom:12px;">⏳</div>' +
         '<div style="font-size:14px;font-weight:500;margin-bottom:6px;">Loading portfolio data…</div>' +
