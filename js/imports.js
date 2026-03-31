@@ -15,15 +15,16 @@ async function importSwyftxCSV(input){
       let cashAcctIdx=null;if(S.cash.length>0){const opts=S.cash.map((a,i)=>(i+1)+'. '+a.name+' ($'+f(a.balance||0)+' AUD)').join('\n');const ans=prompt('Found '+tradeRows.length+' trade'+(tradeRows.length!==1?'s':'')+'.\n\nDeduct total (purchase + fee) from which cash account?\n\n'+opts+'\n\nEnter number, or 0 to skip:');if(ans===null)return;const n=parseInt(ans);if(n>=1&&n<=S.cash.length)cashAcctIdx=n-1;}
       let imported=0,skipped=0;
       for(const row of tradeRows){
-        if(row.uuid){const isDupe=S.cry.some(h=>(h.txns||[]).some(tx=>tx.swyftxId===row.uuid));if(isDupe){skipped++;continue;}}
+        if(row.uuid){const isDupe=S.cry.some(h=>(h.txns||[]).some(tx=>tx.swyftxId&&tx.swyftxId===row.uuid));if(isDupe){skipped++;continue;}}
         let idx=S.cry.findIndex(h=>h.ticker===row.asset);
-        if(idx===-1){S.cry.push({ticker:row.asset,name:row.asset,qty:0,cost:0,txns:[]});idx=S.cry.length-1;try{await xanoAddHolding('cry');}catch(e){S.cry.pop();continue;}}
+        if(idx===-1){S.cry.push({ticker:row.asset,name:row.asset,qty:0,cost:0,txns:[]});idx=S.cry.length-1;try{await xanoAddHolding('cry');}catch(e){console.warn('xanoAddHolding failed for '+row.asset+':',e);/* keep in local state, retry will happen on next xanoUpdateHolding */}}
         if(!S.cry[idx].txns)S.cry[idx].txns=[];
         const txnId=generateTxnId(row.date);
         S.cry[idx].txns.push({date:row.date,side:row.event,qty:row.amount,price:parseFloat((row.audVal/row.amount).toFixed(6)),fee:row.fee,txnId,swyftxId:row.uuid,cashAcct:cashAcctIdx});
         recalcFromTxns('cry',idx);
         try{await xanoUpdateHolding('cry',idx);await xanoAddTransaction('cry',idx);}catch(e){console.warn('Xano save failed for trade',e);}
-        if(cashAcctIdx!==null&&S.cash[cashAcctIdx]){S.cash[cashAcctIdx].balance=(S.cash[cashAcctIdx].balance||0)-(row.audVal+row.fee);await xanoUpdateCash(cashAcctIdx);}
+        // audVal is GROSS and already includes the fee — deduct audVal only, not audVal+fee
+        if(cashAcctIdx!==null&&S.cash[cashAcctIdx]){S.cash[cashAcctIdx].balance=(S.cash[cashAcctIdx].balance||0)-row.audVal;await xanoUpdateCash(cashAcctIdx);}
         // Fee is stored on the transaction and Xano creates the ledger entry server-side via /transaction POST
         imported++;
       }
@@ -119,5 +120,3 @@ async function importSwyftxCSVText(text,statusEl){
 async function importCommsecIntlCSVText(text,statusEl){
   if(statusEl)setImportStatus(statusEl,'error','CommSec CSV is no longer supported \u2014 please use the HTML Trade Confirmation file.');
 }
-
-
