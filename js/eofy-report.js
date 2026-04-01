@@ -126,7 +126,7 @@ function generateEOFYReport() {
         var fee   = pf(tx.fee);
         // Swyftx stores price as audVal/qty where audVal is GROSS (fee inside).
         // CommSec/manual stores price as net per-unit (fee is additive).
-        var isSwyftx = !!tx.swyftxId;
+        var isSwyftx = !!(tx.swyftxId || (tx.source_id && (String(tx.source_id).startsWith('ord_') || String(tx.source_id).startsWith('dep_'))));
         // netTotal = the trade value excluding brokerage
         var netTotal = isSwyftx ? gross - fee : gross;
         // grossTotal = actual cash movement
@@ -183,7 +183,7 @@ function generateEOFYReport() {
         var id    = tx.txnId || tx.swyftxId || tx.commsecIntlId || (ticker+'_'+tx.date+'_'+qty);
         // Swyftx: price = audVal/qty where audVal is GROSS (fee inside) → grossCost = gross
         // CommSec/manual: price is net per-unit → grossCost = gross + fee
-        var isSwyftx  = !!tx.swyftxId;
+        var isSwyftx  = !!(tx.swyftxId || (tx.source_id && (String(tx.source_id).startsWith('ord_') || String(tx.source_id).startsWith('dep_'))));
         var grossCost = isSwyftx ? gross : gross + fee;
         if (tx.side==='buy') {
           acq.push({ id:id, asset:ticker, date:tx.date, qty:qty, grossCost:grossCost });
