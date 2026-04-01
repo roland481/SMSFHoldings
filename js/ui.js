@@ -243,7 +243,14 @@ function delTransfer(i){
   S.transfers.splice(i,1);save();renderCash();renderFees();
 }
 
-function recalcFromTxns(type,i){const txns=S[type][i].txns||[];if(!txns.length)return;let totalQty=0,totalCost=0;[...txns].sort((a,b)=>new Date(a.date)-new Date(b.date)).forEach(tx=>{if(tx.side==='buy'){totalCost+=tx.qty*tx.price+(tx.fee||0);totalQty+=tx.qty;}else{const sf=Math.min(tx.qty/(totalQty||1),1);totalCost-=totalCost*sf;totalQty-=tx.qty;if(totalQty<0)totalQty=0;if(totalCost<0)totalCost=0;}});S[type][i].qty=parseFloat(totalQty.toFixed(8));S[type][i].cost=totalQty>0?parseFloat((totalCost/totalQty).toFixed(6)):0;}
+function recalcFromTxns(type,i){const txns=S[type][i].txns||[];if(!txns.length)return;let totalQty=0,totalCost=0;[...txns].sort((a,b)=>new Date(a.date)-new Date(b.date)).forEach(tx=>{if(tx.side==='buy'){
+  // Swyftx: price = audVal/qty where audVal is GROSS (fee inside) → cost = qty*price
+  // CommSec/manual: price is net per-unit → cost = qty*price + fee
+  // Detect Swyftx via swyftxId OR source_id starting with 'ord_'
+  const sid=tx.swyftxId||tx.source_id||'';
+  const isSwyftx=!!(tx.swyftxId||(sid&&(String(sid).startsWith('ord_')||String(sid).startsWith('dep_'))));
+  const cost=isSwyftx?tx.qty*tx.price:tx.qty*tx.price+(tx.fee||0);
+  totalCost+=cost;totalQty+=tx.qty;}else{const sf=Math.min(tx.qty/(totalQty||1),1);totalCost-=totalCost*sf;totalQty-=tx.qty;if(totalQty<0)totalQty=0;if(totalCost<0)totalCost=0;}});S[type][i].qty=parseFloat(totalQty.toFixed(8));S[type][i].cost=totalQty>0?parseFloat((totalCost/totalQty).toFixed(6)):0;}
 function recalcAll(){['us','asx','cry','met'].forEach(type=>{S[type].forEach((item,i)=>{if((item.txns||[]).length)recalcFromTxns(type,i);});});}
 
 async function upField(t,i,field,v){
@@ -532,3 +539,4 @@ function renderAllHoldings(){
   const allTotal=allRows.reduce((s,row)=>s+row.valAUD,0);const totEl=document.getElementById('allSecTot');if(totEl)totEl.textContent=allTotal>0?'$'+f(allTotal)+' AUD':'';
   setTimeout(applyRowTints,50);
 }
+
