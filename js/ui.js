@@ -341,7 +341,7 @@ async function fetchWl(){
       const FIELD_MAP = {'XAU':'goldGram','GOLD':'goldGram','AU':'goldGram','GLD':'goldGram','XAG':'silverGram','SILVER':'silverGram','AG':'silverGram','SLV':'silverGram','XPD':'palladiumGram','PALLADIUM':'palladiumGram','PD':'palladiumGram','XPT':'platinumGram','PLATINUM':'platinumGram','PT':'platinumGram'};
       const TROY = 31.1035;
       try {
-        const res = await fetch('https://x7so-voll-zqb3.a2.xano.io/api:bS2r6m6-/roland_pricing_api');
+        const res = await fetch(XANO_BASE + '/metals/price', { headers: authHeaders() });
         if(!res.ok) throw new Error('HTTP '+res.status);
         const data = await res.json();
         metalItems.forEach(w => {
@@ -468,7 +468,8 @@ async function fetchMetals(){
   };
 
   try {
-    const res = await fetch('https://x7so-voll-zqb3.a2.xano.io/api:bS2r6m6-/roland_pricing_api');
+    // Call via SMSF Xano proxy — keeps auth server-side, avoids CORS issues
+    const res = await fetch(XANO_BASE + '/metals/price', { headers: authHeaders() });
     if(!res.ok) throw new Error('HTTP ' + res.status);
     const data = await res.json();
 
