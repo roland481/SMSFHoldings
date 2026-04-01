@@ -167,9 +167,9 @@ async function loadPortfolio(portfolioId) {
         fee:        tx.fee || 0,
         txnId:      tx.txn_id,
         source_id:  tx.source_id,
-        // Restore swyftxId so recalcFromTxns can detect Swyftx trades
-        // (Swyftx UUIDs start with 'ord_' or 'dep_'; CommSec IDs start with 'CSINTL_')
-        swyftxId:   tx.source_id && !String(tx.source_id).startsWith('CSINTL_') ? tx.source_id : undefined,
+        // Restore swyftxId so recalcFromTxns can detect Swyftx trades.
+        // Swyftx source_ids always start with 'ord_' or 'dep_'.
+        swyftxId:   tx.source_id && (String(tx.source_id).startsWith('ord_') || String(tx.source_id).startsWith('dep_')) ? tx.source_id : undefined,
         cashAcct:   cashIdx >= 0 ? cashIdx : null,
         priceExFee: tx.price_ex_fee || false,
       });
