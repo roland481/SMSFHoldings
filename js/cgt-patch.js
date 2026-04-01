@@ -99,7 +99,7 @@
           var id    = tx.txnId || tx.swyftxId || tx.commsecIntlId || (ticker + '_' + tx.date + '_' + qty);
           // Swyftx: price = audVal/qty where audVal is GROSS (fee inside) → cost base = gross
           // CommSec/manual: price is net per-unit → cost base = gross + fee
-          var isSwyftx  = !!tx.swyftxId;
+          var isSwyftx  = !!(tx.swyftxId || (tx.source_id && (String(tx.source_id).startsWith('ord_') || String(tx.source_id).startsWith('dep_'))));
           var grossCost = isSwyftx ? gross : gross + fee;
 
           if (tx.side === 'buy') {
