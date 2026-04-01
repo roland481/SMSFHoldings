@@ -122,10 +122,20 @@ function generateEOFYReport() {
     state[type].forEach(function(h) {
       (h.txns||[]).forEach(function(tx) {
         if (!inFY(tx.date)) return;
+        var gross = pf(tx.qty) * pf(tx.price);
+        var fee   = pf(tx.fee);
+        // Swyftx stores price as audVal/qty where audVal is GROSS (fee inside).
+        // CommSec/manual stores price as net per-unit (fee is additive).
+        var isSwyftx = !!tx.swyftxId;
+        // netTotal = the trade value excluding brokerage
+        var netTotal = isSwyftx ? gross - fee : gross;
+        // grossTotal = actual cash movement
+        var grossTotal = isSwyftx ? gross : gross + fee;
         fyTrades.push({
           date: tx.date, ticker: h.ticker, name: h.name,
           side: tx.side, qty: tx.qty, price: tx.price,
-          fee: tx.fee, total: tx.qty * tx.price
+          fee: fee, netTotal: netTotal, grossTotal: grossTotal,
+          isSwyftx: isSwyftx
         });
       });
     });
@@ -134,8 +144,9 @@ function generateEOFYReport() {
 
   var fyBuys  = fyTrades.filter(function(t){ return t.side==='buy'; });
   var fySells = fyTrades.filter(function(t){ return t.side==='sell'; });
-  var totalBought = fyBuys.reduce(function(s,t){ return s+t.total+pf(t.fee); }, 0);
-  var totalSold   = fySells.reduce(function(s,t){ return s+t.total-pf(t.fee); }, 0);
+  // totalBought/Sold = actual cash movements (gross)
+  var totalBought = fyBuys.reduce(function(s,t){ return s+t.grossTotal; }, 0);
+  var totalSold   = fySells.reduce(function(s,t){ return s+t.grossTotal; }, 0);
 
   // ── 5. CGT (reuse cgt-patch engine if available) ─────────────────────────
   var cgtEvents = [];
@@ -268,8 +279,8 @@ function generateEOFYReport() {
           '<td style="color:'+(isBuy?'#2d7d46':'#b91c1c')+';font-weight:600;">'+(isBuy?'BUY':'SELL')+'</td>' +
           '<td class="r">'+pf(t.qty).toLocaleString('en-AU',{maximumFractionDigits:6})+'</td>' +
           '<td class="r">'+aud(t.price)+'</td>' +
-          '<td class="r">'+aud(t.total)+'</td>' +
-          '<td class="r">'+aud(pf(t.fee))+'</td>' +
+          '<td class="r">'+aud(t.netTotal)+'</td>' +
+          '<td class="r">'+aud(t.fee)+'</td>' +
         '</tr>';
       }).join('');
 
@@ -292,9 +303,34 @@ function generateEOFYReport() {
       }).join('');
 
   // Fees breakdown
-  var feesHTML = fyFees.length === 0
+  // Fees breakdown — manual fees + trade brokerage
+  var brokerageFees = [];
+  ['us','asx','cry','met'].forEach(function(type) {
+    state[type].forEach(function(h) {
+      (h.txns||[]).forEach(function(tx) {
+        if (!inFY(tx.date)) return;
+        if (pf(tx.fee) <= 0) return;
+        brokerageFees.push({
+          date: tx.date,
+          desc: 'Brokerage — ' + (tx.side==='buy'?'Buy':'Sell') + ' ' + h.ticker,
+          cat:  'Transaction Fee',
+          amount: pf(tx.fee)
+        });
+      });
+    });
+  });
+
+  var allFees = fyFees.map(function(e) {
+    return { date:e.date, desc:e.desc, cat:e.cat, amount:pf(e.amount) };
+  }).concat(brokerageFees);
+  allFees.sort(function(a,b){ return a.date.localeCompare(b.date); });
+
+  var totalAllFees = allFees.reduce(function(s,e){ return s+e.amount; }, 0);
+  var totalBrokerage = brokerageFees.reduce(function(s,e){ return s+e.amount; }, 0);
+
+  var feesHTML = allFees.length === 0
     ? '<tr><td colspan="4" style="text-align:center;color:#999;padding:12px;">No fees recorded</td></tr>'
-    : fyFees.map(function(e) {
+    : allFees.map(function(e) {
         return '<tr>'+
           '<td>'+fmtDate(e.date)+'</td>'+
           '<td>'+e.desc+'</td>'+
@@ -498,7 +534,7 @@ ${section('3. Financial Year Summary — ' + fyLabel)}
 </div>
 <div class="cards">
   ${summaryCard('Franking Credits', aud(totalFranking), 'Attached to dividends', '#b45309')}
-  ${summaryCard('Total Fees & Expenses', aud(totalFees), 'Admin, audit, brokerage etc.', '#b91c1c')}
+  ${summaryCard('Total Fees & Expenses', aud(totalAllFees), 'Admin, audit, brokerage etc.', '#b91c1c')}
   ${summaryCard('Total Bought', aud(totalBought), fyBuys.length+' buy trade'+(fyBuys.length!==1?'s':''), '#5757e8')}
   ${summaryCard('Total Sold', aud(totalSold), fySells.length+' sell trade'+(fySells.length!==1?'s':''), '#b45309')}
 </div>
@@ -538,10 +574,11 @@ ${section('6. Fees & Expenses — ' + fyLabel)}
     <th>Date</th><th>Description</th><th>Category</th><th class="r">Amount (AUD)</th>
   </tr></thead>
   <tbody>${feesHTML}</tbody>
-  <tfoot><tr>
-    <td colspan="3">Total fees & expenses</td>
-    <td class="r">${aud(totalFees)}</td>
-  </tr></tfoot>
+  <tfoot>
+    ${totalBrokerage > 0 ? '<tr><td colspan="3" style="color:#666;">Brokerage subtotal</td><td class="r" style="color:#666;">'+aud(totalBrokerage)+'</td></tr>' : ''}
+    ${totalFees > 0 ? '<tr><td colspan="3" style="color:#666;">Other fees subtotal</td><td class="r" style="color:#666;">'+aud(totalFees)+'</td></tr>' : ''}
+    <tr><td colspan="3">Total fees & expenses</td><td class="r">${aud(totalAllFees)}</td></tr>
+  </tfoot>
 </table>
 
 <!-- ══ 7. TRADES ══ -->
@@ -551,7 +588,7 @@ ${section('7. Trades — ' + fyLabel)}
   <thead><tr>
     <th>Date</th><th>Ticker</th><th>Name</th><th>Side</th>
     <th class="r">Qty</th><th class="r">Price (AUD)</th>
-    <th class="r">Total (AUD)</th><th class="r">Fee (AUD)</th>
+    <th class="r">Total (excl. brokerage)</th><th class="r">Fee (AUD)</th>
   </tr></thead>
   <tbody>${tradesHTML}</tbody>
   <tfoot><tr>
