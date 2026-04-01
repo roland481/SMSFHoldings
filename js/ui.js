@@ -336,7 +336,21 @@ async function fetchWl(){
     ...usItems.map(async w=>{try{const res=await fetch(`https://finnhub.io/api/v1/quote?symbol=${w.ticker}&token=${FINHUB_KEY}`);const d=await res.json();if(d&&d.c&&d.c>0){S.prices['wl:us:'+w.ticker]={price:d.c/r,change:d.pc>0?((d.c-d.pc)/d.pc*100):0};ok=true;}}catch(e){}}),
     ...asxItems.map(async w=>{try{const yahooUrl=`https://query1.finance.yahoo.com/v8/finance/chart/${w.ticker}.AX?interval=1d&range=2d`;const proxyUrl=`https://api.allorigins.win/get?url=${encodeURIComponent(yahooUrl)}`;const res=await fetch(proxyUrl);const outer=await res.json();if(!outer.contents)return;const d=JSON.parse(outer.contents);const meta=d?.chart?.result?.[0]?.meta;if(meta&&meta.regularMarketPrice>0){const prev=meta.chartPreviousClose||meta.previousClose||meta.regularMarketPrice;S.prices['wl:asx:'+w.ticker]={price:meta.regularMarketPrice,change:prev>0?((meta.regularMarketPrice-prev)/prev*100):0};ok=true;}}catch(e){}}),
     cryptoItems.length?fetch(`https://api.coingecko.com/api/v3/simple/price?ids=${cryptoItems.map(w=>CID[w.ticker]||w.ticker.toLowerCase()).join(',')}&vs_currencies=aud&include_24hr_change=true`).then(r=>r.json()).then(d=>{cryptoItems.forEach(w=>{const id=CID[w.ticker]||w.ticker.toLowerCase();if(d[id]){S.prices['wl:crypto:'+w.ticker]={price:d[id].aud,change:d[id].aud_24h_change};ok=true;}});}).catch(()=>{}):Promise.resolve(),
-    ...metalItems.map(async w=>{try{const res=await fetch(XANO_BASE+'/metals/price?symbol='+w.ticker,{headers:authHeaders()});const raw=await res.json();const d=raw.response&&raw.response.result?raw.response.result:raw;if(d&&d.price>0){S.prices['wl:metal:'+w.ticker]={price:d.price,change:d.chp!=null?d.chp:0};ok=true;}}catch(e){}}),
+    metalItems.length ? (async () => {
+      // Same roland_pricing_api used for portfolio metals — per-gram × 31.1035 = per troy oz
+      const FIELD_MAP = {'XAU':'goldGram','GOLD':'goldGram','AU':'goldGram','GLD':'goldGram','XAG':'silverGram','SILVER':'silverGram','AG':'silverGram','SLV':'silverGram','XPD':'palladiumGram','PALLADIUM':'palladiumGram','PD':'palladiumGram','XPT':'platinumGram','PLATINUM':'platinumGram','PT':'platinumGram'};
+      const TROY = 31.1035;
+      try {
+        const res = await fetch('https://x7so-voll-zqb3.a2.xano.io/api:bS2r6m6-/roland_pricing_api');
+        if(!res.ok) throw new Error('HTTP '+res.status);
+        const data = await res.json();
+        metalItems.forEach(w => {
+          const field = FIELD_MAP[w.ticker.toUpperCase()];
+          const price = field ? parseFloat(data[field]) : 0;
+          if(price > 0) { S.prices['wl:metal:'+w.ticker]={price:price*TROY,change:0}; ok=true; }
+        });
+      } catch(e) { console.warn('Watchlist metal fetch failed:', e); }
+    })() : Promise.resolve(),
   ]);
   setDot('wlDot',ok?'live':'err');renderWl();
 }
@@ -432,17 +446,57 @@ async function fetchASX(){setDot('asxDot','loading');clearErr('asx');const ticke
     }
   }catch(e){}}));setDot('asxDot',ok?'live':'err');if(!ok)showErr('asx','Could not load ASX prices — check ticker is correct (e.g. CBA, BHP, SVL).');rows('asx');}
 async function fetchCry(){setDot('crypDot','loading');const coins=S.cry.map(a=>CID[a.ticker.toUpperCase()]||a.ticker.toLowerCase());if(!coins.length){setDot('crypDot','stale');return;}try{const r=await fetch(`https://api.coingecko.com/api/v3/simple/price?ids=${coins.join(',')}&vs_currencies=aud&include_24hr_change=true`);const d=await r.json();S.cry.forEach(item=>{const id=CID[item.ticker.toUpperCase()]||item.ticker.toLowerCase();if(d[id])S.prices['cry:'+item.ticker]={price:d[id].aud,change:d[id].aud_24h_change};});setDot('crypDot','live');}catch(e){setDot('crypDot','err');}rows('cry');}
-async function fetchMetals(){setDot('metDot','loading');clearErr('met');if(!S.met.length){setDot('metDot','stale');return;}let ok=false;await Promise.all(S.met.map(async item=>{try{
-    // GoldAPI.io via Xano proxy — API key stays server-side
-    const res=await fetch(XANO_BASE+'/metals/price?symbol='+item.ticker.toUpperCase(),{headers:authHeaders()});
-    const raw=await res.json();
-    const d=raw.response&&raw.response.result?raw.response.result:raw;
-    if(d&&d.price&&d.price>0){
-      const change=d.chp!=null?d.chp:(d.ch!=null&&d.price>0?(d.ch/d.price*100):0);
-      S.prices['met:'+item.ticker]={price:d.price,change};
-      ok=true;
-    }
-  }catch(e){console.warn('Metal fetch failed:',item.ticker,e);}}));setDot('metDot',ok?'live':'err');if(!ok)showErr('met','Could not load metal prices.');rows('met');}
+async function fetchMetals(){
+  setDot('metDot','loading');
+  clearErr('met');
+  if(!S.met.length){setDot('metDot','stale');return;}
+
+  // ── Ticker → API field mapping ──────────────────────────────
+  // roland_pricing_api returns per-GRAM prices in AUD.
+  // Metal holdings are tracked in troy ounces (1 troy oz = 31.1035 g)
+  // so we multiply by 31.1035 to get the AUD price per troy ounce.
+  const TROY_OZ_IN_GRAMS = 31.1035;
+  const FIELD_MAP = {
+    // Gold
+    'XAU':'goldGram','GOLD':'goldGram','AU':'goldGram','GLD':'goldGram',
+    // Silver
+    'XAG':'silverGram','SILVER':'silverGram','AG':'silverGram','SLV':'silverGram',
+    // Palladium
+    'XPD':'palladiumGram','PALLADIUM':'palladiumGram','PD':'palladiumGram',
+    // Platinum
+    'XPT':'platinumGram','PLATINUM':'platinumGram','PT':'platinumGram',
+  };
+
+  try {
+    const res = await fetch('https://x7so-voll-zqb3.a2.xano.io/api:bS2r6m6-/roland_pricing_api');
+    if(!res.ok) throw new Error('HTTP ' + res.status);
+    const data = await res.json();
+
+    // data shape: { goldGram, silverGram, palladiumGram, platinumGram, updatedTime, ... }
+    let ok = false;
+    S.met.forEach(item => {
+      const field = FIELD_MAP[item.ticker.toUpperCase()];
+      if(!field) {
+        console.warn('fetchMetals: no field mapping for ticker', item.ticker);
+        return;
+      }
+      const price = parseFloat(data[field]) * TROY_OZ_IN_GRAMS;
+      if(price > 0) {
+        // API doesn't provide a % change — set to 0 (no 24h change available)
+        S.prices['met:' + item.ticker] = { price, change: 0 };
+        ok = true;
+      }
+    });
+
+    setDot('metDot', ok ? 'live' : 'err');
+    if(!ok) showErr('met', 'Metal prices loaded but no matching tickers found. Check your ticker names match: XAU, XAG, XPD, XPT.');
+  } catch(e) {
+    console.warn('fetchMetals error:', e);
+    setDot('metDot', 'err');
+    showErr('met', 'Could not load metal prices: ' + e.message);
+  }
+  rows('met');
+}
   
 
 async function refreshAll(){const btn=document.getElementById('rfBtn'),icon=document.getElementById('rfIcon');btn.disabled=true;icon.classList.add('spin');try{await fetchRate();await Promise.allSettled([fetchUS(),fetchASX(),fetchCry(),fetchMetals(),fetchWl()]);summary();renderAllHoldings();renderAllocTable();
@@ -477,4 +531,3 @@ function renderAllHoldings(){
   const allTotal=allRows.reduce((s,row)=>s+row.valAUD,0);const totEl=document.getElementById('allSecTot');if(totEl)totEl.textContent=allTotal>0?'$'+f(allTotal)+' AUD':'';
   setTimeout(applyRowTints,50);
 }
-
