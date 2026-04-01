@@ -84,20 +84,19 @@
   function buildCGTInputs() {
     var acq = [], disp = [];
 
-    // Only crypto assets for now (Swyftx imports go into S.cry)
-    // Can extend to S.us / S.asx / S.met in future
-    var state = (typeof S !== "undefined" ? S : window.S);
+    var state = (typeof S !== 'undefined' ? S : window.S);
     if (!state) return { acq: acq, disp: disp };
 
-    ['cry'].forEach(function(type) {
+    // Read all asset types: crypto, US stocks, ASX stocks, metals
+    ['cry', 'us', 'asx', 'met'].forEach(function(type) {
       (state[type] || []).forEach(function(holding) {
         var ticker = (holding.ticker || '').toUpperCase();
         (holding.txns || []).forEach(function(tx) {
           var qty   = pf(tx.qty);
           var price = pf(tx.price);   // AUD per unit stored on txn
           var fee   = pf(tx.fee);
-          var gross = qty * price;    // total AUD before fee
-          var id    = tx.txnId || tx.swyftxId || (ticker + '_' + tx.date + '_' + qty);
+          var gross = qty * price;
+          var id    = tx.txnId || tx.swyftxId || tx.commsecIntlId || (ticker + '_' + tx.date + '_' + qty);
 
           if (tx.side === 'buy') {
             acq.push({
@@ -105,7 +104,7 @@
               asset:     ticker,
               date:      tx.date,
               qty:       qty,
-              // Cost base = gross + fee (fee is capitalised per ATO s.110-25)
+              // Cost base = gross + fee (fee capitalised per ATO s.110-25)
               grossCost: gross + fee
             });
           } else if (tx.side === 'sell') {
@@ -114,7 +113,7 @@
               asset:         ticker,
               date:          tx.date,
               qty:           qty,
-              // Proceeds = gross - fee (net proceeds for CGT)
+              // Net proceeds = gross - fee
               grossProceeds: gross,
               fee:           fee,
               type:          'sale'
@@ -148,13 +147,19 @@
      PRICES — read directly from S.prices (already populated by fetchCry)
   ──────────────────────────────────────────────────────────────────────── */
   function getLivePrice(ticker) {
-    var state = (typeof S !== "undefined" ? S : window.S);
+    var state = (typeof S !== 'undefined' ? S : window.S);
     if (!state || !state.prices) return 0;
-    // Try all asset type prefixes
     var keys = ['cry:' + ticker, 'us:' + ticker, 'asx:' + ticker, 'met:' + ticker];
     for (var i = 0; i < keys.length; i++) {
       var p = state.prices[keys[i]];
-      if (p && p.price > 0) return p.price;
+      if (p && p.price > 0) {
+        // US prices are stored in USD — convert to AUD for CGT
+        if (keys[i].startsWith('us:')) {
+          var rate = pf(state.audUsd) || 0.64;
+          return p.price / rate;
+        }
+        return p.price;
+      }
     }
     return 0;
   }
