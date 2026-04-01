@@ -178,12 +178,17 @@ function generateEOFYReport() {
     state[type].forEach(function(h) {
       var ticker = h.ticker.toUpperCase();
       (h.txns||[]).forEach(function(tx) {
-        var qty = pf(tx.qty), price = pf(tx.price), fee = pf(tx.fee);
+        var qty   = pf(tx.qty), price = pf(tx.price), fee = pf(tx.fee);
         var gross = qty * price;
-        var id = tx.txnId || tx.swyftxId || tx.commsecIntlId || (ticker+'_'+tx.date+'_'+qty);
+        var id    = tx.txnId || tx.swyftxId || tx.commsecIntlId || (ticker+'_'+tx.date+'_'+qty);
+        // Swyftx: price = audVal/qty where audVal is GROSS (fee inside) → grossCost = gross
+        // CommSec/manual: price is net per-unit → grossCost = gross + fee
+        var isSwyftx  = !!tx.swyftxId;
+        var grossCost = isSwyftx ? gross : gross + fee;
         if (tx.side==='buy') {
-          acq.push({ id:id, asset:ticker, date:tx.date, qty:qty, grossCost:gross+fee });
+          acq.push({ id:id, asset:ticker, date:tx.date, qty:qty, grossCost:grossCost });
         } else if (tx.side==='sell') {
+          // For sells: net proceeds = gross - fee for Swyftx, gross - fee for CommSec too
           disp.push({ id:id, asset:ticker, date:tx.date, qty:qty, grossProceeds:gross, fee:fee });
         }
       });
