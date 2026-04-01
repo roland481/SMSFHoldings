@@ -361,6 +361,7 @@
         <span class="sec-tot" id="feesSecTot"></span>
         <button class="addbtn write-only" data-action="openAddModal" style="background:linear-gradient(135deg,var(--gold),var(--gold2));color:#0c0e14;border-color:transparent;font-weight:600;">+ Add</button>
         <button class="csvbtn" data-action="exportCSV">⬇ Export FY CSV</button>
+        <button class="csvbtn" onclick="generateEOFYReport()" style="background:linear-gradient(135deg,#5757e8,#5754fd);color:#fff;border-color:transparent;">📄 EOFY Report</button>
       </div>
     </div>
     <div style="padding:10px 14px 0;display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
@@ -759,6 +760,7 @@
 <!-- CGT Engine — must load before cgt-patch.js -->
 <script src="js/cgt.js"></script>
 <script src="js/cgt-patch.js"></script>
+<script src="js/eofy-report.js"></script>
 
 </body>
 </html>
