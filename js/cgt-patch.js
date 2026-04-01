@@ -93,10 +93,14 @@
         var ticker = (holding.ticker || '').toUpperCase();
         (holding.txns || []).forEach(function(tx) {
           var qty   = pf(tx.qty);
-          var price = pf(tx.price);   // AUD per unit stored on txn
+          var price = pf(tx.price);
           var fee   = pf(tx.fee);
           var gross = qty * price;
           var id    = tx.txnId || tx.swyftxId || tx.commsecIntlId || (ticker + '_' + tx.date + '_' + qty);
+          // Swyftx: price = audVal/qty where audVal is GROSS (fee inside) → cost base = gross
+          // CommSec/manual: price is net per-unit → cost base = gross + fee
+          var isSwyftx  = !!tx.swyftxId;
+          var grossCost = isSwyftx ? gross : gross + fee;
 
           if (tx.side === 'buy') {
             acq.push({
@@ -104,8 +108,7 @@
               asset:     ticker,
               date:      tx.date,
               qty:       qty,
-              // Cost base = gross + fee (fee capitalised per ATO s.110-25)
-              grossCost: gross + fee
+              grossCost: grossCost
             });
           } else if (tx.side === 'sell') {
             disp.push({
