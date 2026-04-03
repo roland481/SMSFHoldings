@@ -68,9 +68,10 @@
     <div style="display:flex;flex-direction:column;gap:1px;"><span class="sb-label" style="font-family:Arial,Helvetica,sans-serif;font-size:15px;letter-spacing:-0.03em;font-weight:800;">SMSF</span><span class="sb-label" style="font-size:9px;text-transform:uppercase;letter-spacing:0.1em;color:var(--text3);font-weight:500;">Portfolio Tracker</span></div>
   </div>
   <div id="sb-search" style="padding:10px 12px 4px;">
-    <div style="display:flex;align-items:center;gap:8px;background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:7px 12px;">
+    <div style="display:flex;align-items:center;gap:8px;background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:7px 12px;transition:border-color 0.15s;" onclick="this.querySelector('input').focus()">
       <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="var(--text4)" stroke-width="1.5" stroke-linecap="round"><circle cx="7" cy="7" r="5"/><path d="M11 11l2.5 2.5"/></svg>
-      <span class="sb-label" style="font-size:12px;color:var(--text4);">Search...</span>
+      <input id="sidebarSearch" type="text" placeholder="Search holdings..." oninput="onSidebarSearch(this.value)" style="background:none;border:none;outline:none;font-size:12px;color:var(--text);font-family:Arial,Helvetica,sans-serif;width:100%;caret-color:var(--accent);" autocomplete="off" spellcheck="false">
+      <button id="sidebarSearchClear" onclick="clearSidebarSearch()" style="display:none;background:none;border:none;color:var(--text4);cursor:pointer;padding:0;line-height:1;font-size:14px;">✕</button>
     </div>
   </div>
   <div class="sb-nav">
@@ -223,11 +224,11 @@
   <div class="sessions" id="sessions"></div>
 
   <div class="tab-bar">
-    <button class="tab-btn active" data-action="switchTab" data-tab="portfolio">📊 Portfolio</button>
-    <button class="tab-btn" data-action="switchTab" data-tab="fees">🧾 Transactions</button>
-    <button class="tab-btn" data-action="switchTab" data-tab="cgt">📈 CGT</button>
-    <button class="tab-btn" data-action="switchTab" data-tab="watchlist">👁 Watchlist</button>
-    <button class="tab-btn" data-action="switchTab" data-tab="import">⬇ Import</button>
+    <button class="tab-btn active" data-action="switchTab" data-tab="portfolio">Portfolio</button>
+    <button class="tab-btn" data-action="switchTab" data-tab="fees">Transactions</button>
+    <button class="tab-btn" data-action="switchTab" data-tab="cgt">CGT</button>
+    <button class="tab-btn" data-action="switchTab" data-tab="watchlist">Watchlist</button>
+    <button class="tab-btn" data-action="switchTab" data-tab="import">Import</button>
   </div>
 
   <div class="tab-panel active" id="tab-portfolio">
@@ -259,7 +260,7 @@
     <div class="history-section" style="margin-bottom:0;">
       <div class="history-header">
         <span class="history-title">Portfolio history</span>
-        <span class="history-meta" id="historyMeta">Snapshots saved each visit</span>
+        <span class="history-meta" id="historyMeta">Daily snapshots</span>
       </div>
       <div style="position:relative;width:100%;height:180px;"><canvas id="historyChart"></canvas></div>
     </div>
@@ -412,6 +413,7 @@
         <span class="badge b-amber" style="font-size:9px;">SMSF Accumulation</span>
       </div>
       <div class="sec-right">
+        <span id="cgtLastCalc" style="font-size:11px;color:var(--text4);"></span>
         <button class="csvbtn" id="cgtExportBtn" onclick="exportCGTCSV()">⬇ Export CGT CSV</button>
       </div>
     </div>
@@ -762,6 +764,7 @@
 <script src="js/cgt-patch.js"></script>
 <script src="js/eofy-report.js"></script>
 <script src="js/scheduler.js"></script>
+<script src="js/ui-improvements.js"></script>
 
 </body>
 </html>
