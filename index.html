@@ -157,24 +157,20 @@
 
 <div class="wrap">
   <div class="topbar">
-    <div class="title-block" style="display:flex;align-items:center;gap:10px;">
-      <button id="hamburgerBtn" data-action="openMobileSidebar" style="display:none;background:none;border:none;padding:4px;cursor:pointer;color:var(--text);flex-shrink:0;">
-        <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M3 5h14M3 10h14M3 15h14"/></svg>
-      </button>
+    <div class="title-block">
       <div style="display:flex;flex-direction:column;gap:2px;">
         <div style="display:flex;align-items:center;gap:10px;">
           <h1 style="font-family:Arial,Helvetica,sans-serif;font-weight:800;font-size:18px;letter-spacing:-0.04em;">SMSF</h1>
           <span class="mob-hide" style="font-size:12px;font-weight:600;color:var(--text2);font-family:Arial,Helvetica,sans-serif;" id="topbarPortfolioName"></span>
           <span class="mob-hide" style="font-size:11px;color:var(--text3);font-family:Arial,Helvetica,sans-serif;" id="todayDate"></span>
         </div>
-        <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
-          <div class="sync-bar">
-            <span class="sync-dot" id="syncDot"></span>
-            <span id="syncStatus">Loading...</span>
-          </div>
-          <div style="font-size:10px;color:var(--text2);display:none;" id="lastRefreshedBar">· Refreshed <span id="lastRefreshedTime">—</span></div>
-
+        <!-- Mobile subtitle row (hidden on desktop via CSS) -->
+        <div id="mobileSubtitle" style="font-size:10px;color:var(--text3);font-family:Arial,Helvetica,sans-serif;display:none;"></div>
+        <div class="sync-bar">
+          <span class="sync-dot" id="syncDot"></span>
+          <span id="syncStatus">Loading...</span>
         </div>
+        <div style="font-size:10px;color:var(--text2);display:none;" id="lastRefreshedBar">· Refreshed <span id="lastRefreshedTime">—</span></div>
       </div>
     </div>
 
@@ -746,6 +742,9 @@
 
   <div class="footer">Prices: Finnhub (US) · Yahoo Finance (ASX) · GoldAPI.io (metals) · CoinGecko (crypto). Cash and fees entered manually. Portfolio synced to Xano. Verify all figures with your SMSF accountant.</div>
 </div>
+
+<!-- FAB — floating action button, mobile only -->
+<button id="mobile-fab" onclick="openAddModal()" aria-label="Add holding or transaction">+</button>
 
 
 <!-- External libraries -->
