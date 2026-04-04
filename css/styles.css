@@ -410,7 +410,12 @@ tr.tint-down td{background:rgba(196,96,97,0.06)!important;}
 [data-theme="light"] .tab-btn.active{background:var(--accent);color:#fff;}
 .tab-panel{display:none;opacity:0;}
 .tab-panel.active{display:block;opacity:1;}
-/* Search input in sidebar */
+/* Mobile subtitle — hidden on desktop, shown on mobile via JS */
+#mobileSubtitle{display:none;}
+@media(max-width:800px){
+  #mobileSubtitle{display:block;font-size:10px;color:var(--text3);line-height:1;margin-top:2px;}
+  .title-block{flex-direction:column;gap:0;}
+}
 #sb-search input::placeholder{color:var(--text4);}
 #sb-search input:focus + button,#sb-search input:not(:placeholder-shown) + button{display:block!important;}
 [data-theme="light"] #sb-search > div{background:rgba(255,255,255,0.5);border-color:rgba(84,84,232,0.15);}
@@ -440,124 +445,188 @@ tr.hrow-met td{border-left:2px solid rgba(154,162,200,0.45);}
 .access-email{font-size:11px;color:var(--text3);}
 
 @media(max-width:800px){
-  .sidebar{position:fixed;top:0;left:0;height:100vh;width:240px;z-index:200;transform:translateX(-100%);transition:transform 0.25s ease;}
-  .sidebar.mobile-open{transform:translateX(0);}
+  /* ── Sidebar: hidden on mobile entirely ── */
+  .sidebar{display:none!important;}
+  #hamburgerBtn{display:none!important;}
+  .sidebar-overlay{display:none!important;}
   .bottom-nav{display:flex;}
 
   /* ── Wrap & spacing ── */
-  .wrap{margin-left:0;padding:10px 10px calc(72px + env(safe-area-inset-bottom));width:100%;}
+  .wrap{margin-left:0;padding:0 0 calc(68px + env(safe-area-inset-bottom));width:100%;}
 
-  /* ── Topbar ── */
-  .topbar{gap:6px;margin-bottom:8px;padding:8px 12px;position:sticky;top:6px;z-index:40;border-radius:12px;margin:6px 8px 0;}
-  .title-block h1{font-size:16px;font-weight:800;}
-  .sync-bar{font-size:10px;}
-  .rfbtn{font-size:11px;padding:7px 10px;}
-  .rfbtn-label{display:none;}
-  .aud-pill{display:none;}
+  /* ── Topbar: clean, spacious, no clutter ── */
+  .topbar{
+    gap:10px;
+    padding:12px 14px 10px;
+    margin:0;
+    border-radius:0;
+    border-bottom:1px solid var(--topbar-border);
+    position:sticky;top:0;z-index:40;
+    flex-wrap:nowrap;
+    align-items:center;
+  }
+  .title-block{display:flex;flex-direction:column;gap:3px;flex:1;min-width:0;}
+  .title-block h1{font-size:20px;font-weight:800;letter-spacing:-0.05em;line-height:1;}
+  /* Show portfolio name as subtitle on mobile */
+  #topbarPortfolioName{display:block!important;font-size:10px;font-weight:500;color:var(--text3);}
+  #todayDate{display:inline!important;font-size:10px;color:var(--text3);}
+
+  /* Hide sync bar and last refreshed text — not needed on mobile */
+  .sync-bar{display:none!important;}
+  #lastRefreshedBar{display:none!important;}
+
+  /* Hide P&L from topbar — shown in hero card instead */
+  #topbar-pnl{display:none!important;}
+
+  /* Hide + Add from topbar — replaced by FAB */
+  #topbarAddBtn{display:none!important;}
+
+  /* Hide misc topbar clutter */
+  .aud-pill{display:none!important;}
   .mob-hide{display:none;}
-  #hamburgerBtn{display:flex!important;}
   .user-name{display:none;}
   .user-role-badge{display:none;}
-  .user-badge{padding:4px 8px;}
 
-  /* ── Summary cards — 1 col for total, 2 col for rest ── */
-  .summary{
-    grid-template-columns:1fr 1fr;
-    gap:7px;
+  /* Refresh button — circular, larger touch target */
+  .rfbtn{
+    width:40px;height:40px;padding:0;border-radius:50%;
+    display:flex;align-items:center;justify-content:center;
+    min-width:40px;flex-shrink:0;
+    box-shadow:0 4px 14px var(--gold-glow);
   }
-  /* Total value card spans full width */
-  .summary .scard:first-child{
-    grid-column:1 / -1;
-  }
-  .scard{border-radius:12px;padding:11px 13px;}
-  .slabel{font-size:9px;margin-bottom:3px;}
-  .sval{font-size:16px;font-weight:500;}
-  .ssub{font-size:10px;}
-  /* Hide sparklines on small cards to save space */
-  .scard:not(:first-child) .sparkline{height:30px!important;margin-top:6px!important;}
-  .scard-row2{grid-template-columns:1fr 1fr;gap:8px;margin-top:8px;}
-  .scard-sub-col:last-child{display:none;}
+  .rfbtn-label{display:none!important;}
+  .rfbtn svg,#rfIcon{width:18px;height:18px;}
 
-  /* ── Mid row — stack ── */
-  .mid-row{grid-template-columns:1fr;gap:8px;}
-  .dash{flex-direction:column;align-items:stretch;border-radius:12px;}
+  /* User badge — just the avatar circle */
+  .user-badge{padding:0;background:none;border:none;flex-shrink:0;}
+
+  /* ── Top actions row ── */
+  .top-actions{gap:8px;flex-shrink:0;}
+
+  /* ── Sessions bar: compact horizontal scroll, no wrapping ── */
+  .sessions{
+    gap:6px;margin:0;
+    padding:8px 14px;
+    overflow-x:auto;-webkit-overflow-scrolling:touch;
+    flex-wrap:nowrap;scrollbar-width:none;
+  }
+  .sessions::-webkit-scrollbar{display:none;}
+  .session-pill{font-size:10px;padding:4px 10px;flex-shrink:0;}
+
+  /* ── Hero total card ── */
+  .scard{border-radius:0;border-left:none;border-right:none;border-top:none;padding:14px 14px 12px;}
+  .summary{display:block;margin-bottom:0;}
+  /* Only show first card (total) — hide the individual asset cards */
+  .summary .scard:not(:first-child){display:none;}
+  .slabel{font-size:10px;font-weight:600;letter-spacing:0.07em;margin-bottom:4px;}
+  .sval{font-size:32px;font-weight:800;letter-spacing:-0.05em;line-height:1;}
+
+  /* Stats row below total (Invested / Cash / Rate) */
+  .scard-row2{
+    display:grid;grid-template-columns:1fr 1fr 1fr;
+    gap:0;margin-top:10px;padding-top:10px;
+    border-top:1px solid var(--border2);
+  }
+  .scard-sub-col{padding:0 10px;}
+  .scard-sub-col:first-child{padding-left:0;}
+  .scard-sub-col:last-child{display:block!important;} /* show AUD/USD on mobile */
+  .scard-sub-col:not(:last-child){border-right:1px solid var(--border2);}
+  .scard-sub-label{font-size:9px;letter-spacing:0.06em;}
+  .scard-sub-val{font-size:13px;font-weight:700;}
+
+  /* Sparkline in total card */
+  .scard:first-child .sparkline{height:48px!important;margin-top:10px!important;}
+
+  /* ── Mid row (charts) — stack vertically ── */
+  .mid-row{grid-template-columns:1fr;gap:8px;padding:0 10px;margin-bottom:8px;margin-top:8px;}
+  .dash{flex-direction:column;align-items:stretch;border-radius:12px;padding:12px;}
   .dash-divider{width:100%;height:1px;}
   .pie-section{width:100%;}
 
-  /* ── Sessions ── */
-  .sessions{gap:4px;margin-bottom:8px;}
-  .session-pill{font-size:9px;padding:3px 8px;}
-
-  /* ── Holdings table ── */
-  .section{border-radius:12px;}
+  /* ── Section headers ── */
+  .section{border-radius:12px;margin:0 10px 8px;}
   .sec-head{padding:10px 12px;}
   .sec-title{font-size:12px;}
-  td,th{padding:8px 10px;}
-  .scard-sub-col:nth-child(3){display:none;}
 
-  /* ── Bottom nav ── */
-  .bottom-nav{padding:6px 0 max(10px,env(safe-area-inset-bottom));}
-  .bn-item{font-size:9px;padding:3px 12px;}
-  .bn-item svg{width:18px;height:18px;}
+  /* ── Holdings table rows — more breathing room ── */
+  td,th{padding:10px 10px;}
+  th{padding:8px 10px;}
+
+  /* ── FAB — floating action button replaces topbar + Add ── */
+  #mobile-fab{
+    position:fixed;
+    bottom:calc(68px + env(safe-area-inset-bottom) + 12px);
+    right:16px;
+    width:54px;height:54px;
+    border-radius:50%;
+    background:linear-gradient(135deg,var(--accent),var(--accent2));
+    display:flex;align-items:center;justify-content:center;
+    box-shadow:0 6px 20px var(--gold-glow),0 2px 8px rgba(0,0,0,0.3);
+    border:none;color:#fff;font-size:24px;font-weight:300;
+    z-index:50;cursor:pointer;
+    font-family:Arial,Helvetica,sans-serif;
+    transition:transform 0.15s,box-shadow 0.15s;
+  }
+  #mobile-fab:active{transform:scale(0.93);box-shadow:0 3px 10px var(--gold-glow);}
+
+  /* ── Bottom nav — bigger, 5 items only ── */
+  .bottom-nav{
+    padding:6px 0 max(12px,env(safe-area-inset-bottom));
+    height:auto;
+  }
+  .bn-item{font-size:10px;padding:6px 4px;gap:4px;font-weight:500;}
+  .bn-item svg{width:22px;height:22px;}
+  /* Hide theme toggle from bottom nav — it's in the user dropdown */
+  .bottom-nav .bn-item:last-child{display:none!important;}
 
   /* ── Readonly notice ── */
-  .readonly-notice{padding:6px 12px;top:48px;font-size:11px;}
+  .readonly-notice{padding:6px 12px;top:62px;font-size:11px;}
 
-  /* ── Add button ── */
-  #topbarAddBtn{padding:6px 12px;font-size:11px;}
+  /* ── Wrap content padding ── */
+  .wrap{padding-top:0;}
 }
 
 /* ══════════════════════════════════════════════════════════════
    ── NARROW SCREEN (Galaxy Z Fold 6 cover screen, ≤420px) ──
    ══════════════════════════════════════════════════════════════ */
 @media(max-width:420px){
-  /* ── Topbar: hide P&L, simplify sync text ── */
-  #topbar-pnl-val,
-  #topbar-pnl-pct,
-  .topbar .title-block .sync-bar .rfbtn-label{display:none!important;}
+  /* ── Topbar ── */
+  .topbar{padding:10px 12px 8px;gap:8px;}
+  .title-block h1{font-size:18px;}
 
-  /* ── Hide the Add button on narrow mobile ── */
-  #topbarAddBtn{display:none!important;}
+  /* ── Holdings table: tighter cells ── */
+  td,th{padding:9px 8px;}
+  .ni{width:56px;font-size:11px;padding:3px 5px;}
+  .tkr-tile{width:28px;height:28px;font-size:10px;border-radius:7px;}
+  .tkr-sym{font-size:12px;}
+  .tkr-name{font-size:9px;}
+  .gl-chip{font-size:10px;padding:2px 6px;}
 
-  /* ── Larger refresh button for touch ── */
-  .rfbtn{width:36px;height:36px;padding:0;border-radius:50%;display:flex;align-items:center;justify-content:center;min-width:36px;}
-  .rfbtn svg,.rfbtn #rfIcon{width:18px;height:18px;}
+  /* ── Sections: full bleed ── */
+  .section{border-radius:10px;margin:0 8px 8px;}
+  .mid-row{padding:0 8px;}
 
-  /* ── Topbar tighter padding ── */
-  .topbar{padding:6px 10px;gap:4px;margin:4px 6px 0;border-radius:10px;}
-  .title-block h1{font-size:14px;}
-  .sync-bar{font-size:9px;gap:4px;}
+  /* ── Sessions ── */
+  .session-pill{font-size:9px;padding:3px 8px;}
 
-  /* ── Bottom nav: hide theme toggle (5th item) ── */
-  .bottom-nav .bn-item:last-child{display:none;}
-  .bottom-nav{padding:8px 0 max(12px,env(safe-area-inset-bottom));}
-  .bn-item{font-size:8px;padding:4px 14px;}
+  /* ── Stats row values ── */
+  .scard-sub-val{font-size:12px;}
+  .scard-sub-label{font-size:8px;}
 
-  /* ── Summary cards: tighter ── */
-  .summary{gap:5px;}
-  .scard{padding:8px 10px;border-radius:10px;}
-  .sval{font-size:15px;}
-
-  /* ── Wrap: less padding ── */
-  .wrap{padding:8px 6px calc(68px + env(safe-area-inset-bottom));}
-
-  /* ── Modals: ensure they fit narrow screens ── */
-  .modal{width:calc(100vw - 24px);max-width:calc(100vw - 24px);padding:16px;border-radius:14px;}
+  /* ── Modals ── */
+  .modal{width:calc(100vw - 20px);max-width:calc(100vw - 20px);padding:16px;border-radius:16px;}
   .modal-row{grid-template-columns:1fr;gap:10px;}
   .modal-input,.modal-select{font-size:14px;padding:10px 12px;}
 
-  /* ── Holdings: tighter cells ── */
-  td,th{padding:6px 6px;}
-  .ni{width:60px;font-size:11px;padding:3px 5px;}
-  .tkr-tile{width:26px;height:26px;font-size:9px;border-radius:6px;}
-  .tkr-sym{font-size:11px;}
-  .tkr-name{font-size:9px;}
+  /* ── FAB slightly smaller ── */
+  #mobile-fab{width:50px;height:50px;font-size:22px;}
 
-  /* ── Session pills: allow scroll ── */
-  .sessions{overflow-x:auto;-webkit-overflow-scrolling:touch;flex-wrap:nowrap;}
+  /* ── Bottom nav ── */
+  .bn-item{font-size:9px;padding:5px 2px;}
+  .bn-item svg{width:20px;height:20px;}
 
-  /* ── Cash accounts: prevent REMOVE column cutoff ── */
-  .section{overflow-x:auto;-webkit-overflow-scrolling:touch;}
+  /* ── Wrap padding ── */
+  .wrap{padding-bottom:calc(64px + env(safe-area-inset-bottom));}
 }
 
 @media(min-width:801px){
