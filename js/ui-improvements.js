@@ -297,6 +297,21 @@
     return allDone;
   }
 
+  /* ── Mobile subtitle — show portfolio name + date under SMSF title ── */
+  function updateMobileSubtitle() {
+    var el = document.getElementById('mobileSubtitle');
+    if (!el) return;
+    if (window.innerWidth > 800) { el.style.display = 'none'; return; }
+    var auth  = getAUTH();
+    var portfolio = auth && auth.portfolios
+      ? auth.portfolios.find(function(p){ return p.id === auth.currentPortfolioId; })
+      : null;
+    var name = portfolio ? portfolio.name : '';
+    var date = new Date().toLocaleDateString('en-AU', { weekday:'short', day:'numeric', month:'short' });
+    el.textContent = (name ? name + ' · ' : '') + date;
+    el.style.display = 'block';
+  }
+
   function boot() {
     var attempts = 0;
     var iv = setInterval(function() {
@@ -306,6 +321,15 @@
       if (window.historyChart) addChartTooltip();
       if (attempts > 60) clearInterval(iv);
     }, 300);
+
+    // Mobile subtitle
+    updateMobileSubtitle();
+    window.addEventListener('resize', updateMobileSubtitle);
+    // Re-run after auth loads
+    var subIv = setInterval(function() {
+      var auth = getAUTH();
+      if (auth && auth.currentPortfolioId) { updateMobileSubtitle(); clearInterval(subIv); }
+    }, 500);
 
     // Keyboard shortcut: Cmd/Ctrl+K focuses search
     document.addEventListener('keydown', function(e) {
