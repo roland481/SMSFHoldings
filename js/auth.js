@@ -243,6 +243,10 @@ async function loadPortfolio(portfolioId) {
       }
     });
     setTimeout(() => { renderCash(); renderAllHoldings(); renderFees(); summary(); renderAllocTable(); }, 150);
+    // Auto-refresh prices on login (after a short delay so UI renders first)
+    setTimeout(() => {
+      if(typeof refreshAll === 'function') refreshAll();
+    }, 800);
   } catch(e) {
     syncUI('err', 'Failed to load portfolio — ' + e.message);
     console.error('loadPortfolio error:', e);
