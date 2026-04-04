@@ -314,8 +314,30 @@ async function addFee(){
 function renderWl(){
   const body=document.getElementById('wlB');if(!body)return;const ro=isReadOnly();
   if(!S.wl.length){body.innerHTML='<tr><td colspan="8" style="text-align:center;color:var(--text4);padding:16px;">No items yet</td></tr>';return;}
-  body.innerHTML=S.wl.map((item,i)=>{const key='wl:'+item.type+':'+item.ticker;const p=S.prices[key];const price=p?p.price:null,chg=p?p.change:null;const cc=chg>0?'pos':chg<0?'neg':'';const cs=chg!==null?(chg>0?'+':'')+f(chg,2)+'%':'—';const typeBadge={us:'<span class="wl-type" style="color:#378ADD;">US</span>',asx:'<span class="wl-type" style="color:#42ac5c;">ASX</span>',crypto:'<span class="wl-type" style="color:#BA7517;">Crypto</span>',metal:'<span class="wl-type" style="color:#888780;">Metal</span>'}[item.type]||'';let vsTarget='<span class="dim">—</span>';if(price!==null&&item.target>0){const diff=price-item.target,pct=(diff/item.target)*100;const sign=diff>=0?'+':'';if(Math.abs(pct)<=3)vsTarget=`<span class="wl-near">${sign}${f(pct,1)}% · Near target</span>`;else if(diff>0)vsTarget=`<span class="wl-above">${sign}${f(pct,1)}% above</span>`;else vsTarget=`<span class="wl-below">${f(pct,1)}% below</span>`;}
-  return`<tr><td><div class="sym">${item.ticker}</div></td><td><div class="aname">${item.name}</div></td><td>${typeBadge}</td><td class="r valbold">${price!==null?'$'+f(price):'<span class="dim">—</span>'}</td><td class="r ${cc}">${cs}</td><td class="r"><input class="ni" type="number" step="any" value="${item.target||''}" placeholder="0.00" onchange="upWlTarget(${i},this.value)" ${ro?'disabled':''}></td><td class="r">${vsTarget}</td><td><button class="del" onclick="delWl(${i})" ${ro?'disabled':''}>✕</button></td></tr>`;}).join('');
+  // Sort by type order then ticker
+  const typeOrder={us:0,asx:1,crypto:2,metal:3};
+  const sorted=[...S.wl].map((item,i)=>({...item,origIdx:i})).sort((a,b)=>{
+    const to=(typeOrder[a.type]??9)-(typeOrder[b.type]??9);
+    return to!==0?to:a.ticker.localeCompare(b.ticker);
+  });
+  const typeBadges={us:'<span class="wl-type" style="color:#378ADD;">US</span>',asx:'<span class="wl-type" style="color:#42ac5c;">ASX</span>',crypto:'<span class="wl-type" style="color:#BA7517;">Crypto</span>',metal:'<span class="wl-type" style="color:#888780;">Metal</span>'};
+  const typeLabels={us:'US Stocks',asx:'ASX Stocks',crypto:'Crypto',metal:'Metals'};
+  let lastType=null;
+  body.innerHTML=sorted.map(item=>{
+    const i=item.origIdx;
+    const key='wl:'+item.type+':'+item.ticker;const p=S.prices[key];const price=p?p.price:null,chg=p?p.change:null;
+    const cc=chg>0?'pos':chg<0?'neg':'';const cs=chg!==null?(chg>0?'+':'')+f(chg,2)+'%':'—';
+    const typeBadge=typeBadges[item.type]||'';
+    let vsTarget='<span class="dim">—</span>';
+    if(price!==null&&item.target>0){const diff=price-item.target,pct=(diff/item.target)*100;const sign=diff>=0?'+':'';if(Math.abs(pct)<=3)vsTarget=`<span class="wl-near">${sign}${f(pct,1)}% · Near target</span>`;else if(diff>0)vsTarget=`<span class="wl-above">${sign}${f(pct,1)}% above</span>`;else vsTarget=`<span class="wl-below">${f(pct,1)}% below</span>`;}
+    // Group header row
+    let header='';
+    if(item.type!==lastType){
+      lastType=item.type;
+      header=`<tr><td colspan="8" style="padding:8px 14px 4px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--text3);background:rgba(0,0,0,0.06);border-bottom:1px solid var(--border2);">${typeLabels[item.type]||item.type}</td></tr>`;
+    }
+    return header+`<tr><td><div class="sym">${item.ticker}</div></td><td><div class="aname">${item.name}</div></td><td>${typeBadge}</td><td class="r valbold">${price!==null?'$'+f(price):'<span class="dim">—</span>'}</td><td class="r ${cc}">${cs}</td><td class="r"><input class="ni" type="number" step="any" value="${item.target||''}" placeholder="0.00" onchange="upWlTarget(${i},this.value)" ${ro?'disabled':''}></td><td class="r">${vsTarget}</td><td><button class="del" onclick="delWl(${i})" ${ro?'disabled':''}>✕</button></td></tr>`;
+  }).join('');
 }
 
 async function upWlTarget(i,v){if(isReadOnly())return;S.wl[i].target=parseFloat(v)||0;try{await xanoUpdateWatchlist(i);}catch(e){syncUI('err','Save failed');}renderWl();}
