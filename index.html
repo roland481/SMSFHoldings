@@ -11,6 +11,8 @@
 <title>SMSF Portfolio Tracker</title>
 
 <link rel="manifest" href="/manifest.json">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/styles.css">
 <script>document.addEventListener("DOMContentLoaded",function(){if(typeof Chart!=="undefined"){Chart.defaults.font.family="Arial,Helvetica,sans-serif";Chart.defaults.font.size=11;}});</script>
 </head>
@@ -155,54 +157,94 @@
 
 <div class="sidebar-overlay" id="sidebarOverlay" data-action="closeMobileSidebar"></div>
 
+<!-- ══ SYNC TOAST — bottom-right, never overlaps topbar ══ -->
+<div id="syncToast">
+  <span class="st-dot"></span>
+  <span id="syncToastMsg">Loading...</span>
+</div>
+
+<div class="app-body">
+
+<nav class="sidebar" id="sidebar">
+  <div class="sb-nav">
+    <button class="sb-item active" id="sb-portfolio" data-action="switchTab" data-tab="portfolio" title="Portfolio">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><rect x="3" y="3" width="7" height="7" rx="1.5" fill="currentColor" opacity="0.7" stroke="none"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
+    </button>
+    <button class="sb-item" id="sb-fees" data-action="switchTab" data-tab="fees" title="Transactions">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4 6h16M4 12h10M4 18h13"/></svg>
+    </button>
+    <button class="sb-item" id="sb-cgt" data-action="switchTab" data-tab="cgt" title="CGT Summary">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M3 17l6-6 4 4 8-10"/></svg>
+    </button>
+    <button class="sb-item" id="sb-watchlist" data-action="switchTab" data-tab="watchlist" title="Watchlist">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="7"/><circle cx="12" cy="12" r="3" fill="currentColor" stroke="none"/></svg>
+    </button>
+    <button class="sb-item" id="sb-import" data-action="switchTab" data-tab="import" title="Import" style="margin-top:8px;">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M12 3v13M7 11l5 5 5-5"/><rect x="3" y="17" width="18" height="4" rx="1.5"/></svg>
+    </button>
+    <button class="sb-item" data-action="exportCSV" title="Export CSV">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M3 12h18M3 6h18M3 18h10"/></svg>
+    </button>
+    <button class="sb-item admin-only" id="sb-access" data-action="openAccessModal" title="Manage Access" style="display:none;">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="9" cy="7" r="4"/><path d="M3 21c0-4 2.7-7 6-7"/><path d="M16 14l1.5 1.5L21 12"/></svg>
+    </button>
+  </div>
+  <div style="margin-top:auto;padding:12px 9px 0;border-top:1px solid var(--border);width:100%;display:flex;justify-content:center;">
+    <button onclick="toggleTheme()" id="themeToggleBtn" title="Toggle theme">
+      <span id="themeToggleIcon">🌙</span>
+      <span id="themeToggleLabel" style="display:none;"></span>
+    </button>
+  </div>
+</nav>
+
 <div class="wrap">
   <div class="topbar">
+    <!-- Logo -->
     <div class="title-block">
-      <div style="display:flex;flex-direction:column;gap:2px;">
-        <div style="display:flex;align-items:center;gap:10px;">
-          <h1 style="font-family:Arial,Helvetica,sans-serif;font-weight:800;font-size:18px;letter-spacing:-0.04em;">SMSF</h1>
-          <span class="mob-hide" style="font-size:12px;font-weight:600;color:var(--text2);font-family:Arial,Helvetica,sans-serif;" id="topbarPortfolioName"></span>
-          <span class="mob-hide" style="font-size:11px;color:var(--text3);font-family:Arial,Helvetica,sans-serif;" id="todayDate"></span>
-        </div>
-        <!-- Mobile subtitle row (hidden on desktop via CSS) -->
-        <div id="mobileSubtitle" style="font-size:10px;color:var(--text3);font-family:Arial,Helvetica,sans-serif;display:none;"></div>
-        <div class="sync-bar">
-          <span class="sync-dot" id="syncDot"></span>
-          <span id="syncStatus">Loading...</span>
-        </div>
-        <div style="font-size:10px;color:var(--text2);display:none;" id="lastRefreshedBar">· Refreshed <span id="lastRefreshedTime">—</span></div>
+      <div class="logo-mark">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><polyline points="2,11 6,7 9,9 14,4" stroke="#1c0e00" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
       </div>
+      <h1>SMSF</h1>
+      <!-- Mobile subtitle only -->
+      <div id="mobileSubtitle" style="display:none;"></div>
     </div>
 
-    <!-- Today's P&L — centred in topbar -->
-    <div id="topbar-pnl" class="mob-hide" style="display:flex;flex-direction:column;align-items:center;gap:2px;flex:1;min-width:0;">
-      <div style="font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:0.09em;color:var(--text3);">Today's P&amp;L</div>
-      <div style="display:flex;align-items:center;gap:8px;">
-        <span id="topbar-pnl-val" style="font-family:var(--mono);font-size:18px;font-weight:600;color:var(--text);">—</span>
-        <span id="topbar-pnl-pct" style="font-size:11px;font-weight:600;padding:2px 8px;border-radius:99px;"></span>
-      </div>
-    </div>
+    <!-- Nav links (desktop only) -->
+    <nav class="nav-links">
+      <button class="nav-link active" id="nl-portfolio" data-action="switchTab" data-tab="portfolio">Portfolio</button>
+      <button class="nav-link" id="nl-fees" data-action="switchTab" data-tab="fees">Transactions</button>
+      <button class="nav-link" id="nl-cgt" data-action="switchTab" data-tab="cgt">CGT</button>
+      <button class="nav-link" id="nl-watchlist" data-action="switchTab" data-tab="watchlist">Watchlist</button>
+      <button class="nav-link" id="nl-import" data-action="switchTab" data-tab="import">Import</button>
+    </nav>
 
-    <!-- Portfolio selector -->
-    <div class="portfolio-selector mob-hide" id="portfolioSelectorWrap" style="display:none;">
-      <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="var(--text3)" stroke-width="1.5" stroke-linecap="round"><rect x="2" y="2" width="12" height="12" rx="2"/><path d="M5 8h6M5 5h6M5 11h4"/></svg>
-      <select id="portfolioSelect" onchange="switchPortfolio(this.value)" style="background:none;border:none;color:var(--text);font-family:Arial,Helvetica,sans-serif;font-size:13px;font-weight:500;cursor:pointer;outline:none;max-width:180px;"></select>
-    </div>
+    <!-- Session pills (desktop only) -->
+    <div class="topbar-sessions" id="topbarSessions"></div>
 
+    <!-- Actions — ALL same height (34px) -->
     <div class="top-actions">
       <input type="checkbox" id="audToggle" checked style="display:none;">
-      <button class="addbtn" id="topbarAddBtn" data-action="openAddModal" style="background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;border-color:transparent;font-weight:600;box-shadow:0 4px 12px var(--gold-glow);">+ Add</button>
       <input type="file" id="swyftxCSVInput" accept=".csv" style="display:none;" onchange="importSwyftxCSV(this)">
       <input type="file" id="commsecIntlCSVInput" accept=".csv" style="display:none;" onchange="importCommsecIntlCSV(this)">
+
+      <!-- Portfolio selector (multi-portfolio users) -->
+      <div class="portfolio-selector mob-hide" id="portfolioSelectorWrap" style="display:none;">
+        <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="var(--text3)" stroke-width="1.5" stroke-linecap="round"><rect x="2" y="2" width="12" height="12" rx="2"/><path d="M5 8h6M5 5h6M5 11h4"/></svg>
+        <select id="portfolioSelect" onchange="switchPortfolio(this.value)"></select>
+      </div>
+
+      <!-- + Add button -->
+      <button class="addbtn" id="topbarAddBtn" data-action="openAddModal">+ Add</button>
+
+      <!-- Refresh button -->
       <button class="rfbtn" id="rfBtn" data-action="refreshAll" disabled>
-        <svg id="rfIcon" width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" style="flex-shrink:0;"><path d="M2 8a6 6 0 1 0 1.5-3.9M2 4v4h4"/></svg>
+        <svg id="rfIcon" width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" style="flex-shrink:0;"><path d="M2 8a6 6 0 1 0 1.5-3.9M2 4v4h4"/></svg>
         <span class="rfbtn-label">Refresh prices</span>
       </button>
+
       <!-- User badge -->
       <div class="user-badge" id="userBadge" onclick="toggleUserDropdown()" style="display:none;">
         <div class="user-avatar" id="userAvatar">?</div>
-        <span class="user-name" id="userName">—</span>
-        <span class="user-role-badge" id="userRoleBadge"></span>
         <div class="user-dropdown" id="userDropdown">
           <div class="user-dd-item" onclick="openChangePassword()">
             <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><rect x="3" y="7" width="10" height="7" rx="1.5"/><path d="M5 7V5a3 3 0 0 1 6 0v2"/></svg>
@@ -746,7 +788,8 @@
   </div>
 
   <div class="footer">Prices: Finnhub (US) · Yahoo Finance (ASX) · GoldAPI.io (metals) · CoinGecko (crypto). Cash and fees entered manually. Portfolio synced to Xano. Verify all figures with your SMSF accountant.</div>
-</div>
+</div><!-- /wrap -->
+</div><!-- /app-body -->
 
 <!-- FAB — floating action button, mobile only -->
 <button id="mobile-fab" onclick="openAddModal()" aria-label="Add holding or transaction">+</button>
