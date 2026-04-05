@@ -4,51 +4,56 @@
 function animateValue(el,newVal,prefix='$',decimals=2){if(!el)return;const raw=el.getAttribute('data-raw');const oldVal=raw?parseFloat(raw):null;el.setAttribute('data-raw',newVal);if(oldVal===null||isNaN(oldVal)||oldVal===newVal){el.textContent=prefix+f(newVal,decimals);return;}const dir=newVal>oldVal?'up':'down';el.classList.remove('flash-up','flash-down');void el.offsetWidth;el.classList.add('flash-'+dir);setTimeout(()=>el.classList.remove('flash-up','flash-down'),1200);const duration=600,steps=30,increment=(newVal-oldVal)/steps;let current=oldVal,step=0;const timer=setInterval(()=>{step++;current+=increment;if(step>=steps){current=newVal;clearInterval(timer);}el.textContent=prefix+f(current,decimals);},duration/steps);}
 
 function updateSessions(){
-  const el=document.getElementById('sessions');if(!el)return;
+  const el=document.getElementById('sessions');
+  const tbEl=document.getElementById('topbarSessions');
+  if(!el&&!tbEl)return;
   const now=new Date();
-  const dayUTC=now.getUTCDay(); // 0=Sun,6=Sat
-  const hAEST=((now.getUTCHours()+10)%24);
+  const dayUTC=now.getUTCDay();
   const hAEDT=((now.getUTCHours()+11)%24);
   const isWeekend=dayUTC===0||dayUTC===6;
-  // ASX: 10:00-16:10 AEDT (UTC+11) Mon-Fri
-  const asxOpen=!isWeekend&&hAEDT>=10&&hAEDT<16||(hAEDT===16&&now.getUTCMinutes()<10);
-  // NYSE: 9:30-16:00 ET. ET is UTC-5 (EST) or UTC-4 (EDT). Approx: UTC 14:30-21:00
+  const asxOpen=!isWeekend&&(hAEDT>=10&&hAEDT<16||(hAEDT===16&&now.getUTCMinutes()<10));
   const hUTC=now.getUTCHours(),mUTC=now.getUTCMinutes();
   const nyseMinUTC=hUTC*60+mUTC;
-  const nyseOpen=!isWeekend&&nyseMinUTC>=870&&nyseMinUTC<1260; // 14:30-21:00 UTC
-  // LSE: 8:00-16:30 GMT Mon-Fri
+  const nyseOpen=!isWeekend&&nyseMinUTC>=870&&nyseMinUTC<1260;
   const lseOpen=!isWeekend&&hUTC>=8&&(hUTC<16||(hUTC===16&&mUTC<30));
-  // Crypto: always open
-  function minsUntil(targetH,targetM,currentH,currentM){
-    const cur=currentH*60+currentM;const tgt=targetH*60+targetM;
-    return tgt>cur?tgt-cur:1440-(cur-tgt);
-  }
+  function minsUntil(targetH,targetM,currentH,currentM){const cur=currentH*60+currentM;const tgt=targetH*60+targetM;return tgt>cur?tgt-cur:1440-(cur-tgt);}
   function fmt(mins){const h=Math.floor(mins/60);const m=mins%60;return h>0?h+'h '+m+'m':m+'m';}
-  // Countdown strings (desktop only)
   const isDesktop=window.innerWidth>800;
+
+  /* Sessions bar pill (under topbar on mobile) */
   function pill(label,open,openInMins,closeInMins){
-    const dot=open?'<span style="width:5px;height:5px;border-radius:50%;background:var(--gain-pos);box-shadow:0 0 5px rgba(93,227,108,0.5);display:inline-block;flex-shrink:0;"></span>':'<span style="width:5px;height:5px;border-radius:50%;background:var(--text4);display:inline-block;flex-shrink:0;"></span>';
+    const dot=open?`<span class="session-dot" style="background:var(--gain-pos);box-shadow:0 0 5px rgba(52,211,153,0.5);animation:pulse 2s infinite;"></span>`:`<span class="session-dot" style="background:var(--text4);"></span>`;
     let timer='';
     if(isDesktop){
-      if(open&&closeInMins!=null)timer=`<span style="font-size:9px;color:#5de36c;margin-left:4px;">closes ${fmt(closeInMins)}</span>`;
-      else if(!open&&openInMins!=null)timer=`<span style="font-size:9px;color:var(--text2);margin-left:4px;opacity:0.8;">opens ${fmt(openInMins)}</span>`;
+      if(open&&closeInMins!=null)timer=`<span style="font-size:9px;color:var(--gain-pos);margin-left:3px;">closes ${fmt(closeInMins)}</span>`;
+      else if(!open&&openInMins!=null)timer=`<span style="font-size:9px;color:var(--text3);margin-left:3px;">opens ${fmt(openInMins)}</span>`;
     }
     const cls=open?'session-pill session-open':'session-pill';
     return`<div class="${cls}" style="display:flex;align-items:center;gap:5px;">${dot}<span>${label}</span>${timer}</div>`;
   }
-  // ASX countdown
+
+  /* Topbar pill — smaller, no countdown */
+  function tbPill(label,open){
+    const dot=`<span class="tb-sess-dot" style="background:${open?'#34d399':'rgba(255,255,255,0.2)'};"></span>`;
+    const cls=open?'tb-sess live':'tb-sess';
+    return`<div class="${cls}">${dot}${label}</div>`;
+  }
+
   let asxOpenIn=null,asxCloseIn=null;
-  if(!asxOpen){const hNow=hAEDT,mNow=now.getUTCMinutes();asxOpenIn=minsUntil(10,0,hNow,mNow);}
-  else{const hNow=hAEDT,mNow=now.getUTCMinutes();asxCloseIn=minsUntil(16,10,hNow,mNow);}
-  // NYSE countdown
+  if(!asxOpen){asxOpenIn=minsUntil(10,0,hAEDT,now.getUTCMinutes());}
+  else{asxCloseIn=minsUntil(16,10,hAEDT,now.getUTCMinutes());}
   let nyseOpenIn=null,nyseCloseIn=null;
-  if(!nyseOpen){nyseOpenIn=minsUntil(14,30,hUTC,mUTC);}
-  else{nyseCloseIn=minsUntil(21,0,hUTC,mUTC);}
-  // LSE countdown
+  if(!nyseOpen){nyseOpenIn=minsUntil(14,30,hUTC,mUTC);}else{nyseCloseIn=minsUntil(21,0,hUTC,mUTC);}
   let lseOpenIn=null,lseCloseIn=null;
-  if(!lseOpen){lseOpenIn=minsUntil(8,0,hUTC,mUTC);}
-  else{lseCloseIn=minsUntil(16,30,hUTC,mUTC);}
-  el.innerHTML=pill('ASX',asxOpen,asxOpenIn,asxCloseIn)+pill('NYSE',nyseOpen,nyseOpenIn,nyseCloseIn)+pill('LSE',lseOpen,lseOpenIn,lseCloseIn)+'<div class="session-pill session-open" style="display:flex;align-items:center;gap:5px;"><span style="width:5px;height:5px;border-radius:50%;background:var(--gain-pos);box-shadow:0 0 5px rgba(93,227,108,0.5);display:inline-block;flex-shrink:0;"></span><span>₿ Crypto 24/7</span></div>';
+  if(!lseOpen){lseOpenIn=minsUntil(8,0,hUTC,mUTC);}else{lseCloseIn=minsUntil(16,30,hUTC,mUTC);}
+
+  const pillsHTML=pill('ASX',asxOpen,asxOpenIn,asxCloseIn)+pill('NYSE',nyseOpen,nyseOpenIn,nyseCloseIn)+pill('LSE',lseOpen,lseOpenIn,lseCloseIn)+`<div class="session-pill session-open" style="display:flex;align-items:center;gap:5px;"><span class="session-dot" style="background:#34d399;box-shadow:0 0 5px rgba(52,211,153,0.5);animation:pulse 2s infinite;"></span><span>₿ Crypto 24/7</span></div>`;
+  if(el)el.innerHTML=pillsHTML;
+
+  /* Topbar sessions (desktop only) */
+  if(tbEl){
+    tbEl.innerHTML=tbPill('ASX',asxOpen)+tbPill('NYSE',nyseOpen)+tbPill('₿ 24/7',true);
+  }
 }
 function applyRowTints(){document.querySelectorAll('tr.holding-row').forEach(tr=>{const changeCell=[...tr.querySelectorAll('td')].find(td=>td.classList.contains('pos')||td.classList.contains('neg'));if(!changeCell)return;tr.classList.remove('tint-up','tint-down');if(changeCell.classList.contains('pos'))tr.classList.add('tint-up');else if(changeCell.classList.contains('neg'))tr.classList.add('tint-down');});}
 
@@ -57,12 +62,32 @@ function closeMobileSidebar(){document.getElementById('sidebar').classList.remov
 function toggleSidebar(){const sb=document.getElementById('sidebar');const collapsed=sb.classList.toggle('collapsed');localStorage.setItem('smsf_sb_collapsed',collapsed?'1':'0');if(pieChart)setTimeout(()=>pieChart.resize(),280);if(historyChart)setTimeout(()=>historyChart.resize(),280);}
 
 function switchTab(name){
-  document.querySelectorAll('.tab-btn').forEach((b,i)=>{const tabs=['portfolio','fees','watchlist','import'];b.classList.toggle('active',tabs[i]===name);});
-  ['portfolio','fees','watchlist','import'].forEach(t=>{const sb=document.getElementById('sb-'+t);if(sb)sb.classList.toggle('active',t===name);const bn=document.getElementById('bn-'+t);if(bn)bn.classList.toggle('active',t===name);});
+  /* Tab panels */
   document.querySelectorAll('.tab-panel').forEach(p=>{p.classList.toggle('active',p.id==='tab-'+name);});
-  const addBtn=document.getElementById('topbarAddBtn');if(addBtn)addBtn.style.display=(name==='watchlist'||name==='import')?'none':'';
+
+  /* Mobile tab-bar buttons */
+  document.querySelectorAll('.tab-btn').forEach(b=>{b.classList.toggle('active',b.getAttribute('data-tab')===name);});
+
+  /* Icon sidebar items */
+  ['portfolio','fees','cgt','watchlist','import'].forEach(t=>{
+    const sb=document.getElementById('sb-'+t);
+    if(sb)sb.classList.toggle('active',t===name);
+    const bn=document.getElementById('bn-'+t);
+    if(bn)bn.classList.toggle('active',t===name);
+  });
+
+  /* Desktop nav links */
+  ['portfolio','fees','cgt','watchlist','import'].forEach(t=>{
+    const nl=document.getElementById('nl-'+t);
+    if(nl)nl.classList.toggle('active',t===name);
+  });
+
+  /* Show/hide Add button based on tab */
+  const addBtn=document.getElementById('topbarAddBtn');
+  if(addBtn)addBtn.style.display=(name==='watchlist'||name==='import')?'none':'';
+
   if(name==='fees')setTimeout(()=>{try{renderFees();}catch(e){}},30);
-  if(name==='portfolio'){try{renderCash();}catch(e){}if(pieChart)setTimeout(()=>pieChart.resize(),50);if(historyChart)setTimeout(()=>historyChart.resize(),50);}
+  if(name==='portfolio'){try{renderCash();}catch(e){}if(typeof pieChart!=='undefined'&&pieChart)setTimeout(()=>pieChart.resize(),50);if(typeof historyChart!=='undefined'&&historyChart)setTimeout(()=>historyChart.resize(),50);}
   closeMobileSidebar();
 }
 
@@ -115,33 +140,25 @@ function applyTheme(theme) {
   const isDark = theme !== 'light';
   const icon = document.getElementById('themeToggleIcon');
   const label = document.getElementById('themeToggleLabel');
-  const pill = document.getElementById('themeTogglePill');
-  const mobileIcon = document.getElementById('mobileThemeIcon');
-  const mobilePill = document.getElementById('mobileThemeToggle');
   if (icon) icon.textContent = isDark ? '🌙' : '☀️';
   if (label) label.textContent = isDark ? 'Dark mode' : 'Light mode';
-  if (pill) pill.style.justifyContent = isDark ? 'flex-end' : 'flex-start';
-  if (mobileIcon) mobileIcon.textContent = isDark ? '🌙' : '☀️';
-  if (mobilePill) mobilePill.style.justifyContent = isDark ? 'flex-end' : 'flex-start';
   const metaTheme = document.querySelector('meta[name="theme-color"]');
-  if (metaTheme) metaTheme.setAttribute('content', isDark ? '#212851' : '#e8e8f4');
+  if (metaTheme) metaTheme.setAttribute('content', isDark ? '#0e0b2a' : '#f0eefa');
   if (typeof pieChart !== 'undefined' && pieChart) setTimeout(() => { try { pieChart.update(); } catch(e) {} }, 50);
-  // Theme switch: update chart colors in-place rather than destroy/rebuild
   if (typeof historyChart !== 'undefined' && historyChart) {
     setTimeout(() => {
       try {
         const isLight = theme === 'light';
-        const gridColor = isLight ? 'rgba(0,0,0,0.06)' : 'rgba(255,255,255,0.06)';
-        const textColor = isLight ? '#999' : '#444';
-        const lineColor = isLight ? '#42ac5c' : '#5de36c';
+        const gridColor = isLight ? 'rgba(80,60,180,0.08)' : 'rgba(255,255,255,0.06)';
+        const textColor = isLight ? '#8070a8' : 'rgba(255,255,255,0.3)';
+        const lineColor = '#f5a623'; /* amber — same in both themes */
         historyChart.data.datasets[0].borderColor = lineColor;
         historyChart.options.scales.x.grid.color = gridColor;
         historyChart.options.scales.x.ticks.color = textColor;
         historyChart.options.scales.y.grid.color = gridColor;
         historyChart.options.scales.y.ticks.color = textColor;
-        historyChart.update('none'); // 'none' = no animation, preserves data
+        historyChart.update('none');
       } catch(e) {
-        // Only fall back to full rebuild if update fails
         try { historyChart.destroy(); historyChart = null; renderHistoryChart(S.snapshots||null); } catch(e2) {}
       }
     }, 50);
@@ -330,13 +347,11 @@ function setImportStatus(el,type,msg){
 
 // ── Boot ──────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', async function(){
-  document.getElementById('todayDate').textContent = new Date().toLocaleDateString('en-AU',{weekday:'short',day:'numeric',month:'long',year:'numeric'});
   initTheme();
   initImportDropZone();
-  function updateSidebarMode(){const sb=document.getElementById('sidebar');if(window.innerWidth>800){sb.classList.add('desktop-visible');sb.classList.remove('mobile-open');document.getElementById('sidebarOverlay').classList.remove('visible');document.body.style.overflow='';}else{sb.classList.remove('desktop-visible');}}
-  updateSidebarMode();window.addEventListener('resize',updateSidebarMode);
-  if(localStorage.getItem('smsf_sb_collapsed')==='1')document.getElementById('sidebar').classList.add('collapsed');
-  renderHistoryChart();updateSessions();setInterval(updateSessions,30000);
+  renderHistoryChart();
+  updateSessions();
+  setInterval(updateSessions, 30000);
 
   // Auto-login if token exists
   const token = getToken();
@@ -507,3 +522,4 @@ function renderFees(){
     }).join(''):`<tr><td colspan="6" style="text-align:center;color:var(--text4);padding:16px;">No transactions yet</td></tr>`);
   }catch(err){console.error('renderFees error:',err);}
 }
+
