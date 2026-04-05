@@ -94,26 +94,25 @@ async function bootApp() {
   // Load current user
   AUTH.user = await xano('GET', '/auth/me');
 
-  // Update user badge
+  // Update user badge — just show initials in the amber circle
   const badge   = document.getElementById('userBadge');
   const avatar  = document.getElementById('userAvatar');
-  const nameEl  = document.getElementById('userName');
-  const roleEl  = document.getElementById('userRoleBadge');
   const initials = (AUTH.user.name || AUTH.user.email || '?').split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
-  avatar.textContent  = initials;
-  nameEl.textContent  = AUTH.user.name || AUTH.user.email;
-  roleEl.textContent  = AUTH.user.role;
-  roleEl.className    = `user-role-badge role-${AUTH.user.role}`;
-  badge.style.display = 'flex';
+  if(avatar) avatar.textContent = initials;
+  if(badge)  badge.style.display = 'flex';
+
+  // Mobile subtitle
+  const mobileSub = document.getElementById('mobileSubtitle');
 
   // Load portfolios this user can access
   AUTH.portfolios = await xano('GET', '/portfolio');
 
   // Populate portfolio selector
   const sel = document.getElementById('portfolioSelect');
-  sel.innerHTML = AUTH.portfolios.map(p => `<option value="${p.id}">${p.name}${p.is_private?' 🔒':''}</option>`).join('');
+  if(sel) sel.innerHTML = AUTH.portfolios.map(p => `<option value="${p.id}">${p.name}${p.is_private?' 🔒':''}</option>`).join('');
   if (AUTH.portfolios.length > 1) {
-    document.getElementById('portfolioSelectorWrap').style.display = 'flex';
+    const pWrap = document.getElementById('portfolioSelectorWrap');
+    if(pWrap) pWrap.style.display = 'flex';
   }
 
   // Default to first portfolio
@@ -121,6 +120,14 @@ async function bootApp() {
   if (!AUTH.currentPortfolioId) {
     syncUI('err', 'No portfolio found — contact your admin');
     return;
+  }
+
+  // Set mobile subtitle: portfolio name + date
+  if(mobileSub) {
+    const portfolio = AUTH.portfolios.find(p=>p.id===AUTH.currentPortfolioId);
+    const name = portfolio ? portfolio.name : '';
+    const date = new Date().toLocaleDateString('en-AU',{weekday:'short',day:'numeric',month:'short'});
+    mobileSub.textContent = (name ? name + ' · ' : '') + date;
   }
 
   // Hide login screen, start app
