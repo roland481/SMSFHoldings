@@ -97,7 +97,7 @@ async function submitAddModal(){
   }else if(smartMode==='transfer'){
     const date=document.getElementById('modal-transfer-date').value;const from=document.getElementById('modal-transfer-from').value;const to=document.getElementById('modal-transfer-to').value;const amt=parseFloat(document.getElementById('modal-transfer-amt').value)||0;const desc=document.getElementById('modal-transfer-desc').value.trim();
     if(!amt||from===''||to===''||from===to)return;const fromIdx=parseInt(from),toIdx=parseInt(to);const txnId=generateTxnId(date);const fromId=S.cash[fromIdx]?._id,toId=S.cash[toIdx]?._id;
-    try{const recId=await xanoAddLedger({portfolio:AUTH.currentPortfolioId,date,type:'transfer',category:'Internal Transfer',description:`Transfer${desc?' — '+desc:''}`,amount:amt,txn_id:txnId,cash_acct_id:fromId,to_cash_acct_id:toId,meta:{desc}});S.transfers.push({_id:recId,date,from:fromIdx,to:toIdx,amount:amt,desc,txnId});S.cash[fromIdx].balance=(S.cash[fromIdx].balance||0)-amt;S.cash[toIdx].balance=(S.cash[toIdx].balance||0)+amt;await Promise.all([xanoUpdateCash(fromIdx),xanoUpdateCash(toIdx)]);renderCash();renderFees();syncUI('synced','Saved');}catch(e){syncUI('err','Save failed');}
+    try{if(!fromId||!toId){syncUI('err','Cash account ID missing — try refreshing');return;}const recId=await xanoAddLedger({portfolio:AUTH.currentPortfolioId,date,type:'transfer',category:'Internal Transfer',description:`Transfer${desc?' — '+desc:''}`,amount:amt,txn_id:txnId,cash_acct_id:fromId,cash_account:fromId,to_cash_acct_id:toId,to_cash_account:toId,meta:{from_account:S.cash[fromIdx]?.name,to_account:S.cash[toIdx]?.name,desc}});S.transfers.push({_id:recId,date,from:fromIdx,to:toIdx,amount:amt,desc,txnId});S.cash[fromIdx].balance=(S.cash[fromIdx].balance||0)-amt;S.cash[toIdx].balance=(S.cash[toIdx].balance||0)+amt;await Promise.all([xanoUpdateCash(fromIdx),xanoUpdateCash(toIdx)]);renderCash();renderFees();closeAddModal();syncUI('synced','Transfer saved');}catch(e){syncUI('err','Transfer failed: '+e.message);}
   }else if(smartMode==='swap'){
     const swapDate=document.getElementById('modal-swap-date')?.value;
     const fromIdx=parseInt(document.getElementById('modal-swap-from-holding')?.value);
@@ -188,4 +188,3 @@ async function submitAddModal(){
 }
 
 document.addEventListener('keydown',e=>{if(e.key==='Escape')closeAddModal();});
-
