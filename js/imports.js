@@ -39,16 +39,63 @@ async function importCommsecIntlHTML(htmlText,statusEl){
   try{
     const parser=new DOMParser();
     const doc=parser.parseFromString(htmlText,'text/html');
-    let audPerUsd=null;
+
+    // ── Build a map of AUD/USD rates by trade time from the Forex SELL rows ──
+    // Each stock trade triggers a forex conversion at (nearly) the same timestamp.
+    // Format: {'09:30': 0.70244, '14:36': 0.70028, ...}
+    // We key by HH:MM (minute precision) to match stock trade times to forex rows.
+    const forexRateByMinute={};
+    let fallbackAudPerUsd=null;
+    // Also capture the total AUD sold from the 'Total AUD.USD (Sold)' subtotal row —
+    // this is the authoritative cash deduction straight from the statement.
+    let totalAudSold=null;
     const allRows=[...doc.querySelectorAll('tbody tr')];
     for(const tr of allRows){
       const cells=[...tr.querySelectorAll('td')].map(td=>td.textContent.trim());
+      // Detect the 'Total AUD.USD (Sold)' subtotal row - cells[0] contains the label
+      if(cells[0]&&cells[0].includes('AUD.USD')&&cells[0].includes('Sold')){
+        // cells[1] = total AUD quantity sold e.g. '-7,630.72'
+        const v=Math.abs(parseFloat((cells[1]||'').replace(/,/g,'')));
+        if(v>0)totalAudSold=parseFloat(v.toFixed(2));
+      }
       if(cells.length>=8&&cells.some(c=>c==='AUD.USD')&&cells.some(c=>c==='SELL')){
-        for(let ci=7;ci<cells.length;ci++){const v=parseFloat(cells[ci].replace(/,/g,''));if(v>0.3&&v<1.5){audPerUsd=parseFloat((1/v).toFixed(6));break;}}
-        if(audPerUsd)break;
+        // cells[2] = datetime like '2026-04-08, 09:30:10'
+        // cells[7] = forex rate (USD per AUD), e.g. '0.70244'
+        const dtStr=cells[2]||'';
+        const timePart=dtStr.includes(',')?dtStr.split(',')[1].trim():'';
+        const minuteKey=timePart.slice(0,5); // 'HH:MM'
+        for(let ci=7;ci<cells.length;ci++){
+          const v=parseFloat(cells[ci].replace(/,/g,''));
+          if(v>0.3&&v<1.5){
+            const audPerUsd=parseFloat((1/v).toFixed(6));
+            if(minuteKey&&!forexRateByMinute[minuteKey])forexRateByMinute[minuteKey]=audPerUsd;
+            if(!fallbackAudPerUsd)fallbackAudPerUsd=audPerUsd;
+            break;
+          }
+        }
       }
     }
-    if(!audPerUsd||audPerUsd<0.5){audPerUsd=1.414;}
+    if(!fallbackAudPerUsd||fallbackAudPerUsd<0.5){fallbackAudPerUsd=1.414;}
+
+    // ── Also build a map of ACTUAL AUD amounts from forex rows by minute ──
+    // The forex SELL quantity (AUD sold) is the most accurate cash deduction.
+    // Format: {'09:30': 5174.82, '14:36': 2455.90}
+    const forexAudByMinute={};
+    for(const tr of allRows){
+      const cells=[...tr.querySelectorAll('td')].map(td=>td.textContent.trim());
+      if(cells.length>=8&&cells.some(c=>c==='AUD.USD')&&cells.some(c=>c==='SELL')){
+        const dtStr=cells[2]||'';
+        const timePart=dtStr.includes(',')?dtStr.split(',')[1].trim():'';
+        const minuteKey=timePart.slice(0,5);
+        if(!minuteKey)continue;
+        // cells[6] = AUD quantity sold (negative, e.g. '-5,174.7')
+        const audQty=Math.abs(parseFloat((cells[6]||'').replace(/,/g,''))||0);
+        if(audQty>0){
+          forexAudByMinute[minuteKey]=(forexAudByMinute[minuteKey]||0)+audQty;
+        }
+      }
+    }
+
     const stockTrades=[];
     let inStocks=false;
     const tbodies=[...doc.querySelectorAll('tbody')];
@@ -70,6 +117,10 @@ async function importCommsecIntlHTML(htmlText,statusEl){
         if(!symbol||symbol==='TOTAL'||!qtyRaw||!usdPriceRaw)continue;
         if(typeStr!=='BUY'&&typeStr!=='SELL')continue;
         const dateStr=dateTimeStr.split(',')[0].trim();
+        const timePart=dateTimeStr.includes(',')?dateTimeStr.split(',')[1].trim():'';
+        const minuteKey=timePart.slice(0,5);
+        // Use the forex rate matching this trade's minute, fall back to global rate
+        const audPerUsd=forexRateByMinute[minuteKey]||fallbackAudPerUsd;
         const qty=Math.abs(qtyRaw);
         const usdPrice=Math.abs(usdPriceRaw);
         const audPrice=parseFloat((usdPrice*audPerUsd).toFixed(6));
@@ -77,7 +128,9 @@ async function importCommsecIntlHTML(htmlText,statusEl){
         const audTotal=parseFloat((qty*audPrice).toFixed(2));
         const side=typeStr==='BUY'?'buy':'sell';
         const dedupId='CSINTL_HTML_'+symbol+'_'+dateStr+'_'+qty+'_'+usdPrice;
-        stockTrades.push({symbol,dateStr,side,qty,usdPrice,audPrice,audComm,audTotal,dedupId});
+        // Store the actual AUD forex amount for this minute if available
+        const actualAudOut=forexAudByMinute[minuteKey]||null;
+        stockTrades.push({symbol,dateStr,minuteKey,side,qty,usdPrice,audPrice,audComm,audTotal,dedupId,actualAudOut,audPerUsd});
       }
     }
     if(!stockTrades.length){if(statusEl)setImportStatus(statusEl,'error','No stock trades found in this HTML file.');return;}
@@ -96,6 +149,8 @@ async function importCommsecIntlHTML(htmlText,statusEl){
         existing.qty=totalQty;
         existing.audComm=parseFloat((existing.audComm+t.audComm).toFixed(6));
         existing.audTotal=parseFloat((existing.audTotal+t.audTotal).toFixed(2));
+        // Sum actual AUD forex amounts (most accurate cash deduction)
+        if(t.actualAudOut!=null)existing.actualAudOut=(existing.actualAudOut||0)+t.actualAudOut;
         // Extend dedup ID to cover all fills
         existing.dedupId=existing.dedupId+'|'+t.dedupId;
         existing.fills=(existing.fills||1)+1;
@@ -106,11 +161,16 @@ async function importCommsecIntlHTML(htmlText,statusEl){
 
     const tradeLines=consolidated.map(t=>{
       const fillNote=t.fills>1?` (${t.fills} fills combined)`:'';
-      return t.side.toUpperCase()+' '+t.qty+' x '+t.symbol+' @ $'+t.audPrice.toFixed(2)+' AUD/share avg = $'+t.audTotal.toFixed(2)+' AUD + $'+t.audComm.toFixed(2)+' brokerage'+fillNote+'\n  (USD $'+t.usdPrice.toFixed(4)+'  x  AUD/USD '+audPerUsd.toFixed(4)+')';
+      const cashNote=t.actualAudOut!=null?` [actual AUD: $${t.actualAudOut.toFixed(2)}]`:'';
+      return t.side.toUpperCase()+' '+t.qty+' x '+t.symbol+' @ $'+t.audPrice.toFixed(2)+' AUD/share avg = $'+t.audTotal.toFixed(2)+' AUD + $'+t.audComm.toFixed(2)+' brokerage'+fillNote+cashNote+'\n  (USD $'+t.usdPrice.toFixed(4)+'  x  AUD/USD '+t.audPerUsd.toFixed(4)+')';
     }).join('\n\n');
     if(!confirm('CommSec International import preview:\n\n'+tradeLines+'\n\nAll values converted to AUD. Proceed?'))return;
     let cashAcctIdx=null;if(S.cash.length>0){const opts=S.cash.map((a,i)=>(i+1)+'. '+a.name+' ($'+f(a.balance||0)+' AUD)').join('\n');const ans=prompt('Deduct total (purchase + brokerage) from which cash account?\n\n'+opts+'\n\nEnter number, or 0 to skip:');if(ans===null)return;const n=parseInt(ans);if(n>=1&&n<=S.cash.length)cashAcctIdx=n-1;}
     let imported=0,skipped=0;
+    // If we captured the statement's own total AUD sold figure, use it as the single
+    // cash deduction (most accurate — avoids per-fill rounding errors).
+    // Otherwise fall back to summing calculated per-trade outlays.
+    let remainingCashDeduction=totalAudSold;
     for(const t of consolidated){
       // Dedup: skip if ALL fills in this consolidated trade already exist
       const allDedupIds=t.dedupId.split('|');
@@ -123,8 +183,22 @@ async function importCommsecIntlHTML(htmlText,statusEl){
       S.us[idx].txns.push({date:t.dateStr,side:t.side,qty:t.qty,price:t.audPrice,fee:t.audComm,txnId,commsecIntlId:t.dedupId,cashAcct:cashAcctIdx});
       recalcFromTxns('us',idx);
       try{await xanoUpdateHolding('us',idx);await xanoAddTransaction('us',idx);}catch(e){console.warn('Xano save failed',e);}
-      const totalOutlay=t.audTotal+t.audComm;
-      if(cashAcctIdx!==null&&S.cash[cashAcctIdx]){S.cash[cashAcctIdx].balance=(S.cash[cashAcctIdx].balance||0)-(t.side==='buy'?totalOutlay:-totalOutlay);await xanoUpdateCash(cashAcctIdx);}
+      if(cashAcctIdx!==null&&S.cash[cashAcctIdx]){
+        // Use statement total AUD sold (most accurate) if we have it and there's only one buy symbol,
+        // otherwise use per-trade actual AUD or calculated outlay.
+        let cashDeduction;
+        if(remainingCashDeduction!=null&&t.side==='buy'){
+          // Allocate the statement total to this trade (handles multi-symbol proportionally if needed)
+          cashDeduction=parseFloat(remainingCashDeduction.toFixed(2));
+          remainingCashDeduction=null; // consumed
+        } else if(t.actualAudOut!=null){
+          cashDeduction=parseFloat(t.actualAudOut.toFixed(2));
+        } else {
+          cashDeduction=parseFloat((t.audTotal+t.audComm).toFixed(2));
+        }
+        S.cash[cashAcctIdx].balance=(S.cash[cashAcctIdx].balance||0)-(t.side==='buy'?cashDeduction:-cashDeduction);
+        await xanoUpdateCash(cashAcctIdx);
+      }
       imported++;
     }
     if(imported>0){rows('us');renderAllHoldings();renderCash();renderFees();summary();}
