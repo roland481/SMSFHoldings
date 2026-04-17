@@ -207,16 +207,12 @@
     <div class="history-section" style="margin-bottom:0;">
       <!-- ── Performance chart header ── -->
       <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:14px;">
-
-        <!-- View tabs -->
         <div style="display:flex;gap:3px;background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:3px;">
           <button id="perf-tab-portfolio" class="perf-tab active" onclick="perfSetView('portfolio')" title="Total portfolio value vs cumulative contributions">Portfolio</button>
           <button id="perf-tab-costbasis" class="perf-tab" onclick="perfSetView('costbasis')" title="Investment market value vs cost basis">Cost Basis</button>
-          <button id="perf-tab-twr"       class="perf-tab" onclick="perfSetView('twr')"       title="Time-weighted return % — removes contribution timing distortion">TWR %</button>
-          <button id="perf-tab-mwr"       class="perf-tab" onclick="perfSetView('mwr')"       title="Money-weighted return % — IRR accounting for when you contributed">MWR %</button>
+          <button id="perf-tab-twr"       class="perf-tab" onclick="perfSetView('twr')"       title="Time-weighted return %">TWR %</button>
+          <button id="perf-tab-mwr"       class="perf-tab" onclick="perfSetView('mwr')"       title="Money-weighted return %">MWR %</button>
         </div>
-
-        <!-- Granularity toggle -->
         <div style="display:flex;gap:3px;background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:3px;">
           <button id="perf-gran-daily"   class="perf-gran active" onclick="perfSetGran('daily')">Daily</button>
           <button id="perf-gran-weekly"  class="perf-gran"        onclick="perfSetGran('weekly')">Weekly</button>
@@ -231,12 +227,13 @@
       </div>
 
       <!-- Metric display -->
-      <div id="perfMetric" style="display:flex;align-items:baseline;flex-wrap:wrap;gap:4px;margin-bottom:14px;min-height:32px;">
-        <span style="color:var(--text4);font-size:12px;">Loading...</span>
-      </div>
+      <div id="perfMetric" style="display:flex;align-items:baseline;flex-wrap:wrap;gap:4px;margin-bottom:14px;min-height:28px;"></div>
 
-      <!-- Chart canvas -->
-      <div style="position:relative;width:100%;height:200px;"><canvas id="historyChart"></canvas></div>
+      <!-- Two canvases: charts.js owns historyChart, performance.js owns perfChart -->
+      <div style="position:relative;width:100%;height:200px;">
+        <canvas id="historyChart" style="position:absolute;top:0;left:0;width:100%;height:100%;"></canvas>
+        <canvas id="perfChart"    style="position:absolute;top:0;left:0;width:100%;height:100%;display:none;"></canvas>
+      </div>
     </div>
   </div>
 
