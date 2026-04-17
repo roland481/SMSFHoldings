@@ -294,22 +294,20 @@ function _perfRenderChart(vd) {
           grid:{color:gridColor, drawBorder:false},
           ticks:{color:textColor, font:{size:10}, callback:function(v){return vd.yFmt(v);}},
           min: (function(){
-            // Collect all data values across all datasets
-            var all = [];
-            vd.datasets.forEach(function(ds){ (ds.data||[]).forEach(function(v){ if(v!=null) all.push(v); }); });
+            // Use only the primary (first) dataset for scaling — excludes contributions/basis lines
+            var all = (vd.datasets[0] && vd.datasets[0].data || []).filter(function(v){ return v!=null; });
             if(!all.length) return undefined;
             var lo = Math.min.apply(null, all);
             var hi = Math.max.apply(null, all);
-            var pad = (hi - lo) * 0.05 || Math.abs(lo) * 0.05 || 1;
+            var pad = (hi - lo) * 0.1 || Math.abs(lo) * 0.05 || 1;
             return lo - pad;
           })(),
           max: (function(){
-            var all = [];
-            vd.datasets.forEach(function(ds){ (ds.data||[]).forEach(function(v){ if(v!=null) all.push(v); }); });
+            var all = (vd.datasets[0] && vd.datasets[0].data || []).filter(function(v){ return v!=null; });
             if(!all.length) return undefined;
             var lo = Math.min.apply(null, all);
             var hi = Math.max.apply(null, all);
-            var pad = (hi - lo) * 0.05 || Math.abs(hi) * 0.05 || 1;
+            var pad = (hi - lo) * 0.1 || Math.abs(hi) * 0.05 || 1;
             return hi + pad;
           })(),
         }
