@@ -290,7 +290,29 @@ function _perfRenderChart(vd) {
       },
       scales:{
         x:{grid:{color:gridColor, drawBorder:false}, ticks:{color:textColor, maxTicksLimit:8, font:{size:10}}},
-        y:{grid:{color:gridColor, drawBorder:false}, ticks:{color:textColor, font:{size:10}, callback:function(v){return vd.yFmt(v);}}}
+        y:{
+          grid:{color:gridColor, drawBorder:false},
+          ticks:{color:textColor, font:{size:10}, callback:function(v){return vd.yFmt(v);}},
+          min: (function(){
+            // Collect all data values across all datasets
+            var all = [];
+            vd.datasets.forEach(function(ds){ (ds.data||[]).forEach(function(v){ if(v!=null) all.push(v); }); });
+            if(!all.length) return undefined;
+            var lo = Math.min.apply(null, all);
+            var hi = Math.max.apply(null, all);
+            var pad = (hi - lo) * 0.05 || Math.abs(lo) * 0.05 || 1;
+            return lo - pad;
+          })(),
+          max: (function(){
+            var all = [];
+            vd.datasets.forEach(function(ds){ (ds.data||[]).forEach(function(v){ if(v!=null) all.push(v); }); });
+            if(!all.length) return undefined;
+            var lo = Math.min.apply(null, all);
+            var hi = Math.max.apply(null, all);
+            var pad = (hi - lo) * 0.05 || Math.abs(hi) * 0.05 || 1;
+            return hi + pad;
+          })(),
+        }
       }
     }
   });
