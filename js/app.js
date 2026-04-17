@@ -4,56 +4,51 @@
 function animateValue(el,newVal,prefix='$',decimals=2){if(!el)return;const raw=el.getAttribute('data-raw');const oldVal=raw?parseFloat(raw):null;el.setAttribute('data-raw',newVal);if(oldVal===null||isNaN(oldVal)||oldVal===newVal){el.textContent=prefix+f(newVal,decimals);return;}const dir=newVal>oldVal?'up':'down';el.classList.remove('flash-up','flash-down');void el.offsetWidth;el.classList.add('flash-'+dir);setTimeout(()=>el.classList.remove('flash-up','flash-down'),1200);const duration=600,steps=30,increment=(newVal-oldVal)/steps;let current=oldVal,step=0;const timer=setInterval(()=>{step++;current+=increment;if(step>=steps){current=newVal;clearInterval(timer);}el.textContent=prefix+f(current,decimals);},duration/steps);}
 
 function updateSessions(){
-  const el=document.getElementById('sessions');
-  const tbEl=document.getElementById('topbarSessions');
-  if(!el&&!tbEl)return;
+  const el=document.getElementById('sessions');if(!el)return;
   const now=new Date();
-  const dayUTC=now.getUTCDay();
+  const dayUTC=now.getUTCDay(); // 0=Sun,6=Sat
+  const hAEST=((now.getUTCHours()+10)%24);
   const hAEDT=((now.getUTCHours()+11)%24);
   const isWeekend=dayUTC===0||dayUTC===6;
-  const asxOpen=!isWeekend&&(hAEDT>=10&&hAEDT<16||(hAEDT===16&&now.getUTCMinutes()<10));
+  // ASX: 10:00-16:10 AEDT (UTC+11) Mon-Fri
+  const asxOpen=!isWeekend&&hAEDT>=10&&hAEDT<16||(hAEDT===16&&now.getUTCMinutes()<10);
+  // NYSE: 9:30-16:00 ET. ET is UTC-5 (EST) or UTC-4 (EDT). Approx: UTC 14:30-21:00
   const hUTC=now.getUTCHours(),mUTC=now.getUTCMinutes();
   const nyseMinUTC=hUTC*60+mUTC;
-  const nyseOpen=!isWeekend&&nyseMinUTC>=870&&nyseMinUTC<1260;
+  const nyseOpen=!isWeekend&&nyseMinUTC>=870&&nyseMinUTC<1260; // 14:30-21:00 UTC
+  // LSE: 8:00-16:30 GMT Mon-Fri
   const lseOpen=!isWeekend&&hUTC>=8&&(hUTC<16||(hUTC===16&&mUTC<30));
-  function minsUntil(targetH,targetM,currentH,currentM){const cur=currentH*60+currentM;const tgt=targetH*60+targetM;return tgt>cur?tgt-cur:1440-(cur-tgt);}
+  // Crypto: always open
+  function minsUntil(targetH,targetM,currentH,currentM){
+    const cur=currentH*60+currentM;const tgt=targetH*60+targetM;
+    return tgt>cur?tgt-cur:1440-(cur-tgt);
+  }
   function fmt(mins){const h=Math.floor(mins/60);const m=mins%60;return h>0?h+'h '+m+'m':m+'m';}
+  // Countdown strings (desktop only)
   const isDesktop=window.innerWidth>800;
-
-  /* Sessions bar pill (under topbar on mobile) */
   function pill(label,open,openInMins,closeInMins){
-    const dot=open?`<span class="session-dot" style="background:var(--gain-pos);box-shadow:0 0 5px rgba(52,211,153,0.5);animation:pulse 2s infinite;"></span>`:`<span class="session-dot" style="background:var(--text4);"></span>`;
+    const dot=open?'<span style="width:5px;height:5px;border-radius:50%;background:var(--gain-pos);box-shadow:0 0 5px rgba(93,227,108,0.5);display:inline-block;flex-shrink:0;"></span>':'<span style="width:5px;height:5px;border-radius:50%;background:var(--text4);display:inline-block;flex-shrink:0;"></span>';
     let timer='';
     if(isDesktop){
-      if(open&&closeInMins!=null)timer=`<span style="font-size:9px;color:var(--gain-pos);margin-left:3px;">closes ${fmt(closeInMins)}</span>`;
-      else if(!open&&openInMins!=null)timer=`<span style="font-size:9px;color:var(--text3);margin-left:3px;">opens ${fmt(openInMins)}</span>`;
+      if(open&&closeInMins!=null)timer=`<span style="font-size:9px;color:#5de36c;margin-left:4px;">closes ${fmt(closeInMins)}</span>`;
+      else if(!open&&openInMins!=null)timer=`<span style="font-size:9px;color:var(--text2);margin-left:4px;opacity:0.8;">opens ${fmt(openInMins)}</span>`;
     }
     const cls=open?'session-pill session-open':'session-pill';
     return`<div class="${cls}" style="display:flex;align-items:center;gap:5px;">${dot}<span>${label}</span>${timer}</div>`;
   }
-
-  /* Topbar pill — smaller, no countdown */
-  function tbPill(label,open){
-    const dot=`<span class="tb-sess-dot" style="background:${open?'#34d399':'rgba(255,255,255,0.2)'};"></span>`;
-    const cls=open?'tb-sess live':'tb-sess';
-    return`<div class="${cls}">${dot}${label}</div>`;
-  }
-
+  // ASX countdown
   let asxOpenIn=null,asxCloseIn=null;
-  if(!asxOpen){asxOpenIn=minsUntil(10,0,hAEDT,now.getUTCMinutes());}
-  else{asxCloseIn=minsUntil(16,10,hAEDT,now.getUTCMinutes());}
+  if(!asxOpen){const hNow=hAEDT,mNow=now.getUTCMinutes();asxOpenIn=minsUntil(10,0,hNow,mNow);}
+  else{const hNow=hAEDT,mNow=now.getUTCMinutes();asxCloseIn=minsUntil(16,10,hNow,mNow);}
+  // NYSE countdown
   let nyseOpenIn=null,nyseCloseIn=null;
-  if(!nyseOpen){nyseOpenIn=minsUntil(14,30,hUTC,mUTC);}else{nyseCloseIn=minsUntil(21,0,hUTC,mUTC);}
+  if(!nyseOpen){nyseOpenIn=minsUntil(14,30,hUTC,mUTC);}
+  else{nyseCloseIn=minsUntil(21,0,hUTC,mUTC);}
+  // LSE countdown
   let lseOpenIn=null,lseCloseIn=null;
-  if(!lseOpen){lseOpenIn=minsUntil(8,0,hUTC,mUTC);}else{lseCloseIn=minsUntil(16,30,hUTC,mUTC);}
-
-  const pillsHTML=pill('ASX',asxOpen,asxOpenIn,asxCloseIn)+pill('NYSE',nyseOpen,nyseOpenIn,nyseCloseIn)+pill('LSE',lseOpen,lseOpenIn,lseCloseIn)+`<div class="session-pill session-open" style="display:flex;align-items:center;gap:5px;"><span class="session-dot" style="background:#34d399;box-shadow:0 0 5px rgba(52,211,153,0.5);animation:pulse 2s infinite;"></span><span>₿ Crypto 24/7</span></div>`;
-  if(el)el.innerHTML=pillsHTML;
-
-  /* Topbar sessions (desktop only) */
-  if(tbEl){
-    tbEl.innerHTML=tbPill('ASX',asxOpen)+tbPill('NYSE',nyseOpen)+tbPill('₿ 24/7',true);
-  }
+  if(!lseOpen){lseOpenIn=minsUntil(8,0,hUTC,mUTC);}
+  else{lseCloseIn=minsUntil(16,30,hUTC,mUTC);}
+  el.innerHTML=pill('ASX',asxOpen,asxOpenIn,asxCloseIn)+pill('NYSE',nyseOpen,nyseOpenIn,nyseCloseIn)+pill('LSE',lseOpen,lseOpenIn,lseCloseIn)+'<div class="session-pill session-open" style="display:flex;align-items:center;gap:5px;"><span style="width:5px;height:5px;border-radius:50%;background:var(--gain-pos);box-shadow:0 0 5px rgba(93,227,108,0.5);display:inline-block;flex-shrink:0;"></span><span>₿ Crypto 24/7</span></div>';
 }
 function applyRowTints(){document.querySelectorAll('tr.holding-row').forEach(tr=>{const changeCell=[...tr.querySelectorAll('td')].find(td=>td.classList.contains('pos')||td.classList.contains('neg'));if(!changeCell)return;tr.classList.remove('tint-up','tint-down');if(changeCell.classList.contains('pos'))tr.classList.add('tint-up');else if(changeCell.classList.contains('neg'))tr.classList.add('tint-down');});}
 
@@ -62,32 +57,12 @@ function closeMobileSidebar(){document.getElementById('sidebar').classList.remov
 function toggleSidebar(){const sb=document.getElementById('sidebar');const collapsed=sb.classList.toggle('collapsed');localStorage.setItem('smsf_sb_collapsed',collapsed?'1':'0');if(pieChart)setTimeout(()=>pieChart.resize(),280);if(historyChart)setTimeout(()=>historyChart.resize(),280);}
 
 function switchTab(name){
-  /* Tab panels */
+  document.querySelectorAll('.tab-btn').forEach((b,i)=>{const tabs=['portfolio','fees','watchlist','import'];b.classList.toggle('active',tabs[i]===name);});
+  ['portfolio','fees','watchlist','import'].forEach(t=>{const sb=document.getElementById('sb-'+t);if(sb)sb.classList.toggle('active',t===name);const bn=document.getElementById('bn-'+t);if(bn)bn.classList.toggle('active',t===name);});
   document.querySelectorAll('.tab-panel').forEach(p=>{p.classList.toggle('active',p.id==='tab-'+name);});
-
-  /* Mobile tab-bar buttons */
-  document.querySelectorAll('.tab-btn').forEach(b=>{b.classList.toggle('active',b.getAttribute('data-tab')===name);});
-
-  /* Icon sidebar items */
-  ['portfolio','fees','cgt','watchlist','import'].forEach(t=>{
-    const sb=document.getElementById('sb-'+t);
-    if(sb)sb.classList.toggle('active',t===name);
-    const bn=document.getElementById('bn-'+t);
-    if(bn)bn.classList.toggle('active',t===name);
-  });
-
-  /* Desktop nav links */
-  ['portfolio','fees','cgt','watchlist','import'].forEach(t=>{
-    const nl=document.getElementById('nl-'+t);
-    if(nl)nl.classList.toggle('active',t===name);
-  });
-
-  /* Show/hide Add button based on tab */
-  const addBtn=document.getElementById('topbarAddBtn');
-  if(addBtn)addBtn.style.display=(name==='watchlist'||name==='import')?'none':'';
-
+  const addBtn=document.getElementById('topbarAddBtn');if(addBtn)addBtn.style.display=(name==='watchlist'||name==='import')?'none':'';
   if(name==='fees')setTimeout(()=>{try{renderFees();}catch(e){}},30);
-  if(name==='portfolio'){try{renderCash();}catch(e){}if(typeof pieChart!=='undefined'&&pieChart)setTimeout(()=>pieChart.resize(),50);if(typeof historyChart!=='undefined'&&historyChart)setTimeout(()=>historyChart.resize(),50);}
+  if(name==='portfolio'){try{renderCash();}catch(e){}if(pieChart)setTimeout(()=>pieChart.resize(),50);if(historyChart)setTimeout(()=>historyChart.resize(),50);}
   closeMobileSidebar();
 }
 
@@ -140,25 +115,33 @@ function applyTheme(theme) {
   const isDark = theme !== 'light';
   const icon = document.getElementById('themeToggleIcon');
   const label = document.getElementById('themeToggleLabel');
+  const pill = document.getElementById('themeTogglePill');
+  const mobileIcon = document.getElementById('mobileThemeIcon');
+  const mobilePill = document.getElementById('mobileThemeToggle');
   if (icon) icon.textContent = isDark ? '🌙' : '☀️';
   if (label) label.textContent = isDark ? 'Dark mode' : 'Light mode';
+  if (pill) pill.style.justifyContent = isDark ? 'flex-end' : 'flex-start';
+  if (mobileIcon) mobileIcon.textContent = isDark ? '🌙' : '☀️';
+  if (mobilePill) mobilePill.style.justifyContent = isDark ? 'flex-end' : 'flex-start';
   const metaTheme = document.querySelector('meta[name="theme-color"]');
-  if (metaTheme) metaTheme.setAttribute('content', isDark ? '#0e0b2a' : '#f0eefa');
+  if (metaTheme) metaTheme.setAttribute('content', isDark ? '#212851' : '#e8e8f4');
   if (typeof pieChart !== 'undefined' && pieChart) setTimeout(() => { try { pieChart.update(); } catch(e) {} }, 50);
+  // Theme switch: update chart colors in-place rather than destroy/rebuild
   if (typeof historyChart !== 'undefined' && historyChart) {
     setTimeout(() => {
       try {
         const isLight = theme === 'light';
-        const gridColor = isLight ? 'rgba(80,60,180,0.08)' : 'rgba(255,255,255,0.06)';
-        const textColor = isLight ? '#8070a8' : 'rgba(255,255,255,0.3)';
-        const lineColor = '#f5a623'; /* amber — same in both themes */
+        const gridColor = isLight ? 'rgba(0,0,0,0.06)' : 'rgba(255,255,255,0.06)';
+        const textColor = isLight ? '#999' : '#444';
+        const lineColor = isLight ? '#42ac5c' : '#5de36c';
         historyChart.data.datasets[0].borderColor = lineColor;
         historyChart.options.scales.x.grid.color = gridColor;
         historyChart.options.scales.x.ticks.color = textColor;
         historyChart.options.scales.y.grid.color = gridColor;
         historyChart.options.scales.y.ticks.color = textColor;
-        historyChart.update('none');
+        historyChart.update('none'); // 'none' = no animation, preserves data
       } catch(e) {
+        // Only fall back to full rebuild if update fails
         try { historyChart.destroy(); historyChart = null; renderHistoryChart(S.snapshots||null); } catch(e2) {}
       }
     }, 50);
@@ -347,11 +330,26 @@ function setImportStatus(el,type,msg){
 
 // ── Boot ──────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', async function(){
+  document.getElementById('todayDate').textContent = new Date().toLocaleDateString('en-AU',{weekday:'short',day:'numeric',month:'long',year:'numeric'});
   initTheme();
   initImportDropZone();
+  function updateSidebarMode(){const sb=document.getElementById('sidebar');if(window.innerWidth>800){sb.classList.add('desktop-visible');sb.classList.remove('mobile-open');document.getElementById('sidebarOverlay').classList.remove('visible');document.body.style.overflow='';}else{sb.classList.remove('desktop-visible');}}
+  updateSidebarMode();window.addEventListener('resize',updateSidebarMode);
+  if(localStorage.getItem('smsf_sb_collapsed')==='1')document.getElementById('sidebar').classList.add('collapsed');
   renderHistoryChart();
   updateSessions();
-  setInterval(updateSessions, 30000);
+  setInterval(updateSessions,30000);
+  // Hook renderHistoryChart so performance chart re-renders whenever snapshots update
+  (function(){
+    const _orig = window.renderHistoryChart;
+    if(_orig && !_orig._perfHooked){
+      window.renderHistoryChart = function(h){
+        _orig(h);
+        setTimeout(()=>{ if(typeof renderPerformance==='function') renderPerformance(); }, 50);
+      };
+      window.renderHistoryChart._perfHooked = true;
+    }
+  })();
 
   // Auto-login if token exists
   const token = getToken();
@@ -389,9 +387,8 @@ function exportCSV(){
   ['us','asx','cry','met'].forEach(type=>{S[type].forEach(h=>{(h.txns||[]).forEach(tx=>{
     const acct=_cashName(tx.cashAcct);
     const acctIdx=tx.cashAcct!=null?tx.cashAcct:null;
-    const gross=tx.price*tx.qty;const fee=tx.fee||0;
-    const isSwyftx=!!tx.swyftxId;
-    const audTotal=parseFloat((isSwyftx?gross-fee:gross).toFixed(2));
+    const total=tx.price*tx.qty;
+    const audTotal=parseFloat(total.toFixed(2));
     entries.push({date:tx.date||'',type:'trade',cat:h.ticker,desc:h.name+' '+tx.side,amount:(tx.side==='buy'?-1:1)*audTotal,acct,acctIdx,txnId:tx.txnId||''});
     if(tx.fee>0)entries.push({date:tx.date||'',type:'fee',cat:'brokerage',desc:'Brokerage — '+h.ticker+' '+tx.side,amount:-tx.fee,acct,acctIdx,txnId:(tx.txnId||'')+'-FEE'});
   });});});
@@ -487,16 +484,7 @@ function renderFees(){
     (S.contributions||[]).forEach((item,orig)=>{if(!inFY(item.date)||!matchAcct(item))return;entries.push({date:item.date||'',desc:`${item.type} contribution — ${item.member}`,type:'contribution',amount:item.amount||0,isDebit:false,orig,deletable:true,txnId:item.txnId||'—',cashAcct:item.cashAcct??null,_id:item._id});});
     (S.transfers||[]).forEach((item,orig)=>{if(!inFY(item.date)||!matchAcct(item))return;const fromName=(()=>{if(item.from==null)return'Unknown';const byIdx=S.cash[item.from];if(byIdx)return byIdx.name;const byId=S.cash.find(c=>c._id===item.from||c._id===parseInt(item.from));return byId?.name||'Unknown';})();
       const toName=(()=>{if(item.to==null)return'Unknown';const byIdx=S.cash[item.to];if(byIdx)return byIdx.name;const byId=S.cash.find(c=>c._id===item.to||c._id===parseInt(item.to));return byId?.name||'Unknown';})();entries.push({date:item.date||'',desc:`Transfer to ${toName}${item.desc?' — '+item.desc:''}`,type:'transfer',amount:item.amount||0,isDebit:true,orig,deletable:true,txnId:item.txnId||'—',cashAcct:item.from,_id:item._id});entries.push({date:item.date||'',desc:`Transfer from ${fromName}${item.desc?' — '+item.desc:''}`,type:'transfer',amount:item.amount||0,isDebit:false,orig,deletable:false,txnId:item.txnId||'—',cashAcct:item.to,_id:item._id});});
-    ['us','asx','cry','met'].forEach(assetType=>{S[assetType].forEach((item,assetIdx)=>{(item.txns||[]).forEach((tx,txIdx)=>{if(!inFY(tx.date))return;
-      const gross=parseFloat((tx.price*tx.qty).toFixed(2));
-      const fee=tx.fee||0;
-      // Swyftx stores price as audVal/qty where audVal is GROSS (fee embedded).
-      // CommSec/manual stores price as net per-unit (fee is additive).
-      const isSwyftx=!!tx.swyftxId;
-      const tradeAmount=isSwyftx?parseFloat((gross-fee).toFixed(2)):gross;
-      entries.push({date:tx.date||'',desc:`${tx.side==='buy'?'Buy':'Sell'} ${f(tx.qty,tx.qty%1===0?0:4)} ${item.ticker}`,type:'trade',amount:tradeAmount,isDebit:tx.side==='buy',deletable:false,reversible:true,assetType,assetIdx,txnIdx:txIdx,txnId:tx.txnId||tx.txn_id||'—',cashAcct:tx.cashAcct??null,_txId:tx._id});
-      if(tx.fee>0)entries.push({date:tx.date||'',desc:`Brokerage — ${item.ticker} ${tx.side}`,type:'fee',amount:tx.fee,isDebit:true,deletable:false,txnId:(tx.txnId||'—')+'-FEE',cashAcct:tx.cashAcct??null});
-    });});});
+    ['us','asx','cry','met'].forEach(assetType=>{S[assetType].forEach((item,assetIdx)=>{(item.txns||[]).forEach((tx,txIdx)=>{if(!inFY(tx.date))return;const total=parseFloat((tx.price*tx.qty).toFixed(2));const audTotal=total;entries.push({date:tx.date||'',desc:`${tx.side==='buy'?'Buy':'Sell'} ${f(tx.qty,tx.qty%1===0?0:4)} ${item.ticker}`,type:'trade',amount:audTotal,isDebit:tx.side==='buy',deletable:false,reversible:true,assetType,assetIdx,txnIdx:txIdx,txnId:tx.txnId||tx.txn_id||'—',cashAcct:tx.cashAcct??null,_txId:tx._id});if(tx.fee>0)entries.push({date:tx.date||'',desc:`Brokerage — ${item.ticker} ${tx.side}`,type:'fee',amount:tx.fee,isDebit:true,deletable:false,txnId:(tx.txnId||'—')+'-FEE',cashAcct:tx.cashAcct??null});});});});
     // Totals
     const fyFees=entries.filter(e=>e.type==='fee'&&e.isDebit).reduce((s,e)=>s+e.amount,0);
     const contribTotal=entries.filter(e=>e.type==='contribution').reduce((s,e)=>s+e.amount,0);
@@ -522,4 +510,3 @@ function renderFees(){
     }).join(''):`<tr><td colspan="6" style="text-align:center;color:var(--text4);padding:16px;">No transactions yet</td></tr>`);
   }catch(err){console.error('renderFees error:',err);}
 }
-
