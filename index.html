@@ -205,11 +205,38 @@
       </div>
     </div>
     <div class="history-section" style="margin-bottom:0;">
-      <div class="history-header">
-        <span class="history-title">Portfolio history</span>
-        <span class="history-meta" id="historyMeta">Daily snapshots</span>
+      <!-- ── Performance chart header ── -->
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:14px;">
+
+        <!-- View tabs -->
+        <div style="display:flex;gap:3px;background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:3px;">
+          <button id="perf-tab-portfolio" class="perf-tab active" onclick="perfSetView('portfolio')" title="Total portfolio value vs cumulative contributions">Portfolio</button>
+          <button id="perf-tab-costbasis" class="perf-tab" onclick="perfSetView('costbasis')" title="Investment market value vs cost basis">Cost Basis</button>
+          <button id="perf-tab-twr"       class="perf-tab" onclick="perfSetView('twr')"       title="Time-weighted return % — removes contribution timing distortion">TWR %</button>
+          <button id="perf-tab-mwr"       class="perf-tab" onclick="perfSetView('mwr')"       title="Money-weighted return % — IRR accounting for when you contributed">MWR %</button>
+        </div>
+
+        <!-- Granularity toggle -->
+        <div style="display:flex;gap:3px;background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:3px;">
+          <button id="perf-gran-daily"   class="perf-gran active" onclick="perfSetGran('daily')">Daily</button>
+          <button id="perf-gran-weekly"  class="perf-gran"        onclick="perfSetGran('weekly')">Weekly</button>
+          <button id="perf-gran-monthly" class="perf-gran"        onclick="perfSetGran('monthly')">Monthly</button>
+        </div>
       </div>
-      <div style="position:relative;width:100%;height:180px;"><canvas id="historyChart"></canvas></div>
+
+      <!-- FY / Inception sub-toggle (TWR + MWR only) -->
+      <div id="perfSubToggle" style="display:none;gap:3px;background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:3px;margin-bottom:12px;width:fit-content;">
+        <button id="perf-sub-fy"        class="perf-gran active" onclick="perfSetMode('fy')">This FY</button>
+        <button id="perf-sub-inception" class="perf-gran"        onclick="perfSetMode('inception')">Since inception</button>
+      </div>
+
+      <!-- Metric display -->
+      <div id="perfMetric" style="display:flex;align-items:baseline;flex-wrap:wrap;gap:4px;margin-bottom:14px;min-height:32px;">
+        <span style="color:var(--text4);font-size:12px;">Loading...</span>
+      </div>
+
+      <!-- Chart canvas -->
+      <div style="position:relative;width:100%;height:200px;"><canvas id="historyChart"></canvas></div>
     </div>
   </div>
 
@@ -737,6 +764,7 @@
 <script src="js/modals.js"></script>
 <script src="js/imports.js"></script>
 <script src="js/app.js"></script>
+<script src="js/performance.js"></script>
 <!-- CGT Engine — must load before cgt-patch.js -->
 <script src="js/cgt.js"></script>
 <script src="js/cgt-patch.js"></script>
