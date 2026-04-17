@@ -349,10 +349,9 @@ function renderPerformance() {
     return;
   }
 
-  // Portfolio view: show historyChart (charts.js green line) + our metric overlay
+  // Portfolio view: daily = show historyChart (charts.js native line, smoothest)
+  //                 weekly/monthly = use perfChart with downsampled data
   if (_perfView === 'portfolio') {
-    _perfShowCanvas(false);
-    // Still compute metric from snapshots
     var fyS    = _perfTodayFyStr();
     var fySnap = null;
     for (var i = 0; i < snaps.length; i++) { if (snaps[i].d >= fyS) { fySnap = snaps[i]; break; } }
@@ -361,6 +360,17 @@ function renderPerformance() {
     var fyGain = (last && fySnap) ? last.v - fySnap.v : 0;
     var fyPct  = (fySnap && fySnap.v > 0) ? (fyGain/fySnap.v)*100 : 0;
     _perfUpdateMetric({gain:fyGain, pct:fyPct, label:'Portfolio growth this FY', isPercent:false});
+
+    if (_perfGran === 'daily') {
+      // Daily: let charts.js own the canvas — it's already rendered correctly
+      _perfShowCanvas(false);
+      if (_perfChart) { try { _perfChart.destroy(); } catch(e){} _perfChart = null; }
+    } else {
+      // Weekly / Monthly: render downsampled portfolio line on perfChart
+      _perfShowCanvas(true);
+      var vd = _perfBuildPortfolio(snaps, _perfGran);
+      if (vd) _perfRenderChart(vd);
+    }
     return;
   }
 
