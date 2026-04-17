@@ -339,17 +339,6 @@ document.addEventListener('DOMContentLoaded', async function(){
   renderHistoryChart();
   updateSessions();
   setInterval(updateSessions,30000);
-  // Hook renderHistoryChart so performance chart re-renders whenever snapshots update
-  (function(){
-    const _orig = window.renderHistoryChart;
-    if(_orig && !_orig._perfHooked){
-      window.renderHistoryChart = function(h){
-        _orig(h);
-        setTimeout(()=>{ if(typeof renderPerformance==='function') renderPerformance(); }, 50);
-      };
-      window.renderHistoryChart._perfHooked = true;
-    }
-  })();
 
   // Auto-login if token exists
   const token = getToken();
