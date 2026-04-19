@@ -74,11 +74,11 @@ function renderAllocTable(){
   // 24h change by type
   function day24(type){let cur=0,prev=0;S[type].forEach(h=>{const p=S.prices[type+':'+h.ticker];if(p&&p.change!=null){const v=p.price*h.qty*(type==='us'?1/r:1);cur+=v;prev+=v/(1+p.change/100);}});return cur-prev;}
   const rows=[
-    {label:'US Stocks',dot:'#5754fd',val:tots.us||0,cost:costs.us||0,d24:day24('us')},
-    {label:'ASX Stocks',dot:'#42ac5c',val:tots.asx||0,cost:costs.asx||0,d24:day24('asx')},
-    {label:'Crypto',dot:'#cea350',val:tots.cry||0,cost:costs.cry||0,d24:day24('cry')},
-    {label:'Metals',dot:'#9b9fc8',val:tots.met||0,cost:costs.met||0,d24:day24('met')},
-    {label:'Cash',dot:'#42ac5c',val:cashTot,cost:cashTot,d24:0},
+    {label:'US Stocks',dot:'#818cf8',val:tots.us||0,cost:costs.us||0,d24:day24('us')},
+    {label:'ASX Stocks',dot:'#10b981',val:tots.asx||0,cost:costs.asx||0,d24:day24('asx')},
+    {label:'Crypto',dot:'#f59e0b',val:tots.cry||0,cost:costs.cry||0,d24:day24('cry')},
+    {label:'Metals',dot:'#94a3b8',val:tots.met||0,cost:costs.met||0,d24:day24('met')},
+    {label:'Cash',dot:'#10b981',val:cashTot,cost:cashTot,d24:0},
   ];
   // Update alloc bar
   const bar=document.getElementById('allocBar');
@@ -154,7 +154,7 @@ function summary(){
   document.getElementById('metSecTot').textContent=metA>0?'$'+f(metA)+' AUD':'';
   if(total>0){
     const up=v=>((v/total)*100).toFixed(1)+'%';const pct=v=>total>0?((v/total)*100).toFixed(0)+'%':'0%';
-    document.getElementById('allocBar').innerHTML=`<div class="alloc-seg" style="background:#378ADD;width:${up(usA)};min-width:${usA>0?'4px':'0'}"></div><div class="alloc-seg" style="background:#639922;width:${up(asxA)};min-width:${asxA>0?'4px':'0'}"></div><div class="alloc-seg" style="background:#BA7517;width:${up(cryA)};min-width:${cryA>0?'4px':'0'}"></div><div class="alloc-seg" style="background:#888780;width:${up(metA)};min-width:${metA>0?'4px':'0'}"></div><div class="alloc-seg" style="background:#397968;width:${up(cashA)};min-width:${cashA>0?'4px':'0'}"></div>`;
+    document.getElementById('allocBar').innerHTML=`<div class="alloc-seg" style="background:#818cf8;width:${up(usA)};min-width:${usA>0?'3px':'0'}"></div><div class="alloc-seg" style="background:#10b981;width:${up(asxA)};min-width:${asxA>0?'3px':'0'}"></div><div class="alloc-seg" style="background:#f59e0b;width:${up(cryA)};min-width:${cryA>0?'3px':'0'}"></div><div class="alloc-seg" style="background:#94a3b8;width:${up(metA)};min-width:${metA>0?'3px':'0'}"></div><div class="alloc-seg" style="background:#00d4ff;width:${up(cashA)};min-width:${cashA>0?'3px':'0'}"></div>`;
     document.getElementById('usAllocVal').textContent=usA>0?'$'+f(usA):'\u2014';
     document.getElementById('asxAllocVal').textContent=asxA>0?'$'+f(asxA):'\u2014';
     document.getElementById('crypAllocVal').textContent=cryA>0?'$'+f(cryA):'\u2014';
@@ -173,12 +173,12 @@ function updatePie(){
   const labels=[],data=[],colors=[];
   const isDark=document.documentElement.getAttribute('data-theme')!=='light';
   // Per-type color palettes
-  const US_COLORS=['#5754fd','#7b6ff5','#9b8fef','#b8aaff','#4040cc'];
-  const ASX_COLORS=['#3a7bd5','#5599ee','#2255aa','#4477cc','#6699ff'];
-  const CRY_COLORS=['#cea350','#e0b86a','#b8903f','#d4a240','#f0c060'];
-  const MET_COLORS=['#9b9fc8','#b0b4d8','#7070a8','#8888bb','#aaaacc'];
-  const CASH_GREEN=isDark?'#5de36c':'#42ac5c';
-  const CASH_COLORS=[CASH_GREEN,'#4ab85c','#3a9e4f','#5de36c','#42ac5c'];
+  const US_COLORS=['#818cf8','#a5b4fc','#6366f1','#4f46e5','#c7d2fe'];
+  const ASX_COLORS=['#10b981','#34d399','#6ee7b7','#059669','#047857'];
+  const CRY_COLORS=['#f59e0b','#fbbf24','#f97316','#d97706','#fb923c'];
+  const MET_COLORS=['#94a3b8','#cbd5e1','#64748b','#475569','#b2bfcf'];
+  const CASH_GREEN=isDark?'#00d4ff':'#0099cc';
+  const CASH_COLORS=[CASH_GREEN,'#38e8ff','#7ef0ff','#00b8e0','#0099cc'];
   let ui=0,ai=0,ci2=0,mi=0,cai=0;
   S.us.forEach(item=>{const p=S.prices['us:'+item.ticker];if(p&&item.qty){const v=(p.price*item.qty)/S.audUsd;if(v>0){labels.push(item.ticker);data.push(parseFloat(v.toFixed(2)));colors.push(US_COLORS[ui%US_COLORS.length]);ui++;}}});
   S.asx.forEach(item=>{const p=S.prices['asx:'+item.ticker];if(p&&item.qty){const v=p.price*item.qty;if(v>0){labels.push(item.ticker);data.push(parseFloat(v.toFixed(2)));colors.push(ASX_COLORS[ai%ASX_COLORS.length]);ai++;}}});
@@ -243,14 +243,7 @@ function delTransfer(i){
   S.transfers.splice(i,1);save();renderCash();renderFees();
 }
 
-function recalcFromTxns(type,i){const txns=S[type][i].txns||[];if(!txns.length)return;let totalQty=0,totalCost=0;[...txns].sort((a,b)=>new Date(a.date)-new Date(b.date)).forEach(tx=>{if(tx.side==='buy'){
-  // Swyftx: price = audVal/qty where audVal is GROSS (fee inside) → cost = qty*price
-  // CommSec/manual: price is net per-unit → cost = qty*price + fee
-  // Detect Swyftx via swyftxId OR source_id starting with 'ord_'
-  const sid=tx.swyftxId||tx.source_id||'';
-  const isSwyftx=!!(tx.swyftxId||(sid&&(String(sid).startsWith('ord_')||String(sid).startsWith('dep_'))));
-  const cost=isSwyftx?tx.qty*tx.price:tx.qty*tx.price+(tx.fee||0);
-  totalCost+=cost;totalQty+=tx.qty;}else{const sf=Math.min(tx.qty/(totalQty||1),1);totalCost-=totalCost*sf;totalQty-=tx.qty;if(totalQty<0)totalQty=0;if(totalCost<0)totalCost=0;}});S[type][i].qty=parseFloat(totalQty.toFixed(8));S[type][i].cost=totalQty>0?parseFloat((totalCost/totalQty).toFixed(6)):0;}
+function recalcFromTxns(type,i){const txns=S[type][i].txns||[];if(!txns.length)return;let totalQty=0,totalCost=0;[...txns].sort((a,b)=>new Date(a.date)-new Date(b.date)).forEach(tx=>{if(tx.side==='buy'){totalCost+=tx.qty*tx.price+(tx.fee||0);totalQty+=tx.qty;}else{const sf=Math.min(tx.qty/(totalQty||1),1);totalCost-=totalCost*sf;totalQty-=tx.qty;if(totalQty<0)totalQty=0;if(totalCost<0)totalCost=0;}});S[type][i].qty=parseFloat(totalQty.toFixed(8));S[type][i].cost=totalQty>0?parseFloat((totalCost/totalQty).toFixed(6)):0;}
 function recalcAll(){['us','asx','cry','met'].forEach(type=>{S[type].forEach((item,i)=>{if((item.txns||[]).length)recalcFromTxns(type,i);});});}
 
 async function upField(t,i,field,v){
@@ -314,30 +307,8 @@ async function addFee(){
 function renderWl(){
   const body=document.getElementById('wlB');if(!body)return;const ro=isReadOnly();
   if(!S.wl.length){body.innerHTML='<tr><td colspan="8" style="text-align:center;color:var(--text4);padding:16px;">No items yet</td></tr>';return;}
-  // Sort by type order then ticker
-  const typeOrder={us:0,asx:1,crypto:2,metal:3};
-  const sorted=[...S.wl].map((item,i)=>({...item,origIdx:i})).sort((a,b)=>{
-    const to=(typeOrder[a.type]??9)-(typeOrder[b.type]??9);
-    return to!==0?to:a.ticker.localeCompare(b.ticker);
-  });
-  const typeBadges={us:'<span class="wl-type" style="color:#378ADD;">US</span>',asx:'<span class="wl-type" style="color:#42ac5c;">ASX</span>',crypto:'<span class="wl-type" style="color:#BA7517;">Crypto</span>',metal:'<span class="wl-type" style="color:#888780;">Metal</span>'};
-  const typeLabels={us:'US Stocks',asx:'ASX Stocks',crypto:'Crypto',metal:'Metals'};
-  let lastType=null;
-  body.innerHTML=sorted.map(item=>{
-    const i=item.origIdx;
-    const key='wl:'+item.type+':'+item.ticker;const p=S.prices[key];const price=p?p.price:null,chg=p?p.change:null;
-    const cc=chg>0?'pos':chg<0?'neg':'';const cs=chg!==null?(chg>0?'+':'')+f(chg,2)+'%':'—';
-    const typeBadge=typeBadges[item.type]||'';
-    let vsTarget='<span class="dim">—</span>';
-    if(price!==null&&item.target>0){const diff=price-item.target,pct=(diff/item.target)*100;const sign=diff>=0?'+':'';if(Math.abs(pct)<=3)vsTarget=`<span class="wl-near">${sign}${f(pct,1)}% · Near target</span>`;else if(diff>0)vsTarget=`<span class="wl-above">${sign}${f(pct,1)}% above</span>`;else vsTarget=`<span class="wl-below">${f(pct,1)}% below</span>`;}
-    // Group header row
-    let header='';
-    if(item.type!==lastType){
-      lastType=item.type;
-      header=`<tr><td colspan="8" style="padding:8px 14px 4px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--text3);background:rgba(0,0,0,0.06);border-bottom:1px solid var(--border2);">${typeLabels[item.type]||item.type}</td></tr>`;
-    }
-    return header+`<tr><td><div class="sym">${item.ticker}</div></td><td><div class="aname">${item.name}</div></td><td>${typeBadge}</td><td class="r valbold">${price!==null?'$'+f(price):'<span class="dim">—</span>'}</td><td class="r ${cc}">${cs}</td><td class="r"><input class="ni" type="number" step="any" value="${item.target||''}" placeholder="0.00" onchange="upWlTarget(${i},this.value)" ${ro?'disabled':''}></td><td class="r">${vsTarget}</td><td><button class="del" onclick="delWl(${i})" ${ro?'disabled':''}>✕</button></td></tr>`;
-  }).join('');
+  body.innerHTML=S.wl.map((item,i)=>{const key='wl:'+item.type+':'+item.ticker;const p=S.prices[key];const price=p?p.price:null,chg=p?p.change:null;const cc=chg>0?'pos':chg<0?'neg':'';const cs=chg!==null?(chg>0?'+':'')+f(chg,2)+'%':'—';const typeBadge={us:'<span class="wl-type" style="color:#818cf8;">US</span>',asx:'<span class="wl-type" style="color:#10b981;">ASX</span>',crypto:'<span class="wl-type" style="color:#f59e0b;">Crypto</span>',metal:'<span class="wl-type" style="color:#94a3b8;">Metal</span>'}[item.type]||'';let vsTarget='<span class="dim">—</span>';if(price!==null&&item.target>0){const diff=price-item.target,pct=(diff/item.target)*100;const sign=diff>=0?'+':'';if(Math.abs(pct)<=3)vsTarget=`<span class="wl-near">${sign}${f(pct,1)}% · Near target</span>`;else if(diff>0)vsTarget=`<span class="wl-above">${sign}${f(pct,1)}% above</span>`;else vsTarget=`<span class="wl-below">${f(pct,1)}% below</span>`;}
+  return`<tr><td><div class="sym">${item.ticker}</div></td><td><div class="aname">${item.name}</div></td><td>${typeBadge}</td><td class="r valbold">${price!==null?'$'+f(price):'<span class="dim">—</span>'}</td><td class="r ${cc}">${cs}</td><td class="r"><input class="ni" type="number" step="any" value="${item.target||''}" placeholder="0.00" onchange="upWlTarget(${i},this.value)" ${ro?'disabled':''}></td><td class="r">${vsTarget}</td><td><button class="del" onclick="delWl(${i})" ${ro?'disabled':''}>✕</button></td></tr>`;}).join('');
 }
 
 async function upWlTarget(i,v){if(isReadOnly())return;S.wl[i].target=parseFloat(v)||0;try{await xanoUpdateWatchlist(i);}catch(e){syncUI('err','Save failed');}renderWl();}
@@ -365,21 +336,7 @@ async function fetchWl(){
     ...usItems.map(async w=>{try{const res=await fetch(`https://finnhub.io/api/v1/quote?symbol=${w.ticker}&token=${FINHUB_KEY}`);const d=await res.json();if(d&&d.c&&d.c>0){S.prices['wl:us:'+w.ticker]={price:d.c/r,change:d.pc>0?((d.c-d.pc)/d.pc*100):0};ok=true;}}catch(e){}}),
     ...asxItems.map(async w=>{try{const yahooUrl=`https://query1.finance.yahoo.com/v8/finance/chart/${w.ticker}.AX?interval=1d&range=2d`;const proxyUrl=`https://api.allorigins.win/get?url=${encodeURIComponent(yahooUrl)}`;const res=await fetch(proxyUrl);const outer=await res.json();if(!outer.contents)return;const d=JSON.parse(outer.contents);const meta=d?.chart?.result?.[0]?.meta;if(meta&&meta.regularMarketPrice>0){const prev=meta.chartPreviousClose||meta.previousClose||meta.regularMarketPrice;S.prices['wl:asx:'+w.ticker]={price:meta.regularMarketPrice,change:prev>0?((meta.regularMarketPrice-prev)/prev*100):0};ok=true;}}catch(e){}}),
     cryptoItems.length?fetch(`https://api.coingecko.com/api/v3/simple/price?ids=${cryptoItems.map(w=>CID[w.ticker]||w.ticker.toLowerCase()).join(',')}&vs_currencies=aud&include_24hr_change=true`).then(r=>r.json()).then(d=>{cryptoItems.forEach(w=>{const id=CID[w.ticker]||w.ticker.toLowerCase();if(d[id]){S.prices['wl:crypto:'+w.ticker]={price:d[id].aud,change:d[id].aud_24h_change};ok=true;}});}).catch(()=>{}):Promise.resolve(),
-    metalItems.length ? (async () => {
-      // Same roland_pricing_api used for portfolio metals — per-gram × 31.1035 = per troy oz
-      const FIELD_MAP = {'XAU':'goldGram','GOLD':'goldGram','AU':'goldGram','GLD':'goldGram','XAG':'silverGram','SILVER':'silverGram','AG':'silverGram','SLV':'silverGram','XPD':'palladiumGram','PALLADIUM':'palladiumGram','PD':'palladiumGram','XPT':'platinumGram','PLATINUM':'platinumGram','PT':'platinumGram'};
-      const TROY = 31.1035;
-      try {
-        const res = await fetch(XANO_BASE + '/metals_price', { headers: authHeaders() });
-        if(!res.ok) throw new Error('HTTP '+res.status);
-        const data = await res.json();
-        metalItems.forEach(w => {
-          const field = FIELD_MAP[w.ticker.toUpperCase()];
-          const price = field ? parseFloat(data[field]) : 0;
-          if(price > 0) { S.prices['wl:metal:'+w.ticker]={price:price*TROY,change:0}; ok=true; }
-        });
-      } catch(e) { console.warn('Watchlist metal fetch failed:', e); }
-    })() : Promise.resolve(),
+    ...metalItems.map(async w=>{try{const res=await fetch(XANO_BASE+'/metals/price?symbol='+w.ticker,{headers:authHeaders()});const raw=await res.json();const d=raw.response&&raw.response.result?raw.response.result:raw;if(d&&d.price>0){S.prices['wl:metal:'+w.ticker]={price:d.price,change:d.chp!=null?d.chp:0};ok=true;}}catch(e){}}),
   ]);
   setDot('wlDot',ok?'live':'err');renderWl();
 }
@@ -438,7 +395,7 @@ function summary(){
   document.getElementById('metSecTot').textContent=metA>0?'$'+f(metA)+' AUD':'';
   if(total>0){
     const up=v=>((v/total)*100).toFixed(1)+'%';const pct=v=>total>0?((v/total)*100).toFixed(0)+'%':'0%';
-    document.getElementById('allocBar').innerHTML=`<div class="alloc-seg" style="background:#378ADD;width:${up(usA)};min-width:${usA>0?'4px':'0'}"></div><div class="alloc-seg" style="background:#639922;width:${up(asxA)};min-width:${asxA>0?'4px':'0'}"></div><div class="alloc-seg" style="background:#BA7517;width:${up(cryA)};min-width:${cryA>0?'4px':'0'}"></div><div class="alloc-seg" style="background:#888780;width:${up(metA)};min-width:${metA>0?'4px':'0'}"></div><div class="alloc-seg" style="background:#397968;width:${up(cashA)};min-width:${cashA>0?'4px':'0'}"></div>`;
+    document.getElementById('allocBar').innerHTML=`<div class="alloc-seg" style="background:#818cf8;width:${up(usA)};min-width:${usA>0?'3px':'0'}"></div><div class="alloc-seg" style="background:#10b981;width:${up(asxA)};min-width:${asxA>0?'3px':'0'}"></div><div class="alloc-seg" style="background:#f59e0b;width:${up(cryA)};min-width:${cryA>0?'3px':'0'}"></div><div class="alloc-seg" style="background:#94a3b8;width:${up(metA)};min-width:${metA>0?'3px':'0'}"></div><div class="alloc-seg" style="background:#00d4ff;width:${up(cashA)};min-width:${cashA>0?'3px':'0'}"></div>`;
     document.getElementById('usAllocVal').textContent=usA>0?'$'+f(usA):'\u2014';
     document.getElementById('asxAllocVal').textContent=asxA>0?'$'+f(asxA):'\u2014';
     document.getElementById('crypAllocVal').textContent=cryA>0?'$'+f(cryA):'\u2014';
@@ -475,58 +432,17 @@ async function fetchASX(){setDot('asxDot','loading');clearErr('asx');const ticke
     }
   }catch(e){}}));setDot('asxDot',ok?'live':'err');if(!ok)showErr('asx','Could not load ASX prices — check ticker is correct (e.g. CBA, BHP, SVL).');rows('asx');}
 async function fetchCry(){setDot('crypDot','loading');const coins=S.cry.map(a=>CID[a.ticker.toUpperCase()]||a.ticker.toLowerCase());if(!coins.length){setDot('crypDot','stale');return;}try{const r=await fetch(`https://api.coingecko.com/api/v3/simple/price?ids=${coins.join(',')}&vs_currencies=aud&include_24hr_change=true`);const d=await r.json();S.cry.forEach(item=>{const id=CID[item.ticker.toUpperCase()]||item.ticker.toLowerCase();if(d[id])S.prices['cry:'+item.ticker]={price:d[id].aud,change:d[id].aud_24h_change};});setDot('crypDot','live');}catch(e){setDot('crypDot','err');}rows('cry');}
-async function fetchMetals(){
-  setDot('metDot','loading');
-  clearErr('met');
-  if(!S.met.length){setDot('metDot','stale');return;}
-
-  // ── Ticker → API field mapping ──────────────────────────────
-  // roland_pricing_api returns per-GRAM prices in AUD.
-  // Metal holdings are tracked in troy ounces (1 troy oz = 31.1035 g)
-  // so we multiply by 31.1035 to get the AUD price per troy ounce.
-  const TROY_OZ_IN_GRAMS = 31.1035;
-  const FIELD_MAP = {
-    // Gold
-    'XAU':'goldGram','GOLD':'goldGram','AU':'goldGram','GLD':'goldGram',
-    // Silver
-    'XAG':'silverGram','SILVER':'silverGram','AG':'silverGram','SLV':'silverGram',
-    // Palladium
-    'XPD':'palladiumGram','PALLADIUM':'palladiumGram','PD':'palladiumGram',
-    // Platinum
-    'XPT':'platinumGram','PLATINUM':'platinumGram','PT':'platinumGram',
-  };
-
-  try {
-    // Call via SMSF Xano proxy — keeps auth server-side, avoids CORS issues
-    const res = await fetch(XANO_BASE + '/metals_price', { headers: authHeaders() });
-    if(!res.ok) throw new Error('HTTP ' + res.status);
-    const data = await res.json();
-
-    // data shape: { goldGram, silverGram, palladiumGram, platinumGram, updatedTime, ... }
-    let ok = false;
-    S.met.forEach(item => {
-      const field = FIELD_MAP[item.ticker.toUpperCase()];
-      if(!field) {
-        console.warn('fetchMetals: no field mapping for ticker', item.ticker);
-        return;
-      }
-      const price = parseFloat(data[field]) * TROY_OZ_IN_GRAMS;
-      if(price > 0) {
-        // API doesn't provide a % change — set to 0 (no 24h change available)
-        S.prices['met:' + item.ticker] = { price, change: 0 };
-        ok = true;
-      }
-    });
-
-    setDot('metDot', ok ? 'live' : 'err');
-    if(!ok) showErr('met', 'Metal prices loaded but no matching tickers found. Check your ticker names match: XAU, XAG, XPD, XPT.');
-  } catch(e) {
-    console.warn('fetchMetals error:', e);
-    setDot('metDot', 'err');
-    showErr('met', 'Could not load metal prices: ' + e.message);
-  }
-  rows('met');
-}
+async function fetchMetals(){setDot('metDot','loading');clearErr('met');if(!S.met.length){setDot('metDot','stale');return;}let ok=false;await Promise.all(S.met.map(async item=>{try{
+    // GoldAPI.io via Xano proxy — API key stays server-side
+    const res=await fetch(XANO_BASE+'/metals/price?symbol='+item.ticker.toUpperCase(),{headers:authHeaders()});
+    const raw=await res.json();
+    const d=raw.response&&raw.response.result?raw.response.result:raw;
+    if(d&&d.price&&d.price>0){
+      const change=d.chp!=null?d.chp:(d.ch!=null&&d.price>0?(d.ch/d.price*100):0);
+      S.prices['met:'+item.ticker]={price:d.price,change};
+      ok=true;
+    }
+  }catch(e){console.warn('Metal fetch failed:',item.ticker,e);}}));setDot('metDot',ok?'live':'err');if(!ok)showErr('met','Could not load metal prices.');rows('met');}
   
 
 async function refreshAll(){const btn=document.getElementById('rfBtn'),icon=document.getElementById('rfIcon');btn.disabled=true;icon.classList.add('spin');try{await fetchRate();await Promise.allSettled([fetchUS(),fetchASX(),fetchCry(),fetchMetals(),fetchWl()]);summary();renderAllHoldings();renderAllocTable();
@@ -561,4 +477,3 @@ function renderAllHoldings(){
   const allTotal=allRows.reduce((s,row)=>s+row.valAUD,0);const totEl=document.getElementById('allSecTot');if(totEl)totEl.textContent=allTotal>0?'$'+f(allTotal)+' AUD':'';
   setTimeout(applyRowTints,50);
 }
-
