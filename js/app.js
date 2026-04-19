@@ -125,7 +125,13 @@ function applyTheme(theme) {
   if (mobilePill) mobilePill.style.justifyContent = isDark ? 'flex-end' : 'flex-start';
   const metaTheme = document.querySelector('meta[name="theme-color"]');
   if (metaTheme) metaTheme.setAttribute('content', isDark ? '#080d17' : '#f0f5fc');
-  if (typeof pieChart !== 'undefined' && pieChart) setTimeout(() => { try { pieChart.update(); } catch(e) {} }, 50);
+  if (typeof pieChart !== 'undefined' && pieChart) setTimeout(() => {
+    try {
+      const isL = theme === 'light';
+      pieChart.data.datasets[0].borderColor = isL ? 'rgba(240,245,252,0.8)' : 'rgba(8,13,23,0.8)';
+      pieChart.update();
+    } catch(e) {}
+  }, 50);
   // Theme switch: update chart colors in-place rather than destroy/rebuild
   if (typeof historyChart !== 'undefined' && historyChart) {
     setTimeout(() => {
@@ -510,4 +516,3 @@ function renderFees(){
     }).join(''):`<tr><td colspan="6" style="text-align:center;color:var(--text4);padding:16px;">No transactions yet</td></tr>`);
   }catch(err){console.error('renderFees error:',err);}
 }
-
