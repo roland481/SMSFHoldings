@@ -77,8 +77,8 @@ function renderAllocTable(){
     {label:'US Stocks',dot:'#818cf8',val:tots.us||0,cost:costs.us||0,d24:day24('us')},
     {label:'ASX Stocks',dot:'#10b981',val:tots.asx||0,cost:costs.asx||0,d24:day24('asx')},
     {label:'Crypto',dot:'#f59e0b',val:tots.cry||0,cost:costs.cry||0,d24:day24('cry')},
-    {label:'Metals',dot:'#94a3b8',val:tots.met||0,cost:costs.met||0,d24:day24('met')},
-    {label:'Cash',dot:'#10b981',val:cashTot,cost:cashTot,d24:0},
+    {label:'Metals',dot:'#9b9fc8',val:tots.met||0,cost:costs.met||0,d24:day24('met')},
+    {label:'Cash',dot:'#00d4ff',val:cashTot,cost:cashTot,d24:0},
   ];
   // Update alloc bar
   const bar=document.getElementById('allocBar');
@@ -92,7 +92,7 @@ function renderAllocTable(){
     const glstr=gl!==0?(gl>0?'+':'')+f(gl)+' ('+(glPct>0?'+':'')+glPct.toFixed(1)+'%)':'—';
     const glcol=gl>0?'var(--gain-pos)':gl<0?'var(--gain-neg)':'var(--text3)';
     return`<tr>
-      <td><div style="display:flex;align-items:center;gap:8px;"><div style="width:3px;height:16px;border-radius:2px;background:${row.dot};flex-shrink:0;"></div>${row.label}</div></td>
+      <td><div style="display:flex;align-items:center;gap:8px;"><div style="width:8px;height:8px;border-radius:50%;background:${row.dot};flex-shrink:0;"></div>${row.label}</div></td>
       <td class="r valbold">$${f(row.val)}</td>
       <td class="r">${pct}%</td>
       <td class="r mob-hide" style="color:${d24col};">${d24str}</td>
@@ -154,7 +154,7 @@ function summary(){
   document.getElementById('metSecTot').textContent=metA>0?'$'+f(metA)+' AUD':'';
   if(total>0){
     const up=v=>((v/total)*100).toFixed(1)+'%';const pct=v=>total>0?((v/total)*100).toFixed(0)+'%':'0%';
-    document.getElementById('allocBar').innerHTML=`<div class="alloc-seg" style="background:#818cf8;width:${up(usA)};min-width:${usA>0?'3px':'0'}"></div><div class="alloc-seg" style="background:#10b981;width:${up(asxA)};min-width:${asxA>0?'3px':'0'}"></div><div class="alloc-seg" style="background:#f59e0b;width:${up(cryA)};min-width:${cryA>0?'3px':'0'}"></div><div class="alloc-seg" style="background:#94a3b8;width:${up(metA)};min-width:${metA>0?'3px':'0'}"></div><div class="alloc-seg" style="background:#00d4ff;width:${up(cashA)};min-width:${cashA>0?'3px':'0'}"></div>`;
+    document.getElementById('allocBar').innerHTML=`<div class="alloc-seg" style="background:#378ADD;width:${up(usA)};min-width:${usA>0?'4px':'0'}"></div><div class="alloc-seg" style="background:#10b981;width:${up(asxA)};min-width:${asxA>0?'4px':'0'}"></div><div class="alloc-seg" style="background:#BA7517;width:${up(cryA)};min-width:${cryA>0?'4px':'0'}"></div><div class="alloc-seg" style="background:#888780;width:${up(metA)};min-width:${metA>0?'4px':'0'}"></div><div class="alloc-seg" style="background:#397968;width:${up(cashA)};min-width:${cashA>0?'4px':'0'}"></div>`;
     document.getElementById('usAllocVal').textContent=usA>0?'$'+f(usA):'\u2014';
     document.getElementById('asxAllocVal').textContent=asxA>0?'$'+f(asxA):'\u2014';
     document.getElementById('crypAllocVal').textContent=cryA>0?'$'+f(cryA):'\u2014';
@@ -176,7 +176,7 @@ function updatePie(){
   const US_COLORS=['#818cf8','#a5b4fc','#6366f1','#4f46e5','#c7d2fe'];
   const ASX_COLORS=['#10b981','#34d399','#6ee7b7','#059669','#047857'];
   const CRY_COLORS=['#f59e0b','#fbbf24','#f97316','#d97706','#fb923c'];
-  const MET_COLORS=['#94a3b8','#cbd5e1','#64748b','#475569','#b2bfcf'];
+  const MET_COLORS=['#9b9fc8','#b0b4d8','#7070a8','#8888bb','#aaaacc'];
   const CASH_GREEN=isDark?'#00d4ff':'#0099cc';
   const CASH_COLORS=[CASH_GREEN,'#38e8ff','#7ef0ff','#00b8e0','#0099cc'];
   let ui=0,ai=0,ci2=0,mi=0,cai=0;
@@ -188,8 +188,8 @@ function updatePie(){
   if(!data.length)return;
   const gt=data.reduce((a,b)=>a+b,0);
   document.getElementById('pieLegend').innerHTML=labels.map((l,i)=>{const pct=gt>0?((data[i]/gt)*100).toFixed(1):0;return`<div class="pie-leg-row"><div class="pie-leg-left"><div class="pie-leg-sw" style="background:${colors[i]}"></div><span>${l}</span></div><span style="font-weight:500;">${pct}%</span></div>`;}).join('');
-  if(pieChart){pieChart.data.labels=labels;pieChart.data.datasets[0].data=data;pieChart.data.datasets[0].backgroundColor=colors;pieChart.update();}
-  else{pieChart=new Chart(document.getElementById('pieChart'),{type:'pie',data:{labels,datasets:[{data,backgroundColor:colors,borderWidth:0,hoverOffset:6}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:(ctx)=>{const pct=gt>0?((ctx.parsed/gt)*100).toFixed(1):0;return ctx.label+': $'+f(ctx.parsed)+' ('+pct+'%)';}}}}}});}
+  if(pieChart){pieChart.data.labels=labels;pieChart.data.datasets[0].data=data;pieChart.data.datasets[0].backgroundColor=colors;pieChart.data.datasets[0].borderColor=document.documentElement.getAttribute('data-theme')==='light'?'rgba(240,245,252,0.8)':'rgba(8,13,23,0.8)';pieChart.update();const pc=document.getElementById('pieCenterNum');if(pc)pc.textContent=data.length;}
+  else{pieChart=new Chart(document.getElementById('pieChart'),{type:'doughnut',data:{labels,datasets:[{data,backgroundColor:colors,borderWidth:2,borderColor:document.documentElement.getAttribute('data-theme')==='light'?'rgba(240,245,252,0.8)':'rgba(8,13,23,0.8)',hoverOffset:4}]},options:{responsive:true,maintainAspectRatio:false,cutout:'62%',plugins:{legend:{display:false},tooltip:{backgroundColor:'rgba(8,13,23,0.9)',bodyColor:'#f0f6ff',padding:10,callbacks:{label:(ctx)=>{const pct=gt>0?((ctx.parsed/gt)*100).toFixed(1):0;return ctx.label+': $'+f(ctx.parsed)+' ('+pct+'%)';}}}}}});}const pc=document.getElementById('pieCenterNum');if(pc)pc.textContent=data.length;
 }
 function clearErr(type){const el=document.getElementById(type+'Err');if(el)el.innerHTML='';}
 function showErr(type,msg){const el=document.getElementById(type+'Err');if(el)el.innerHTML=`<div class="err-note">${msg}</div>`;}
@@ -201,7 +201,7 @@ function renderSparklines(){
   const pts=history.slice(-14); // last 2 weeks
   // Draw sparkline into any .sparkline element \u2014 use overall portfolio trajectory
   document.querySelectorAll('.sparkline').forEach((el,idx)=>{
-    if(pts.length<2){el.innerHTML='<svg viewBox="0 0 100 36" style="width:100%;height:100%;"><line x1="0" y1="18" x2="100" y2="18" stroke="rgba(0,212,255,0.15)" stroke-width="1" stroke-dasharray="3,3"/></svg>';return;}
+    if(pts.length<2){el.innerHTML='<svg viewBox="0 0 100 36" style="width:100%;height:100%;"><line x1="0" y1="18" x2="100" y2="18" stroke="rgba(201,149,42,0.2)" stroke-width="1" stroke-dasharray="3,3"/></svg>';return;}
     const vals=pts.map(p=>p.v);
     const min=Math.min(...vals),max=Math.max(...vals),range=max-min||1;
     const H=34;
@@ -307,7 +307,7 @@ async function addFee(){
 function renderWl(){
   const body=document.getElementById('wlB');if(!body)return;const ro=isReadOnly();
   if(!S.wl.length){body.innerHTML='<tr><td colspan="8" style="text-align:center;color:var(--text4);padding:16px;">No items yet</td></tr>';return;}
-  body.innerHTML=S.wl.map((item,i)=>{const key='wl:'+item.type+':'+item.ticker;const p=S.prices[key];const price=p?p.price:null,chg=p?p.change:null;const cc=chg>0?'pos':chg<0?'neg':'';const cs=chg!==null?(chg>0?'+':'')+f(chg,2)+'%':'—';const typeBadge={us:'<span class="wl-type" style="color:#818cf8;">US</span>',asx:'<span class="wl-type" style="color:#10b981;">ASX</span>',crypto:'<span class="wl-type" style="color:#f59e0b;">Crypto</span>',metal:'<span class="wl-type" style="color:#94a3b8;">Metal</span>'}[item.type]||'';let vsTarget='<span class="dim">—</span>';if(price!==null&&item.target>0){const diff=price-item.target,pct=(diff/item.target)*100;const sign=diff>=0?'+':'';if(Math.abs(pct)<=3)vsTarget=`<span class="wl-near">${sign}${f(pct,1)}% · Near target</span>`;else if(diff>0)vsTarget=`<span class="wl-above">${sign}${f(pct,1)}% above</span>`;else vsTarget=`<span class="wl-below">${f(pct,1)}% below</span>`;}
+  body.innerHTML=S.wl.map((item,i)=>{const key='wl:'+item.type+':'+item.ticker;const p=S.prices[key];const price=p?p.price:null,chg=p?p.change:null;const cc=chg>0?'pos':chg<0?'neg':'';const cs=chg!==null?(chg>0?'+':'')+f(chg,2)+'%':'—';const typeBadge={us:'<span class="wl-type" style="color:#378ADD;">US</span>',asx:'<span class="wl-type" style="color:#10b981;">ASX</span>',crypto:'<span class="wl-type" style="color:#BA7517;">Crypto</span>',metal:'<span class="wl-type" style="color:#888780;">Metal</span>'}[item.type]||'';let vsTarget='<span class="dim">—</span>';if(price!==null&&item.target>0){const diff=price-item.target,pct=(diff/item.target)*100;const sign=diff>=0?'+':'';if(Math.abs(pct)<=3)vsTarget=`<span class="wl-near">${sign}${f(pct,1)}% · Near target</span>`;else if(diff>0)vsTarget=`<span class="wl-above">${sign}${f(pct,1)}% above</span>`;else vsTarget=`<span class="wl-below">${f(pct,1)}% below</span>`;}
   return`<tr><td><div class="sym">${item.ticker}</div></td><td><div class="aname">${item.name}</div></td><td>${typeBadge}</td><td class="r valbold">${price!==null?'$'+f(price):'<span class="dim">—</span>'}</td><td class="r ${cc}">${cs}</td><td class="r"><input class="ni" type="number" step="any" value="${item.target||''}" placeholder="0.00" onchange="upWlTarget(${i},this.value)" ${ro?'disabled':''}></td><td class="r">${vsTarget}</td><td><button class="del" onclick="delWl(${i})" ${ro?'disabled':''}>✕</button></td></tr>`;}).join('');
 }
 
@@ -395,7 +395,7 @@ function summary(){
   document.getElementById('metSecTot').textContent=metA>0?'$'+f(metA)+' AUD':'';
   if(total>0){
     const up=v=>((v/total)*100).toFixed(1)+'%';const pct=v=>total>0?((v/total)*100).toFixed(0)+'%':'0%';
-    document.getElementById('allocBar').innerHTML=`<div class="alloc-seg" style="background:#818cf8;width:${up(usA)};min-width:${usA>0?'3px':'0'}"></div><div class="alloc-seg" style="background:#10b981;width:${up(asxA)};min-width:${asxA>0?'3px':'0'}"></div><div class="alloc-seg" style="background:#f59e0b;width:${up(cryA)};min-width:${cryA>0?'3px':'0'}"></div><div class="alloc-seg" style="background:#94a3b8;width:${up(metA)};min-width:${metA>0?'3px':'0'}"></div><div class="alloc-seg" style="background:#00d4ff;width:${up(cashA)};min-width:${cashA>0?'3px':'0'}"></div>`;
+    document.getElementById('allocBar').innerHTML=`<div class="alloc-seg" style="background:#378ADD;width:${up(usA)};min-width:${usA>0?'4px':'0'}"></div><div class="alloc-seg" style="background:#10b981;width:${up(asxA)};min-width:${asxA>0?'4px':'0'}"></div><div class="alloc-seg" style="background:#BA7517;width:${up(cryA)};min-width:${cryA>0?'4px':'0'}"></div><div class="alloc-seg" style="background:#888780;width:${up(metA)};min-width:${metA>0?'4px':'0'}"></div><div class="alloc-seg" style="background:#397968;width:${up(cashA)};min-width:${cashA>0?'4px':'0'}"></div>`;
     document.getElementById('usAllocVal').textContent=usA>0?'$'+f(usA):'\u2014';
     document.getElementById('asxAllocVal').textContent=asxA>0?'$'+f(asxA):'\u2014';
     document.getElementById('crypAllocVal').textContent=cryA>0?'$'+f(cryA):'\u2014';
@@ -470,11 +470,25 @@ function renderAllHoldings(){
   const body=document.getElementById('allHoldingsB');if(!body)return;
   const showAud=document.getElementById('audToggle').checked;const r=S.audUsd;const allRows=[];const ro=isReadOnly();
   const TYPE_BADGE={us:'<span class="badge b-blue" style="font-size:9px;">US</span>',asx:'<span class="badge b-green" style="font-size:9px;">ASX</span>',cry:'<span class="badge b-amber" style="font-size:9px;">Crypto</span>',met:'<span class="badge b-gray" style="font-size:9px;">Metal</span>'};
-  ['us','asx','cry','met'].forEach(type=>{S[type].forEach((item,i)=>{const priceKey=type+':'+item.ticker;const p=S.prices[priceKey];const price=p?p.price:null;const chg=p?p.change:null;let val=price!==null?price*item.qty:null;if(type==='us'&&price!==null&&showAud)val=val/r;const hasCost=item.cost&&item.cost>0;let gl=null,glPct=null;if(hasCost&&val!==null){const tc=item.cost*item.qty;gl=val-tc;glPct=tc>0?(gl/tc)*100:0;}const cc=chg>0?'pos':chg<0?'neg':'';const cs=chg!==null?(chg>0?'+':'')+f(chg,2)+'%':'—';const isF=type==='cry'||type==='met';const txCount=(item.txns||[]).length;const txBadge=txCount>0?` <span style="font-size:10px;color:var(--text4);">${txCount} trade${txCount>1?'s':''}</span>`:'';const costDisp=item.cost>0?item.cost:'';const isOpen=openDrawer===type+':'+i;const drawerHtml=isOpen?buildDrawer(type,i,item,showAud,r):'';let dp=price;if(type==='us'&&price!==null&&showAud)dp=price/r;const tileClass={us:'tkr-us',asx:'tkr-asx',cry:'tkr-cry',met:'tkr-met'}[type]||'';const rowClass={us:'hrow-us',asx:'hrow-asx',cry:'hrow-cry',met:'hrow-met'}[type]||'';const valAUD=val||0;allRows.push({valAUD,html:`<tr class="holding-row ${rowClass}${isOpen?' open':''}" onclick="toggleDrawer('${type}',${i})"><td><div class="tkr-cell"><div class="tkr-tile ${tileClass}">${item.ticker.slice(0,2)}</div><div class="tkr-info"><div class="tkr-sym">${item.ticker}${txBadge}</div><div class="tkr-name mob-hide">${item.name}</div>${gl!==null&&!isNaN(gl)?`<div style="display:flex;align-items:center;gap:6px;margin-top:3px;">${glChip(gl,glPct)}</div>`:''}</div></div></td><td class="mob-hide">${item.name}</td><td class="mob-hide">${TYPE_BADGE[type]||''}</td><td class="r"><input class="ni" type="number" step="${isF?'any':'1'}" value="${item.qty}" onclick="event.stopPropagation()" onchange="upField('${type}',${i},'qty',this.value)" ${ro?'disabled':''}></td><td class="r">${price!==null?'<span class="valbold">$'+f(dp)+'</span>':'<span class="dim">—</span>'}</td><td class="r ${cc} mob-hide">${cs}</td><td class="r mob-hide"><input class="ni" type="number" step="any" value="${costDisp}" placeholder="0.00" onclick="event.stopPropagation()" onchange="upField('${type}',${i},'cost',this.value)" ${ro||txCount>0?'disabled':''}></td><td class="r valbold">${val!==null?'$'+f(val):'<span class="dim">—</span>'}</td><td class="r mob-hide">${glChip(gl,glPct)}</td><td><button class="del" onclick="event.stopPropagation();delA('${type}',${i})" ${ro?'disabled':''}>✕</button></td></tr>${drawerHtml?`<tr class="tx-row"><td colspan="10">${drawerHtml}</td></tr>`:''}`});});});
+  ['us','asx','cry','met'].forEach(type=>{S[type].forEach((item,i)=>{const priceKey=type+':'+item.ticker;const p=S.prices[priceKey];const price=p?p.price:null;const chg=p?p.change:null;let val=price!==null?price*item.qty:null;if(type==='us'&&price!==null&&showAud)val=val/r;const hasCost=item.cost&&item.cost>0;let gl=null,glPct=null;if(hasCost&&val!==null){const tc=item.cost*item.qty;gl=val-tc;glPct=tc>0?(gl/tc)*100:0;}const cc=chg>0?'pos':chg<0?'neg':'';const cs=chg!==null?(chg>0?'+':'')+f(chg,2)+'%':'—';const isF=type==='cry'||type==='met';const txCount=(item.txns||[]).length;const txBadge=txCount>0?` <span style="font-size:10px;color:var(--text4);">${txCount} trade${txCount>1?'s':''}</span>`:'';const costDisp=item.cost>0?item.cost:'';const isOpen=openDrawer===type+':'+i;const drawerHtml=isOpen?buildDrawer(type,i,item,showAud,r):'';let dp=price;if(type==='us'&&price!==null&&showAud)dp=price/r;const tileClass={us:'tkr-us',asx:'tkr-asx',cry:'tkr-cry',met:'tkr-met'}[type]||'';const rowClass={us:'hrow-us',asx:'hrow-asx',cry:'hrow-cry',met:'hrow-met'}[type]||'';const valAUD=val||0;// Mini sparkline path (simple up/down visual based on 24h change)
+    const sparkColor=chg>0?'#10b981':chg<0?'#f43f5e':'#475569';
+    const sparkPath=chg>0?'M0,14 L10,11 L20,9 L30,7 L40,5 L50,4':'chg<0?'M0,4 L10,6 L20,9 L30,11 L40,13 L50,14':'M0,9 L50,9';
+    const sparkD=chg>0?'M0,14 L10,11 L20,9 L30,7 L40,5 L50,4':chg<0?'M0,4 L10,6 L20,9 L30,11 L40,13 L50,14':'M0,9 L10,8 L20,10 L30,9 L40,8 L50,9';
+    const glVal=gl!==null&&!isNaN(gl)?`<span class="${gl>=0?'gain-pos':'gain-neg'}" style="font-family:var(--mono);font-size:12px;">${gl>=0?'+':'-'}$${f(Math.abs(gl))}</span>`:'<span class="dim">—</span>';
+    allRows.push({valAUD,html:`<tr class="holding-row ${rowClass}${isOpen?' open':''}" onclick="toggleDrawer('${type}',${i})">
+      <td><div class="tkr-cell"><div class="tkr-tile ${tileClass}">${item.ticker.slice(0,2).toUpperCase()}</div><div class="tkr-info"><div class="tkr-sym">${item.ticker}</div><div class="tkr-name">${item.name}</div></div></div></td>
+      <td class="mob-hide">${TYPE_BADGE[type]||''}</td>
+      <td class="r" style="font-family:var(--mono);font-size:12px;">${item.qty%1===0?f(item.qty,0):f(item.qty,4)}</td>
+      <td class="r" style="font-family:var(--mono);font-size:12px;">${price!==null?'$'+f(dp):'<span class="dim">—</span>'}</td>
+      <td class="r" style="font-family:var(--mono);font-size:13px;font-weight:500;">${val!==null?'$'+f(type==='us'&&showAud?val/r:val):'<span class="dim">—</span>'}</td>
+      <td class="r mob-hide">${chg!==null?`<span class="gl-chip ${chg>=0?'gl-pos':'gl-neg'}">${chg>=0?'+':''}${f(chg,2)}%</span>`:'<span class="dim">—</span>'}</td>
+      <td class="r mob-hide">${glVal}</td>
+      <td class="r mob-hide" style="width:60px;"><svg width="52" height="18" viewBox="0 0 52 18" preserveAspectRatio="none"><path d="${sparkD}" fill="none" stroke="${sparkColor}" stroke-width="1.5" stroke-linecap="round"/></svg></td>
+      <td><button class="del" onclick="event.stopPropagation();delA('${type}',${i})" ${ro?'disabled':''}>✕</button></td>
+    </tr>${drawerHtml?`<tr class="tx-row"><td colspan="9">${drawerHtml}</td></tr>`:''}`});});});
   allRows.sort((a,b)=>b.valAUD-a.valAUD);
   body.innerHTML=allRows.length?allRows.map(r=>r.html).join(''):'<tr><td colspan="10" style="text-align:center;color:var(--text4);padding:20px;">No holdings yet — tap + Add to get started</td></tr>';
   const dot=document.getElementById('allDot');if(dot)dot.className='dot '+(Object.keys(S.prices).length>0?'dot-live':'dot-stale');
   const allTotal=allRows.reduce((s,row)=>s+row.valAUD,0);const totEl=document.getElementById('allSecTot');if(totEl)totEl.textContent=allTotal>0?'$'+f(allTotal)+' AUD':'';
   setTimeout(applyRowTints,50);
 }
-
