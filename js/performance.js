@@ -137,7 +137,7 @@ function _perfBuildPortfolio(snaps, gran) {
   return {
     labels:labels, showLegend:true,
     datasets:[
-      {label:'Portfolio value', data:valueLine,   borderColor:'#f5a623', backgroundColor:'rgba(245,166,35,0.08)', fill:true,  tension:0.3, pointRadius:0, borderWidth:2},
+      {label:'Portfolio value', data:valueLine,   borderColor:'#00d4ff', backgroundColor:'rgba(0,212,255,0.07)', fill:true,  tension:0.3, pointRadius:0, borderWidth:2},
       {label:'Contributions',   data:contribLine, borderColor:'rgba(255,255,255,0.25)', backgroundColor:'transparent', fill:false, tension:0, pointRadius:0, borderWidth:1.5, borderDash:[5,4]},
     ],
     metric:{gain:fyGain, pct:fyPct, label:'Portfolio growth this FY', isPercent:false},
@@ -160,7 +160,7 @@ function _perfBuildCostBasis(snaps, gran) {
   return {
     labels:labels, showLegend:true,
     datasets:[
-      {label:'Market value', data:mkt, borderColor:'#f5a623', backgroundColor:'rgba(245,166,35,0.08)', fill:true,  tension:0.3, pointRadius:0, borderWidth:2},
+      {label:'Market value', data:mkt, borderColor:'#00d4ff', backgroundColor:'rgba(0,212,255,0.07)', fill:true,  tension:0.3, pointRadius:0, borderWidth:2},
       {label:'Cost basis',   data:bas, borderColor:'rgba(255,255,255,0.25)', backgroundColor:'transparent', fill:false, tension:0, pointRadius:0, borderWidth:1.5, borderDash:[5,4]},
     ],
     metric:{gain:gain, pct:pct, label:'Unrealised gain on investments', isPercent:false},
@@ -203,7 +203,7 @@ function _perfBuildTWR(snaps, gran, mode) {
   var final = line.length ? line[line.length-1] : 0;
   return {
     labels:labels, showLegend:false,
-    datasets:[{label:'TWR', data:line, borderColor:'#f5a623', backgroundColor:'rgba(245,166,35,0.08)', fill:true, tension:0.3, pointRadius:0, borderWidth:2}],
+    datasets:[{label:'TWR', data:line, borderColor:'#00d4ff', backgroundColor:'rgba(0,212,255,0.07)', fill:true, tension:0.3, pointRadius:0, borderWidth:2}],
     metric:{gain:final, pct:null, label:(mode==='fy'?'Time-weighted return this FY':'Time-weighted return since inception'), isPercent:true},
     yFmt:  function(v) { return v.toFixed(1)+'%'; },
     tipFmt:function(v) { return 'TWR: '+v.toFixed(2)+'%'; },
@@ -243,7 +243,7 @@ function _perfBuildMWR(snaps, gran, mode) {
   var final = line.length ? line[line.length-1] : 0;
   return {
     labels:labels, showLegend:false,
-    datasets:[{label:'MWR', data:line, borderColor:'#f5a623', backgroundColor:'rgba(245,166,35,0.08)', fill:true, tension:0.3, pointRadius:0, borderWidth:2}],
+    datasets:[{label:'MWR', data:line, borderColor:'#00d4ff', backgroundColor:'rgba(0,212,255,0.07)', fill:true, tension:0.3, pointRadius:0, borderWidth:2}],
     metric:{gain:final, pct:null, label:(mode==='fy'?'Money-weighted return this FY (annualised)':'Money-weighted return since inception (annualised)'), isPercent:true},
     yFmt:  function(v) { return v.toFixed(1)+'%'; },
     tipFmt:function(v) { return 'MWR: '+v.toFixed(2)+'%'; },
