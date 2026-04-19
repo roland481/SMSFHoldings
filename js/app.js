@@ -124,7 +124,7 @@ function applyTheme(theme) {
   if (mobileIcon) mobileIcon.textContent = isDark ? '🌙' : '☀️';
   if (mobilePill) mobilePill.style.justifyContent = isDark ? 'flex-end' : 'flex-start';
   const metaTheme = document.querySelector('meta[name="theme-color"]');
-  if (metaTheme) metaTheme.setAttribute('content', isDark ? '#212851' : '#e8e8f4');
+  if (metaTheme) metaTheme.setAttribute('content', isDark ? '#080d17' : '#f0f5fc');
   if (typeof pieChart !== 'undefined' && pieChart) setTimeout(() => { try { pieChart.update(); } catch(e) {} }, 50);
   // Theme switch: update chart colors in-place rather than destroy/rebuild
   if (typeof historyChart !== 'undefined' && historyChart) {
@@ -133,7 +133,7 @@ function applyTheme(theme) {
         const isLight = theme === 'light';
         const gridColor = isLight ? 'rgba(0,0,0,0.06)' : 'rgba(255,255,255,0.06)';
         const textColor = isLight ? '#999' : '#444';
-        const lineColor = isLight ? '#42ac5c' : '#5de36c';
+        const lineColor = isLight ? '#0099cc' : '#00d4ff';
         historyChart.data.datasets[0].borderColor = lineColor;
         historyChart.options.scales.x.grid.color = gridColor;
         historyChart.options.scales.x.ticks.color = textColor;
@@ -499,3 +499,4 @@ function renderFees(){
     }).join(''):`<tr><td colspan="6" style="text-align:center;color:var(--text4);padding:16px;">No transactions yet</td></tr>`);
   }catch(err){console.error('renderFees error:',err);}
 }
+
