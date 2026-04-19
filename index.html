@@ -215,10 +215,17 @@
 
   <!-- Charts row: pie + history side by side -->
   <div class="mid-row" style="margin-bottom:12px;">
-    <div class="dash" style="margin-bottom:0;">
+    <div class="dash pie-dash" style="margin-bottom:0;">
       <div class="pie-section" style="width:100%;">
         <div class="pie-label">By holding</div>
-        <div style="position:relative;width:100%;height:200px;"><canvas id="pieChart"></canvas></div>
+        <!-- Doughnut with center label overlay -->
+        <div style="position:relative;width:100%;height:160px;">
+          <canvas id="pieChart"></canvas>
+          <div id="pieCenter" style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;pointer-events:none;">
+            <div id="pieCenterNum" style="font-size:22px;font-weight:700;color:var(--text);letter-spacing:-0.03em;line-height:1;">—</div>
+            <div style="font-family:var(--mono);font-size:8px;color:var(--text4);letter-spacing:0.12em;text-transform:uppercase;margin-top:3px;">Holdings</div>
+          </div>
+        </div>
         <div class="pie-legend" id="pieLegend"></div>
       </div>
     </div>
@@ -307,10 +314,15 @@
     </div>
     <div class="tbl-wrap"><table>
       <thead><tr>
-        <th>Ticker</th><th class="mob-hide">Name</th><th class="mob-hide">Type</th>
-        <th class="r">Qty</th><th class="r">Price (AUD)</th><th class="r mob-hide">24h</th>
-        <th class="r mob-hide">Avg cost</th><th class="r">Value (AUD)</th>
-        <th class="r mob-hide">Gain / loss</th><th style="width:28px"></th>
+        <th>Asset</th>
+        <th class="mob-hide">Type</th>
+        <th class="r">Qty</th>
+        <th class="r">Price (AUD)</th>
+        <th class="r">Value (AUD)</th>
+        <th class="r mob-hide">24h</th>
+        <th class="r mob-hide">Lifetime P&amp;L</th>
+        <th class="r mob-hide" style="width:60px;">Trend</th>
+        <th style="width:28px;"></th>
       </tr></thead>
       <tbody id="allHoldingsB"></tbody>
     </table></div>
