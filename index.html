@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<meta name="theme-color" content="#0c0e14">
+<meta name="theme-color" content="#080d17">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
@@ -12,7 +12,7 @@
 
 <link rel="manifest" href="/manifest.json">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=DM+Mono:wght@300;400;500&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/styles.css">
 <script>document.addEventListener("DOMContentLoaded",function(){if(typeof Chart!=="undefined"){Chart.defaults.font.family="Arial,Helvetica,sans-serif";Chart.defaults.font.size=11;}});</script>
 </head>
@@ -23,7 +23,7 @@
   <div class="login-card">
     <div class="login-logo">
       <div class="login-logo-dot">
-        <svg width="20" height="20" viewBox="0 0 16 16" fill="none"><polyline points="2,11 6,7 9,9 14,4" stroke="#0c0e14" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <svg width="20" height="20" viewBox="0 0 16 16" fill="none"><polyline points="2,11 6,7 9,9 14,4" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
       </div>
       <div class="login-logo-text">
         <div class="login-logo-title">SMSF Portfolio</div>
@@ -71,7 +71,7 @@
   <!-- Logo -->
   <div class="title-block">
     <div class="logo-mark">
-      <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><polyline points="2,11 6,7 9,9 14,4" stroke="#1c0e00" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><polyline points="2,11 6,7 9,9 14,4" stroke="#ffffff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
     </div>
     <h1>SMSF</h1>
     <!-- Mobile subtitle only -->
@@ -179,20 +179,38 @@
   </div>
 
   <div class="tab-panel active" id="tab-portfolio">
-  <!-- Total value card — full width -->
-  <div class="scard" style="margin-bottom:12px;display:flex;align-items:center;gap:32px;flex-wrap:wrap;">
-    <div>
-      <div class="slabel">Total portfolio value (AUD)</div>
-      <div class="sval" id="tot" style="font-size:28px;letter-spacing:-0.04em;">—</div>
-      <div class="ssub" id="totGL" style="margin-top:4px;color:var(--text3);">Investments + cash</div>
+  <!-- ══ HERO — total portfolio value, 3-column, no text collision ══ -->
+  <div class="hero-strip" style="margin-bottom:16px;">
+    <!-- Primary: big number -->
+    <div class="hero-primary">
+      <div class="hero-eyebrow">Total Portfolio Value · AUD</div>
+      <div class="hero-value" id="tot">—</div>
+      <div class="hero-caption">
+        <span id="totGL">Investments + cash</span>
+      </div>
     </div>
-    <div class="scard-row2" style="flex:1;min-width:240px;margin-top:0;padding-top:0;border-top:none;padding-left:32px;border-left:1px solid var(--border2);">
-      <div class="scard-sub-col"><div class="scard-sub-label">Invested</div><div class="scard-sub-val" id="tot-invested">—</div></div>
-      <div class="scard-sub-col"><div class="scard-sub-label">Cash</div><div class="scard-sub-val" id="tot-cash">—</div></div>
-      <div class="scard-sub-col"><div class="scard-sub-label">AUD/USD</div><div class="scard-sub-val" id="tot-rate">—</div></div>
+
+    <!-- Metrics card -->
+    <div class="hero-metrics">
+      <div class="hm">
+        <div class="hm-label">Invested</div>
+        <div class="hm-value" id="tot-invested">—</div>
+      </div>
+      <div class="hm">
+        <div class="hm-label">Cash</div>
+        <div class="hm-value" id="tot-cash">—</div>
+      </div>
+      <div class="hm">
+        <div class="hm-label">AUD / USD</div>
+        <div class="hm-value" id="tot-rate">—</div>
+      </div>
     </div>
-    <!-- Portfolio history sparkline inline -->
-    <div style="flex:2;min-width:200px;min-height:60px;" class="mob-hide"><div class="sparkline" id="totalSparkline" style="height:60px;"></div></div>
+
+    <!-- Sparkline -->
+    <div class="hero-spark mob-hide">
+      <div class="spark-label">30d trend</div>
+      <div class="sparkline" id="totalSparkline" style="width:160px;height:52px;"></div>
+    </div>
   </div>
 
   <!-- Charts row: pie + history side by side -->
@@ -331,7 +349,7 @@
       <div class="sec-title"><span class="badge b-red">AUD</span>Transaction &amp; fees ledger</div>
       <div class="sec-right">
         <span class="sec-tot" id="feesSecTot"></span>
-        <button class="addbtn write-only" data-action="openAddModal" style="background:linear-gradient(135deg,var(--gold),var(--gold2));color:#0c0e14;border-color:transparent;font-weight:600;">+ Add</button>
+        <button class="addbtn write-only" data-action="openAddModal" style="background:linear-gradient(135deg,var(--gold),var(--gold2));color:#ffffff;border-color:transparent;font-weight:600;">+ Add</button>
         <button class="csvbtn" data-action="exportCSV">⬇ Export FY CSV</button>
         <button class="csvbtn" onclick="generateEOFYReport()" style="background:linear-gradient(135deg,#5757e8,#5754fd);color:#fff;border-color:transparent;">📄 EOFY Report</button>
       </div>
