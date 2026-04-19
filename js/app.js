@@ -337,6 +337,17 @@ document.addEventListener('DOMContentLoaded', async function(){
   updateSidebarMode();window.addEventListener('resize',updateSidebarMode);
   if(localStorage.getItem('smsf_sb_collapsed')==='1')document.getElementById('sidebar').classList.add('collapsed');
   renderHistoryChart();
+  // Force chart line to cyan after charts.js creates it with its default colour
+  setTimeout(function() {
+    try {
+      if (typeof historyChart !== 'undefined' && historyChart) {
+        const isLight = (localStorage.getItem('smsf_theme') || 'dark') === 'light';
+        historyChart.data.datasets[0].borderColor = isLight ? '#0099cc' : '#00d4ff';
+        historyChart.data.datasets[0].backgroundColor = isLight ? 'rgba(0,153,204,0.08)' : 'rgba(0,212,255,0.07)';
+        historyChart.update('none');
+      }
+    } catch(e) {}
+  }, 200);
   updateSessions();
   setInterval(updateSessions,30000);
 
@@ -499,3 +510,4 @@ function renderFees(){
     }).join(''):`<tr><td colspan="6" style="text-align:center;color:var(--text4);padding:16px;">No transactions yet</td></tr>`);
   }catch(err){console.error('renderFees error:',err);}
 }
+
