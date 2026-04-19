@@ -223,7 +223,11 @@ async function loadPortfolio(portfolioId) {
     }));
 
     // Recalculate avg cost and qty from transaction history
-    recalcAll();
+    ['us','asx','cry','met'].forEach(type => {
+      (S[type] || []).forEach((_, idx) => {
+        if (typeof recalcFromTxns === 'function') recalcFromTxns(type, idx);
+      });
+    });
 
 
     syncUI('synced', 'Loaded · ' + new Date().toLocaleTimeString('en-AU',{hour:'2-digit',minute:'2-digit'}));
