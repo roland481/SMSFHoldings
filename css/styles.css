@@ -455,7 +455,8 @@ select option,select optgroup{background:#080d17 !important;color:#f0f6ff !impor
 .scard-sub-val{font-family:var(--mono);font-size:13px;font-weight:500;color:var(--text);font-variant-numeric:tabular-nums;}
 
 /* ══ MID ROW ══ */
-.mid-row{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;}
+.mid-row{display:grid;grid-template-columns:260px 1fr;gap:16px;margin-bottom:16px;}
+.pie-dash{padding:16px 16px;}
 .dash{background:var(--card-glass);border:1px solid var(--border);border-radius:14px;padding:16px 20px;display:flex;gap:20px;align-items:center;}
 .alloc-section{flex:1;min-width:0;}
 .alloc-bar{height:6px;background:var(--alloc-bg);border-radius:99px;overflow:hidden;display:flex;gap:2px;margin-bottom:14px;}
@@ -472,7 +473,7 @@ select option,select optgroup{background:#080d17 !important;color:#f0f6ff !impor
 .pie-legend{display:flex;flex-direction:column;gap:6px;margin-top:10px;}
 .pie-leg-row{display:flex;align-items:center;justify-content:space-between;font-size:12px;color:var(--text2);}
 .pie-leg-left{display:flex;align-items:center;gap:6px;}
-.pie-leg-sw{width:3px;height:14px;border-radius:2px;flex-shrink:0;}
+.pie-leg-sw{width:3px;height:16px;border-radius:2px;flex-shrink:0;}
 
 /* ══ HISTORY CHART SECTION ══ */
 .history-section{background:var(--card-glass);border:1px solid var(--border);border-radius:14px;padding:16px 20px;margin-bottom:16px;}
