@@ -9,6 +9,6 @@ const DEF = {
   us:[],asx:[],cry:[],met:[],cash:[],fees:[],income:[],contributions:[],transfers:[],wl:[]
 };
 const CID={BTC:'bitcoin',ETH:'ethereum',SOL:'solana',ADA:'cardano',XRP:'ripple',BNB:'binancecoin',DOGE:'dogecoin',DOT:'polkadot',AVAX:'avalanche-2',MATIC:'matic-network',LINK:'chainlink',UNI:'uniswap',LTC:'litecoin',ATOM:'cosmos',NEAR:'near',SHIB:'shiba-inu',TRX:'tron',BCH:'bitcoin-cash',XLM:'stellar',ALGO:'algorand',XMR:'monero',ETC:'ethereum-classic'};
-const PIE_COLORS=['#5754fd','#5757e8','#494f91','#5de36c','#5de36c','#42ac5c','#cea350','#b8903f','#9a7a2e','#c46061','#a84f50','#5de36c','#8080f5','#9b9fc8','#7070d0','#212851','#2a3260'];
+const PIE_COLORS=['#00d4ff','#38e8ff','#7ef0ff','#818cf8','#a5b4fc','#6366f1','#f59e0b','#fbbf24','#f97316','#10b981','#34d399','#94a3b8','#64748b','#f43f5e','#fb7185','#a78bfa','#c4b5fd'];
 const S = { audUsd:0.695, prices:{}, us:[], asx:[], cry:[], met:[], cash:[], fees:[], income:[], contributions:[], transfers:[], wl:[] };
 let pieChart = null;
