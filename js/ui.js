@@ -92,7 +92,7 @@ function renderAllocTable(){
     const glstr=gl!==0?(gl>0?'+':'')+f(gl)+' ('+(glPct>0?'+':'')+glPct.toFixed(1)+'%)':'—';
     const glcol=gl>0?'var(--gain-pos)':gl<0?'var(--gain-neg)':'var(--text3)';
     return`<tr>
-      <td><div style="display:flex;align-items:center;gap:8px;"><div style="width:8px;height:8px;border-radius:50%;background:${row.dot};flex-shrink:0;"></div>${row.label}</div></td>
+      <td><div style="display:flex;align-items:center;gap:8px;"><div style="width:3px;height:16px;border-radius:2px;background:${row.dot};flex-shrink:0;"></div>${row.label}</div></td>
       <td class="r valbold">$${f(row.val)}</td>
       <td class="r">${pct}%</td>
       <td class="r mob-hide" style="color:${d24col};">${d24str}</td>
@@ -201,7 +201,7 @@ function renderSparklines(){
   const pts=history.slice(-14); // last 2 weeks
   // Draw sparkline into any .sparkline element \u2014 use overall portfolio trajectory
   document.querySelectorAll('.sparkline').forEach((el,idx)=>{
-    if(pts.length<2){el.innerHTML='<svg viewBox="0 0 100 36" style="width:100%;height:100%;"><line x1="0" y1="18" x2="100" y2="18" stroke="rgba(201,149,42,0.2)" stroke-width="1" stroke-dasharray="3,3"/></svg>';return;}
+    if(pts.length<2){el.innerHTML='<svg viewBox="0 0 100 36" style="width:100%;height:100%;"><line x1="0" y1="18" x2="100" y2="18" stroke="rgba(0,212,255,0.15)" stroke-width="1" stroke-dasharray="3,3"/></svg>';return;}
     const vals=pts.map(p=>p.v);
     const min=Math.min(...vals),max=Math.max(...vals),range=max-min||1;
     const H=34;
@@ -477,3 +477,4 @@ function renderAllHoldings(){
   const allTotal=allRows.reduce((s,row)=>s+row.valAUD,0);const totEl=document.getElementById('allSecTot');if(totEl)totEl.textContent=allTotal>0?'$'+f(allTotal)+' AUD':'';
   setTimeout(applyRowTints,50);
 }
+
