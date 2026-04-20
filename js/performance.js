@@ -5,7 +5,7 @@
 // ══════════════════════════════════════════════════════════════
 
 var _perfView  = 'portfolio'; // portfolio | costbasis | twr | mwr
-var _perfGran  = 'daily';     // daily | weekly | monthly
+var _perfGran  = 'weekly';     // daily | weekly | monthly
 var _perfMode  = 'fy';        // fy | inception
 var _perfChart = null;        // Chart.js on #perfChart
 
