@@ -231,7 +231,6 @@ async function loadPortfolio(portfolioId) {
 
 
     syncUI('synced', 'Loaded · ' + new Date().toLocaleTimeString('en-AU',{hour:'2-digit',minute:'2-digit'}));
-    ['us','asx','cry','met','cash','fees','wl'].forEach(t => rows(t));
     renderAllHoldings(); renderFees(); renderCash(); summary(); renderAllocTable();
     // Load snapshots from Xano for history chart
     xanoLoadSnapshots(portfolioId).then(snapshots => {
