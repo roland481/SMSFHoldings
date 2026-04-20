@@ -58,7 +58,7 @@ function toggleSidebar(){const sb=document.getElementById('sidebar');const colla
 
 function switchTab(name){
   document.querySelectorAll('.tab-btn').forEach((b,i)=>{const tabs=['portfolio','fees','watchlist','import'];b.classList.toggle('active',tabs[i]===name);});
-  ['portfolio','fees','watchlist','import'].forEach(t=>{const sb=document.getElementById('sb-'+t);if(sb)sb.classList.toggle('active',t===name);const bn=document.getElementById('bn-'+t);if(bn)bn.classList.toggle('active',t===name);});
+  ['portfolio','fees','cgt','watchlist','import'].forEach(t=>{const sb=document.getElementById('sb-'+t);if(sb)sb.classList.toggle('active',t===name);const bn=document.getElementById('bn-'+t);if(bn)bn.classList.toggle('active',t===name);const nl=document.getElementById('nl-'+t);if(nl)nl.classList.toggle('active',t===name);});
   document.querySelectorAll('.tab-panel').forEach(p=>{p.classList.toggle('active',p.id==='tab-'+name);});
   const addBtn=document.getElementById('topbarAddBtn');if(addBtn)addBtn.style.display=(name==='watchlist'||name==='import')?'none':'';
   if(name==='fees')setTimeout(()=>{try{renderFees();}catch(e){}},30);
