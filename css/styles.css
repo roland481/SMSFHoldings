@@ -519,8 +519,8 @@ tr.hrow-met td:first-child{border-left:2px solid rgba(148,163,184,0.4);}
 @keyframes rowFlashDown{0%{background:rgba(244,63,94,0.12);}100%{background:transparent;}}
 tr.row-up td{animation:rowFlashUp 1.8s ease-out forwards;}
 tr.row-down td{animation:rowFlashDown 1.8s ease-out forwards;}
-tr.tint-up td{background:rgba(16,185,129,0.05) !important;}
-tr.tint-down td{background:rgba(244,63,94,0.05) !important;}
+tr.tint-up td{background:transparent;}
+tr.tint-down td{background:transparent;}
 
 /* ══ BADGES & CHIPS ══ */
 .badge{font-family:var(--mono);font-size:9px;padding:2px 8px;border-radius:4px;font-weight:400;letter-spacing:0.06em;}
