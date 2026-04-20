@@ -877,3 +877,43 @@ tr.cgt-totals td{border-top:2px solid var(--border);background:var(--surface2) !
 .hero-metrics .hm { min-width: 0; }
 .hero-metrics .hm:nth-child(3) { max-width: 90px; }
 .hero-metrics .hm .hm-value { font-variant-numeric: tabular-nums; overflow: hidden; text-overflow: ellipsis; }
+
+
+/* ── Round 2 mobile overrides — phones < 640px ─────────────── */
+@media (max-width: 640px) {
+  /* Allocation table: let Value breathe, drop %-only row to narrow */
+  .section:has(#allocTableBody) .tbl-wrap > table { table-layout: auto; }
+  .section:has(#allocTableBody) .tbl-wrap > table th,
+  .section:has(#allocTableBody) .tbl-wrap > table td {
+    padding-left: 6px;
+    padding-right: 6px;
+    white-space: nowrap;
+  }
+  .section:has(#allocTableBody) .tbl-wrap > table th:nth-child(2),
+  .section:has(#allocTableBody) .tbl-wrap > table td:nth-child(2) { width: auto; min-width: 110px; }
+  .section:has(#allocTableBody) .tbl-wrap > table th:nth-child(3),
+  .section:has(#allocTableBody) .tbl-wrap > table td:nth-child(3) { width: 56px; }
+
+  /* Cash table: stop Balance from being clipped.
+     It's a plain .tbl-wrap > table (no id on the body), so target by scope. */
+  #tab-portfolio .section:not(:has(#allHoldingsB)):not(:has(#allocTableBody)) .tbl-wrap > table {
+    table-layout: auto !important;
+    width: 100%;
+  }
+  #tab-portfolio .section:not(:has(#allHoldingsB)):not(:has(#allocTableBody)) .tbl-wrap > table td,
+  #tab-portfolio .section:not(:has(#allHoldingsB)):not(:has(#allocTableBody)) .tbl-wrap > table th {
+    overflow: visible !important;
+    text-overflow: clip !important;
+    white-space: nowrap;
+    padding-left: 6px;
+    padding-right: 6px;
+  }
+
+  /* Hide the inline edit input on narrow screens — tap the row to edit instead.
+     This frees room for the Balance value. */
+  #cashB td input.ni { display: none; }
+  #cashB td .del { margin-left: 4px; }
+
+  /* Shrink hero AUD/USD cap so it doesn't waste room */
+  .hero-metrics .hm:nth-child(3) { max-width: none; }
+}
