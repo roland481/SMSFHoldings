@@ -481,7 +481,9 @@ function renderAllHoldings(){
   const body=document.getElementById('allHoldingsB');if(!body)return;
   const showAud=document.getElementById('audToggle').checked;const r=S.audUsd;const allRows=[];const ro=isReadOnly();
   const TYPE_BADGE={us:'<span class="badge b-blue" style="font-size:9px;">US</span>',asx:'<span class="badge b-green" style="font-size:9px;">ASX</span>',cry:'<span class="badge b-amber" style="font-size:9px;">Crypto</span>',met:'<span class="badge b-gray" style="font-size:9px;">Metal</span>'};
-  ['us','asx','cry','met'].forEach(type=>{S[type].forEach((item,i)=>{const priceKey=type+':'+item.ticker;const p=S.prices[priceKey];const price=p?p.price:null;const chg=p?p.change:null;let val=price!==null?price*item.qty:null;if(type==='us'&&price!==null&&showAud)val=val/r;const hasCost=item.cost&&item.cost>0;let gl=null,glPct=null;if(hasCost&&val!==null){const tc=item.cost*item.qty;gl=val-tc;glPct=tc>0?(gl/tc)*100:0;}const cc=chg>0?'pos':chg<0?'neg':'';const cs=chg!==null?(chg>0?'+':'')+f(chg,2)+'%':'—';const isF=type==='cry'||type==='met';const txCount=(item.txns||[]).length;const txBadge=txCount>0?` <span style="font-size:10px;color:var(--text4);">${txCount} trade${txCount>1?'s':''}</span>`:'';const costDisp=item.cost>0?item.cost:'';const isOpen=openDrawer===type+':'+i;const drawerHtml=isOpen?buildDrawer(type,i,item,showAud,r):'';let dp=price;if(type==='us'&&price!==null&&showAud)dp=price/r;const tileClass={us:'tkr-us',asx:'tkr-asx',cry:'tkr-cry',met:'tkr-met'}[type]||'';const rowClass={us:'hrow-us',asx:'hrow-asx',cry:'hrow-cry',met:'hrow-met'}[type]||'';const valAUD=val||0;// Mini sparkline path (simple up/down visual based on 24h change)
+  const activeFilter = window.holdingsFilter || 'all';
+  const typesToShow = activeFilter==='all' ? ['us','asx','cry','met'] : [activeFilter];
+  typesToShow.forEach(type=>{S[type].forEach((item,i)=>{const priceKey=type+':'+item.ticker;const p=S.prices[priceKey];const price=p?p.price:null;const chg=p?p.change:null;let val=price!==null?price*item.qty:null;if(type==='us'&&price!==null&&showAud)val=val/r;const hasCost=item.cost&&item.cost>0;let gl=null,glPct=null;if(hasCost&&val!==null){const tc=item.cost*item.qty;gl=val-tc;glPct=tc>0?(gl/tc)*100:0;}const cc=chg>0?'pos':chg<0?'neg':'';const cs=chg!==null?(chg>0?'+':'')+f(chg,2)+'%':'—';const isF=type==='cry'||type==='met';const txCount=(item.txns||[]).length;const txBadge=txCount>0?` <span style="font-size:10px;color:var(--text4);">${txCount} trade${txCount>1?'s':''}</span>`:'';const costDisp=item.cost>0?item.cost:'';const isOpen=openDrawer===type+':'+i;const drawerHtml=isOpen?buildDrawer(type,i,item,showAud,r):'';let dp=price;if(type==='us'&&price!==null&&showAud)dp=price/r;const tileClass={us:'tkr-us',asx:'tkr-asx',cry:'tkr-cry',met:'tkr-met'}[type]||'';const rowClass={us:'hrow-us',asx:'hrow-asx',cry:'hrow-cry',met:'hrow-met'}[type]||'';const valAUD=val||0;// Mini sparkline path (simple up/down visual based on 24h change)
     const sparkColor=chg>0?'#10b981':chg<0?'#f43f5e':'#475569';
     const sparkD=chg>0?'M0,14 L10,11 L20,9 L30,7 L40,5 L50,4':chg<0?'M0,4 L10,6 L20,9 L30,11 L40,13 L50,14':'M0,9 L10,8 L20,10 L30,9 L40,8 L50,9';
     const glVal=gl!==null&&!isNaN(gl)?`<span class="${gl>=0?'gain-pos':'gain-neg'}" style="font-family:var(--mono);font-size:12px;">${gl>=0?'+':'-'}$${f(Math.abs(gl))}</span>`:'<span class="dim">—</span>';
@@ -501,4 +503,51 @@ function renderAllHoldings(){
   const dot=document.getElementById('allDot');if(dot)dot.className='dot '+(Object.keys(S.prices).length>0?'dot-live':'dot-stale');
   const allTotal=allRows.reduce((s,row)=>s+row.valAUD,0);const totEl=document.getElementById('allSecTot');if(totEl)totEl.textContent=allTotal>0?'$'+f(allTotal)+' AUD':'';
   setTimeout(applyRowTints,50);
+  renderHoldingsTabs();
 }
+
+// ── Holdings type-filter tabs (All / US / ASX / Crypto / Metals) ──
+function renderHoldingsTabs(){
+  const wrap=document.getElementById('holdingsTabs');if(!wrap)return;
+  const showAud=document.getElementById('audToggle')?.checked;const r=S.audUsd||1;
+  const counts={us:0,asx:0,cry:0,met:0};
+  const totals={us:0,asx:0,cry:0,met:0};
+  ['us','asx','cry','met'].forEach(type=>{
+    (S[type]||[]).forEach(item=>{
+      counts[type]++;
+      const p=S.prices[type+':'+item.ticker];
+      if(p&&p.price){
+        let v=p.price*item.qty;
+        if(type==='us'&&showAud)v=v/r;
+        totals[type]+=v;
+      }
+    });
+  });
+  const active=window.holdingsFilter||'all';
+  const allCount=counts.us+counts.asx+counts.cry+counts.met;
+  const allTotal=totals.us+totals.asx+totals.cry+totals.met;
+  const LABELS={us:'US Stocks',asx:'ASX Stocks',cry:'Crypto',met:'Metals'};
+  const DOTS={us:'#5de36c',asx:'#5754fd',cry:'#cea350',met:'#9b9fc8'};
+  const mkTab=(id,label,count,total,dot)=>{
+    const isActive=active===id;
+    return `<button class="holdings-tab${isActive?' active':''}" onclick="setHoldingsFilter('${id}')" style="
+      display:inline-flex;align-items:center;gap:8px;
+      font-size:12px;font-weight:${isActive?'600':'500'};
+      padding:7px 14px;border-radius:99px;
+      border:1px solid ${isActive?'var(--accent)':'var(--border4)'};
+      background:${isActive?'var(--accent-bg,rgba(87,84,253,0.08))':'var(--surface2)'};
+      color:${isActive?'var(--accent,#5754fd)':'var(--text2)'};
+      cursor:pointer;font-family:inherit;transition:all .15s;
+      ">${dot?`<span style="width:7px;height:7px;border-radius:50%;background:${dot};flex-shrink:0;"></span>`:''}${label}
+      <span style="font-size:10px;color:var(--text3);font-weight:500;">${count}</span>
+      ${total>0?`<span style="font-family:var(--mono);font-size:11px;color:var(--text3);font-weight:500;">·$${f(total,0)}</span>`:''}
+    </button>`;
+  };
+  const tabs=[mkTab('all','All',allCount,allTotal,null)];
+  ['us','asx','cry','met'].forEach(type=>{
+    if(counts[type]>0)tabs.push(mkTab(type,LABELS[type],counts[type],totals[type],DOTS[type]));
+  });
+  wrap.innerHTML=tabs.join('');
+}
+function setHoldingsFilter(f){window.holdingsFilter=f;renderAllHoldings();}
+window.setHoldingsFilter=setHoldingsFilter;
