@@ -425,7 +425,7 @@ select option,select optgroup{background:#080d17 !important;color:#f0f6ff !impor
   border:1px solid var(--border);border-radius:12px;
   overflow:hidden;background:var(--surface2);
 }
-.hm{padding:14px 18px;border-right:1px solid var(--border);}
+.hm{padding:14px 18px;border-right:1px solid var(--border);min-width:110px;}
 .hm:last-child{border-right:none;}
 .hm-label{font-family:var(--mono);font-size:9px;color:var(--text4);letter-spacing:0.15em;text-transform:uppercase;margin-bottom:6px;}
 .hm-value{font-family:var(--mono);font-size:14px;font-weight:500;color:var(--text);font-variant-numeric:tabular-nums;letter-spacing:-0.02em;}
@@ -698,6 +698,7 @@ tr.cgt-totals td{border-top:2px solid var(--border);background:var(--surface2) !
   .tab-bar{display:none !important;}
   #mobile-fab{display:none !important;}
   .mob-hide{display:block;}
+  th.mob-hide,td.mob-hide{display:table-cell;}
   .wrap{padding:22px 28px;}
   .summary{grid-template-columns:repeat(6,minmax(0,1fr));}
 }
@@ -815,3 +816,68 @@ tr.cgt-totals td{border-top:2px solid var(--border);background:var(--surface2) !
   .perf-tab{font-size:11px;padding:4px 10px;}
   .perf-gran{font-size:9px;padding:3px 8px;}
 }
+
+
+/* ── Round 2: teammate-review fixes ─────────────────────────── */
+
+/* [1] Holdings table: lock column widths so header and body align */
+#allHoldingsB,
+.tbl-wrap > table {
+  table-layout: fixed;
+  width: 100%;
+}
+.tbl-wrap > table th,
+.tbl-wrap > table td {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  padding-left: 8px;
+  padding-right: 8px;
+}
+/* Holdings table column sizing: Asset | Type | Qty | Price | Value | 24h | P&L | Trend | × */
+#tab-portfolio .section .tbl-wrap > table th:nth-child(1),
+#tab-portfolio .section .tbl-wrap > table td:nth-child(1) { width: auto; min-width: 180px; }
+#tab-portfolio .section .tbl-wrap > table th:nth-child(2),
+#tab-portfolio .section .tbl-wrap > table td:nth-child(2) { width: 64px; text-align: center; }
+#tab-portfolio .section .tbl-wrap > table th:nth-child(3),
+#tab-portfolio .section .tbl-wrap > table td:nth-child(3) { width: 82px; }
+#tab-portfolio .section .tbl-wrap > table th:nth-child(4),
+#tab-portfolio .section .tbl-wrap > table td:nth-child(4) { width: 110px; }
+#tab-portfolio .section .tbl-wrap > table th:nth-child(5),
+#tab-portfolio .section .tbl-wrap > table td:nth-child(5) { width: 120px; }
+#tab-portfolio .section .tbl-wrap > table th:nth-child(6),
+#tab-portfolio .section .tbl-wrap > table td:nth-child(6) { width: 82px; }
+#tab-portfolio .section .tbl-wrap > table th:nth-child(7),
+#tab-portfolio .section .tbl-wrap > table td:nth-child(7) { width: 130px; }
+#tab-portfolio .section .tbl-wrap > table th:nth-child(8),
+#tab-portfolio .section .tbl-wrap > table td:nth-child(8) { width: 64px; }
+#tab-portfolio .section .tbl-wrap > table th:nth-child(9),
+#tab-portfolio .section .tbl-wrap > table td:nth-child(9) { width: 36px; }
+
+/* Force badge + chips onto a single line */
+#allHoldingsB td .badge,
+#allHoldingsB td .gl-chip { display: inline-block; vertical-align: middle; }
+#allHoldingsB td { vertical-align: middle; }
+
+/* [2] Allocation table: condense columns */
+#allocTableBody { }
+.section .tbl-wrap > table.alloc-tbl th,
+.section .tbl-wrap > table.alloc-tbl td { padding-left: 10px; padding-right: 10px; }
+
+/* Scope allocation table condensing via its id */
+table:has(> tbody#allocTableBody) { table-layout: fixed; }
+table:has(> tbody#allocTableBody) th:nth-child(1),
+table:has(> tbody#allocTableBody) td:nth-child(1) { width: 30%; }
+table:has(> tbody#allocTableBody) th:nth-child(2),
+table:has(> tbody#allocTableBody) td:nth-child(2) { width: 140px; }
+table:has(> tbody#allocTableBody) th:nth-child(3),
+table:has(> tbody#allocTableBody) td:nth-child(3) { width: 60px; }
+table:has(> tbody#allocTableBody) th:nth-child(4),
+table:has(> tbody#allocTableBody) td:nth-child(4) { width: 110px; }
+table:has(> tbody#allocTableBody) th:nth-child(5),
+table:has(> tbody#allocTableBody) td:nth-child(5) { width: 150px; white-space: nowrap; }
+
+/* [3] Hero AUD/USD tile: make sure it doesn't stretch */
+.hero-metrics .hm { min-width: 0; }
+.hero-metrics .hm:nth-child(3) { max-width: 90px; }
+.hero-metrics .hm .hm-value { font-variant-numeric: tabular-nums; overflow: hidden; text-overflow: ellipsis; }
