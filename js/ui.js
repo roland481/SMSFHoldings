@@ -492,7 +492,7 @@ function renderAllHoldings(){
       <td class="mob-hide">${TYPE_BADGE[type]||''}</td>
       <td class="r" style="font-family:var(--mono);font-size:12px;">${item.qty%1===0?f(item.qty,0):f(item.qty,4)}</td>
       <td class="r" style="font-family:var(--mono);font-size:12px;">${price!==null?'$'+f(dp):'<span class="dim">—</span>'}</td>
-      <td class="r" style="font-family:var(--mono);font-size:13px;font-weight:500;">${val!==null?'$'+f(type==='us'&&showAud?val/r:val):'<span class="dim">—</span>'}</td>
+      <td class="r" style="font-family:var(--mono);font-size:13px;font-weight:500;">${val!==null?'$'+f(val):'<span class="dim">—</span>'}</td>
       <td class="r mob-hide">${chg!==null?`<span class="gl-chip ${chg>=0?'gl-pos':'gl-neg'}">${chg>=0?'+':''}${f(chg,2)}%</span>`:'<span class="dim">—</span>'}</td>
       <td class="r mob-hide">${glVal}</td>
       <td class="r mob-hide" style="width:60px;"><svg width="52" height="18" viewBox="0 0 52 18" preserveAspectRatio="none"><path d="${sparkD}" fill="none" stroke="${sparkColor}" stroke-width="1.5" stroke-linecap="round"/></svg></td>
