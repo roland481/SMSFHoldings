@@ -559,8 +559,10 @@
   function setCGTNavActive(active) {
     var sbCgt = document.getElementById('sb-cgt');
     var bnCgt = document.getElementById('bn-cgt');
+    var nlCgt = document.getElementById('nl-cgt');
     if (sbCgt) sbCgt.classList.toggle('active', active);
     if (bnCgt) bnCgt.classList.toggle('active', active);
+    if (nlCgt) nlCgt.classList.toggle('active', active);
     // Also sync the top tab-btn for CGT
     document.querySelectorAll('.tab-btn').forEach(function(b) {
       if (b.getAttribute('data-tab') === 'cgt') b.classList.toggle('active', active);
