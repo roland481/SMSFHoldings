@@ -14,6 +14,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=DM+Mono:wght@300;400;500&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="css/new-ui.css">
 <script>document.addEventListener("DOMContentLoaded",function(){if(typeof Chart!=="undefined"){Chart.defaults.font.family="Arial,Helvetica,sans-serif";Chart.defaults.font.size=11;}});</script>
 </head>
 <body>
@@ -179,181 +180,68 @@
   </div>
 
   <div class="tab-panel active" id="tab-portfolio">
-  <!-- ══ HERO — total portfolio value, 3-column, no text collision ══ -->
-  <div class="hero-strip" style="margin-bottom:16px;">
-    <!-- Primary: big number -->
-    <div class="hero-primary">
-      <div class="hero-eyebrow">Total Portfolio Value · AUD</div>
-      <div class="hero-value" id="tot">—</div>
-      <div class="hero-caption">
-        <span id="totGL">Investments + cash</span>
+<div class="nx-dashboard">
+
+  <!-- Hero: total + metrics -->
+  <div class="nx-hero">
+    <div>
+      <div class="nx-hero-label">Total Portfolio · AUD</div>
+      <div class="nx-hero-total" id="nx-total">—</div>
+      <div class="nx-hero-caption">
+        Investments + cash
+        <span class="nx-gain" id="nx-gain">—</span>
       </div>
     </div>
-
-    <!-- Metrics card -->
-    <div class="hero-metrics">
-      <div class="hm">
-        <div class="hm-label">Invested</div>
-        <div class="hm-value" id="tot-invested">—</div>
+    <div class="nx-metrics">
+      <div class="nx-metric">
+        <div class="nx-metric-label">Invested</div>
+        <div class="nx-metric-value" id="nx-invested">—</div>
       </div>
-      <div class="hm">
-        <div class="hm-label">Cash</div>
-        <div class="hm-value" id="tot-cash">—</div>
+      <div class="nx-metric">
+        <div class="nx-metric-label">Market Value</div>
+        <div class="nx-metric-value" id="nx-mv">—</div>
       </div>
-      <div class="hm">
-        <div class="hm-label">AUD / USD</div>
-        <div class="hm-value" id="tot-rate">—</div>
+      <div class="nx-metric">
+        <div class="nx-metric-label">Cash Holdings</div>
+        <div class="nx-metric-value" id="nx-cash">—</div>
       </div>
-    </div>
-
-    <!-- Sparkline -->
-    <div class="hero-spark mob-hide">
-      <div class="spark-label">30d trend</div>
-      <div class="sparkline" id="totalSparkline" style="width:160px;height:52px;"></div>
-    </div>
-  </div>
-
-  <!-- Charts row: pie + history side by side -->
-  <div class="mid-row" style="margin-bottom:12px;">
-    <div class="dash pie-dash" style="margin-bottom:0;">
-      <div class="pie-section" style="width:100%;">
-        <div class="pie-label">By holding</div>
-        <!-- Doughnut with center label overlay -->
-        <div style="position:relative;width:100%;height:160px;">
-          <canvas id="pieChart"></canvas>
-          <div id="pieCenter" style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;pointer-events:none;">
-            <div id="pieCenterNum" style="font-size:22px;font-weight:700;color:var(--text);letter-spacing:-0.03em;line-height:1;">—</div>
-            <div style="font-family:var(--mono);font-size:8px;color:var(--text4);letter-spacing:0.12em;text-transform:uppercase;margin-top:3px;">Holdings</div>
-          </div>
-        </div>
-        <div class="pie-legend" id="pieLegend"></div>
-      </div>
-    </div>
-    <div class="history-section" style="margin-bottom:0;">
-      <!-- ── Performance chart header ── -->
-      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:14px;">
-        <div style="display:flex;gap:3px;background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:3px;">
-          <button id="perf-tab-portfolio" class="perf-tab active" onclick="perfSetView('portfolio')" title="Total portfolio value vs cumulative contributions">Portfolio</button>
-          <button id="perf-tab-costbasis" class="perf-tab" onclick="perfSetView('costbasis')" title="Investment market value vs cost basis">Cost Basis</button>
-          <button id="perf-tab-twr"       class="perf-tab" onclick="perfSetView('twr')"       title="Time-weighted return %">TWR %</button>
-          <button id="perf-tab-mwr"       class="perf-tab" onclick="perfSetView('mwr')"       title="Money-weighted return %">MWR %</button>
-        </div>
-        <div style="display:flex;gap:3px;background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:3px;">
-          <button id="perf-gran-daily"   class="perf-gran active" onclick="perfSetGran('daily')">Daily</button>
-          <button id="perf-gran-weekly"  class="perf-gran"        onclick="perfSetGran('weekly')">Weekly</button>
-          <button id="perf-gran-monthly" class="perf-gran"        onclick="perfSetGran('monthly')">Monthly</button>
-        </div>
-      </div>
-
-      <!-- FY / Inception sub-toggle (TWR + MWR only) -->
-      <div id="perfSubToggle" style="display:none;gap:3px;background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:3px;margin-bottom:12px;width:fit-content;">
-        <button id="perf-sub-fy"        class="perf-gran active" onclick="perfSetMode('fy')">This FY</button>
-        <button id="perf-sub-inception" class="perf-gran"        onclick="perfSetMode('inception')">Since inception</button>
-      </div>
-
-      <!-- Metric display -->
-      <div id="perfMetric" style="display:flex;align-items:baseline;flex-wrap:wrap;gap:4px;margin-bottom:14px;min-height:28px;"></div>
-
-      <!-- Two canvases: charts.js owns historyChart, performance.js owns perfChart -->
-      <div style="position:relative;width:100%;height:200px;">
-        <canvas id="historyChart" style="position:absolute;top:0;left:0;width:100%;height:100%;"></canvas>
-        <canvas id="perfChart"    style="position:absolute;top:0;left:0;width:100%;height:100%;display:none;"></canvas>
+      <div class="nx-metric">
+        <div class="nx-metric-label">AUD / USD</div>
+        <div class="nx-metric-value" id="nx-fx">—</div>
       </div>
     </div>
   </div>
 
-  <!-- Allocation table -->
-  <div class="section" style="margin-bottom:12px;">
-    <div class="sec-head">
-      <div class="sec-title">Allocation</div>
-      <div style="width:100%;margin-top:8px;height:6px;background:var(--alloc-bg);border-radius:99px;overflow:hidden;display:flex;gap:2px;" id="allocBar">
-        <div class="alloc-seg" style="background:#5754fd;width:25%"></div>
-        <div class="alloc-seg" style="background:#5de36c;width:25%"></div>
-        <div class="alloc-seg" style="background:#cea350;width:25%"></div>
-        <div class="alloc-seg" style="background:#9b9fc8;width:25%"></div>
+  <!-- Donut + Holdings -->
+  <div class="nx-body">
+    <div class="nx-panel">
+      <div class="nx-section-label">Asset Allocation</div>
+      <div class="nx-donut-wrap" id="nx-donut"></div>
+      <div class="nx-legend" id="nx-legend"></div>
+    </div>
+    <div class="nx-panel">
+      <div class="nx-section-label">Holdings</div>
+      <div style="overflow-x:auto;">
+        <table class="nx-holdings-table">
+          <thead>
+            <tr>
+              <th style="width:22%">Asset</th>
+              <th>Market</th>
+              <th class="r">Qty</th>
+              <th class="r">Price (AUD)</th>
+              <th class="r">Market Value</th>
+              <th class="r">P/L %</th>
+              <th class="r">Cost Basis</th>
+            </tr>
+          </thead>
+          <tbody id="nx-holdings-body"></tbody>
+        </table>
       </div>
     </div>
-    <div class="tbl-wrap"><table>
-      <thead><tr>
-        <th>Type</th>
-        <th class="r">Value (AUD)</th>
-        <th class="r">%</th>
-        <th class="r mob-hide">24h</th>
-        <th class="r mob-hide">Lifetime change</th>
-      </tr></thead>
-      <tbody id="allocTableBody">
-        <tr><td colspan="5" style="text-align:center;color:var(--text4);padding:16px;">Loading...</td></tr>
-      </tbody>
-    </table></div>
   </div>
 
-  <!-- Hidden legacy elements for compatibility -->
-  <div style="display:none;">
-    <div class="sval" id="usT"></div><div id="usGL"></div>
-    <div class="sval" id="crypT"></div><div id="crypGL"></div>
-    <div class="sval" id="asxT"></div><div id="asxGL"></div>
-    <div class="sval" id="metT"></div><div id="metGL"></div>
-    <div class="sval" id="cashT"></div><div id="cashGL"></div>
-    <div id="allocLegend"></div>
-    <span id="usAllocVal"></span><span id="usAlloc"></span>
-    <span id="asxAllocVal"></span><span id="asxAlloc"></span>
-    <span id="crypAllocVal"></span><span id="crypAlloc"></span>
-    <span id="metAllocVal"></span><span id="metAlloc"></span>
-    <span id="cashAllocVal"></span><span id="cashAlloc"></span>
-    <div class="sparkline"></div><div class="sparkline"></div>
-    <div class="sparkline"></div><div class="sparkline"></div>
-    <div class="sparkline"></div>
-  </div>
-
-  <div style="margin-bottom:12px;"></div>
-
-  <div class="section">
-    <div class="sec-head">
-      <div class="sec-title"><span class="dot dot-stale" id="allDot"></span>Holdings<span id="allSecTot" style="font-size:12px;font-weight:500;color:var(--text3);margin-left:4px;"></span></div>
-      <div class="sec-right"><div id="usErr" style="display:inline;"></div><div id="asxErr" style="display:inline;"></div><div id="metErr" style="display:inline;"></div></div>
-    </div>
-    <div class="tbl-wrap"><table>
-      <thead><tr>
-        <th>Asset</th>
-        <th class="mob-hide">Type</th>
-        <th class="r">Qty</th>
-        <th class="r">Price (AUD)</th>
-        <th class="r">Value (AUD)</th>
-        <th class="r mob-hide">24h</th>
-        <th class="r mob-hide">Lifetime P&amp;L</th>
-        <th class="r mob-hide" style="width:60px;">Trend</th>
-        <th style="width:28px;"></th>
-      </tr></thead>
-      <tbody id="allHoldingsB"></tbody>
-    </table></div>
-  </div>
-
-  <div class="section">
-    <div class="sec-head">
-      <div class="sec-title"><span class="badge b-teal">AUD</span>Cash accounts</div>
-      <div class="sec-right"><span class="sec-tot" id="cashSecTot"></span><button class="addbtn write-only" onclick="openAddModal();setTimeout(()=>setSmartMode('cash'),50);">+ Add account</button></div>
-    </div>
-    <div class="tbl-wrap"><table>
-      <thead><tr><th>Account name</th><th class="r">Balance (AUD)</th><th class="r" style="width:120px;"><span class="mob-hide">Edit / </span>Remove</th></tr></thead>
-      <tbody id="cashB"></tbody>
-    </table></div>
-  </div>
-
-  <!-- Hidden legacy tbodies kept for compatibility -->
-  <div style="display:none;">
-    <table><tbody id="usB"></tbody></table>
-    <table><tbody id="asxB"></tbody></table>
-    <table><tbody id="cryB"></tbody></table>
-    <table><tbody id="metB"></tbody></table>
-    <span id="usSecTot"></span><span id="asxSecTot"></span>
-    <span id="crypSecTot"></span><span id="metSecTot"></span>
-    <span id="usDot" class="dot dot-stale"></span>
-    <span id="asxDot" class="dot dot-stale"></span>
-    <span id="crypDot" class="dot dot-stale"></span>
-    <span id="metDot" class="dot dot-stale"></span>
-    <span id="usPH"></span><span id="usVH"></span>
-  </div>
-  </div><!-- /tab-portfolio -->
+</div>
+</div><!-- /tab-portfolio -->
 
   <div class="tab-panel" id="tab-fees">
   <div class="section">
@@ -809,5 +697,6 @@
   }
 </script>
 
+  <script src="js/new-ui-adapter.js"></script>
 </body>
 </html>
