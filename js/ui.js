@@ -432,17 +432,28 @@ async function fetchASX(){setDot('asxDot','loading');clearErr('asx');const ticke
     }
   }catch(e){}}));setDot('asxDot',ok?'live':'err');if(!ok)showErr('asx','Could not load ASX prices — check ticker is correct (e.g. CBA, BHP, SVL).');rows('asx');}
 async function fetchCry(){setDot('crypDot','loading');const coins=S.cry.map(a=>CID[a.ticker.toUpperCase()]||a.ticker.toLowerCase());if(!coins.length){setDot('crypDot','stale');return;}try{const r=await fetch(`https://api.coingecko.com/api/v3/simple/price?ids=${coins.join(',')}&vs_currencies=aud&include_24hr_change=true`);const d=await r.json();S.cry.forEach(item=>{const id=CID[item.ticker.toUpperCase()]||item.ticker.toLowerCase();if(d[id])S.prices['cry:'+item.ticker]={price:d[id].aud,change:d[id].aud_24h_change};});setDot('crypDot','live');}catch(e){setDot('crypDot','err');}rows('cry');}
-async function fetchMetals(){setDot('metDot','loading');clearErr('met');if(!S.met.length){setDot('metDot','stale');return;}let ok=false;await Promise.all(S.met.map(async item=>{try{
-    // GoldAPI.io via Xano proxy — API key stays server-side
-    const res=await fetch(XANO_BASE+'/metals/price?symbol='+item.ticker.toUpperCase(),{headers:authHeaders()});
-    const raw=await res.json();
-    const d=raw.response&&raw.response.result?raw.response.result:raw;
-    if(d&&d.price&&d.price>0){
-      const change=d.chp!=null?d.chp:(d.ch!=null&&d.price>0?(d.ch/d.price*100):0);
-      S.prices['met:'+item.ticker]={price:d.price,change};
-      ok=true;
-    }
-  }catch(e){console.warn('Metal fetch failed:',item.ticker,e);}}));setDot('metDot',ok?'live':'err');if(!ok)showErr('met','Could not load metal prices.');rows('met');}
+async function fetchMetals(){setDot('metDot','loading');clearErr('met');if(!S.met.length){setDot('metDot','stale');return;}let ok=false;try{
+    // Xano metals_price proxy → returns all metals per-gram in AUD
+    const res=await fetch(XANO_BASE+'/metals_price',{headers:authHeaders()});
+    if(!res.ok) throw new Error('HTTP '+res.status);
+    const d=await res.json();
+    const GRAMS_PER_OZ=31.1034768;
+    const map={
+      XAU:d.goldGram, GOLD:d.goldGram,
+      XAG:d.silverGram, SILVER:d.silverGram,
+      XPT:d.platinumGram, PLATINUM:d.platinumGram,
+      XPD:d.palladiumGram, PALLADIUM:d.palladiumGram
+    };
+    S.met.forEach(item=>{
+      const perGram=map[item.ticker.toUpperCase()];
+      if(perGram&&perGram>0){
+        const pricePerOz=perGram*GRAMS_PER_OZ;
+        S.prices['met:'+item.ticker]={price:pricePerOz,change:0};
+        ok=true;
+      }
+    });
+  }catch(e){console.warn('Metal fetch failed:',e);}
+  setDot('metDot',ok?'live':'err');if(!ok)showErr('met','Could not load metal prices.');rows('met');}
   
 
 async function refreshAll(){const btn=document.getElementById('rfBtn'),icon=document.getElementById('rfIcon');btn.disabled=true;icon.classList.add('spin');try{await fetchRate();await Promise.allSettled([fetchUS(),fetchASX(),fetchCry(),fetchMetals(),fetchWl()]);summary();renderAllHoldings();renderAllocTable();
